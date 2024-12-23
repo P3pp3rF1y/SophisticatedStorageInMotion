@@ -1,0 +1,270 @@
+package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
+import net.p3pp3rf1y.sophisticatedstorage.block.*;
+import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelContainerMenu;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.data.MovingStorageData;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
+
+import javax.annotation.Nullable;
+import java.util.Map;
+import java.util.UUID;
+
+public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
+	private final T entity;
+
+	@Nullable
+	private StorageBlockEntity renderBlockEntity = null;
+
+	private IStorageWrapper storageWrapper = NoopStorageWrapper.INSTANCE;
+
+	public EntityStorageHolder(T entity) {
+		this.entity = entity;
+	}
+
+	public static boolean areUpgradesVisible(ItemStack storageItem) {
+		return storageItem.getOrDefault(ModDataComponents.UPGRADES_VISIBLE, false);
+	}
+
+	public void setStorageItemFrom(ItemStack stack) {
+		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM.get());
+		if (storageItemContents == null) {
+			ItemStack barrel = new ItemStack(ModBlocks.BARREL_ITEM.get());
+			WoodStorageBlockItem.setWoodType(barrel, WoodType.SPRUCE);
+			setStorageItem(barrel);
+		} else {
+			ItemStack storageItem = storageItemContents.copy();
+			setStorageItem(storageItem);
+			if (isLimitedBarrel(storageItem)) {
+				LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper(), storageWrapper instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : storageWrapper.getInventoryHandler().getSlots());
+			}
+		}
+	}
+
+	public CompoundTag saveData(HolderLookup.Provider registries) {
+		CompoundTag ret = new CompoundTag();
+		ItemStack storageItem = entity.getStorageItem();
+		if (!storageItem.isEmpty()) {
+			ret.put("storageItem", storageItem.save(registries, new CompoundTag()));
+		}
+		return ret;
+	}
+
+	public void readData(HolderLookup.Provider registries, CompoundTag tag) {
+		if (tag.contains("storageItem")) {
+			setStorageItem(ItemStack.parseOptional(registries, tag.getCompound("storageItem")));
+		}
+	}
+
+	public void setStorageItem(ItemStack storageItem) {
+		entity.setStorageItem(storageItem);
+		storageWrapper = NoopStorageWrapper.INSTANCE; //reset storage wrapper to force update when it's next requested
+		renderBlockEntity = null;
+	}
+
+	public void updateStorageWrapper() {
+		ItemStack storageItem = entity.getStorageItem();
+		UUID id = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+		if (id == null) {
+			id = UUID.randomUUID();
+			storageItem.set(ModCoreDataComponents.STORAGE_UUID, id);
+			setStorageItem(storageItem);
+		}
+
+		storageWrapper = MovingStorageWrapper.fromStack(storageItem, this::onContentsChanged, this::onStackChanged, entity.level());
+	}
+
+	public IStorageWrapper getStorageWrapper() {
+		if (!entity.getStorageItem().isEmpty() && storageWrapper == NoopStorageWrapper.INSTANCE) {
+			updateStorageWrapper();
+		}
+
+		return storageWrapper;
+	}
+
+	private void setRenderBlockEntity(StorageBlockEntity storageBlockEntity) {
+		this.renderBlockEntity = storageBlockEntity;
+	}
+
+	private void onStackChanged() {
+		entity.setStorageItem(getStorageWrapper().getWrappedStorageStack());
+		renderBlockEntity = null;
+	}
+
+	private void onContentsChanged() {
+		if (entity.level().isClientSide()) {
+			return;
+		}
+
+		ItemStack storageItem = entity.getStorageItem();
+		@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+		if (storageId == null) {
+			return;
+		}
+		MovingStorageData.get(storageId).setDirty();
+	}
+
+	public void dropAllItems() {
+		//TODO implement
+	}
+
+	public void startOpen(Player player) {
+		entity.gameEvent(GameEvent.CONTAINER_OPEN, player);
+		PiglinAi.angerNearbyPiglins(player, true);
+
+		//TODO implement openers tracking? Would require stopOpen override in that case as well
+	}
+
+	public void stopOpen(Player player) {
+		//noop
+	}
+
+	public void tick() {
+		if (entity.level().isClientSide()) {
+			return;
+		}
+		getStorageWrapper().getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(entity, entity.level(), entity.blockPosition()));
+	}
+
+	public static boolean isLocked(ItemStack stack) {
+		return stack.getOrDefault(ModDataComponents.LOCKED, false);
+	}
+
+	public static boolean isLockVisible(ItemStack storageItem) {
+		return storageItem.getOrDefault(ModDataComponents.LOCK_VISIBLE, true);
+	}
+
+	public static CompoundTag getRenderInfoNbt(ItemStack storageItem) {
+		return storageItem.getOrDefault(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.EMPTY).copyTag();
+	}
+
+	public StorageBlockEntity getRenderBlockEntity() {
+		if (renderBlockEntity == null) {
+			ItemStack storageItem = entity.getStorageItem();
+			if (storageItem.getItem() instanceof BlockItem blockItem) {
+				if (blockItem.getBlock() instanceof ChestBlock) {
+					renderBlockEntity = new ChestBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
+				} else if (blockItem.getBlock() instanceof LimitedBarrelBlock) {
+					renderBlockEntity = new LimitedBarrelBlockEntity(BlockPos.ZERO,
+							blockItem.getBlock().defaultBlockState()
+									.setValue(LimitedBarrelBlock.HORIZONTAL_FACING, Direction.NORTH)
+									.setValue(LimitedBarrelBlock.VERTICAL_FACING, VerticalFacing.UP)
+					);
+				} else if (blockItem.getBlock() instanceof BarrelBlock) {
+					renderBlockEntity = new BarrelBlockEntity(BlockPos.ZERO,
+							blockItem.getBlock().defaultBlockState()
+									.setValue(BarrelBlock.FACING, Direction.UP)
+					);
+				} else if (blockItem.getBlock() instanceof ShulkerBoxBlock) {
+					renderBlockEntity = new ShulkerBoxBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
+				}
+
+				if (renderBlockEntity != null) {
+					if (renderBlockEntity.isLocked() != EntityStorageHolder.isLocked(storageItem)) {
+						renderBlockEntity.toggleLock();
+					}
+					if (renderBlockEntity.shouldShowLock() != EntityStorageHolder.isLockVisible(storageItem)) {
+						renderBlockEntity.toggleLockVisibility();
+					}
+					if (renderBlockEntity.shouldShowTier() != StorageBlockItem.showsTier(storageItem)) {
+						renderBlockEntity.toggleTierVisiblity();
+					}
+					renderBlockEntity.getStorageWrapper().getRenderInfo().deserializeFrom(EntityStorageHolder.getRenderInfoNbt(storageItem));
+					if (renderBlockEntity.shouldShowUpgrades() != EntityStorageHolder.areUpgradesVisible(storageItem)) {
+						renderBlockEntity.toggleUpgradesVisiblity();
+					}
+					if (storageItem.getItem() instanceof ITintableBlockItem tintableBlockItem) {
+						renderBlockEntity.getStorageWrapper().setMainColor(tintableBlockItem.getMainColor(storageItem).orElse(-1));
+						renderBlockEntity.getStorageWrapper().setAccentColor(tintableBlockItem.getAccentColor(storageItem).orElse(-1));
+					}
+					if (renderBlockEntity instanceof WoodStorageBlockEntity woodStorage) {
+						WoodStorageBlockItem.getWoodType(storageItem).ifPresent(woodType -> {
+							if (woodStorage.getWoodType() != WoodStorageBlockItem.getWoodType(storageItem)) {
+								woodStorage.setWoodType(woodType);
+							}
+						});
+						boolean isPacked = WoodStorageBlockItem.isPacked(storageItem);
+						if (woodStorage.isPacked() != isPacked) {
+							woodStorage.setPacked(isPacked);
+						}
+					}
+					if (renderBlockEntity instanceof BarrelBlockEntity barrel) {
+						Map<BarrelMaterial, ResourceLocation> materials = BarrelBlockItem.getMaterials(storageItem);
+						if (!barrel.getMaterials().equals(materials)) {
+							barrel.setMaterials(materials);
+						}
+						barrel.setDynamicRenderTracker(new IDynamicRenderTracker() {
+							@Override
+							public boolean isDynamicRenderer() {
+								return true;
+							}
+
+							@Override
+							public boolean isFullyDynamicRenderer() {
+								return true;
+							}
+
+							@Override
+							public void onRenderInfoUpdated(RenderInfo ri) {
+								//noop
+							}
+						});
+					}
+				}
+			}
+
+			if (renderBlockEntity == null) {
+				renderBlockEntity = new ChestBlockEntity(BlockPos.ZERO, ModBlocks.CHEST.get().defaultBlockState());
+			}
+			setRenderBlockEntity(renderBlockEntity);
+		}
+		return renderBlockEntity;
+	}
+
+	public void onStorageItemSynced() {
+		renderBlockEntity = null;
+		storageWrapper = NoopStorageWrapper.INSTANCE;
+	}
+
+	public InteractionResult openContainerMenu(Player player, IMovingStorageEntity storageEntity) {
+		ItemStack storageItem = storageEntity.getStorageItem();
+
+		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> {
+			if (isLimitedBarrel(storageItem)) {
+				return new MovingLimitedBarrelContainerMenu(w, pl, storageEntity.getId());
+			} else {
+				return new MovingStorageContainerMenu(w, pl, storageEntity.getId());
+			}
+		}, storageItem.getDisplayName(), false), buffer -> buffer.writeInt(storageEntity.getId()));
+		return player.level().isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+	}
+
+	public static boolean isLimitedBarrel(ItemStack storageItem) {
+		return storageItem.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof LimitedBarrelBlock;
+	}
+}

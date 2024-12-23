@@ -1,0 +1,43 @@
+package net.p3pp3rf1y.sophisticatedstorageinmotion.init;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageMinecartItem;
+
+import java.util.function.Supplier;
+
+public class ModItems {
+	private ModItems() {
+	}
+
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, SophisticatedStorageInMotion.MOD_ID);
+	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.location(), SophisticatedStorageInMotion.MOD_ID);
+
+	public static final Supplier<StorageMinecartItem> STORAGE_MINECART = ITEMS.register("storage_minecart", StorageMinecartItem::new);
+
+	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SophisticatedStorageInMotion.MOD_ID);
+
+	public static Supplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("main", () ->
+			CreativeModeTab.builder().icon(() -> new ItemStack(STORAGE_MINECART.get()))
+					.title(Component.translatable("itemGroup.sophisticatedstorageinmotion"))
+					.displayItems((featureFlags, output) -> {
+						ITEMS.getEntries().stream().filter(i -> i.get() instanceof ItemBase).forEach(i -> ((ItemBase) i.get()).addCreativeTabItems(output::accept));
+					})
+					.build());
+
+	public static void registerHandlers(IEventBus modBus) {
+		ITEMS.register(modBus);
+		CREATIVE_MODE_TABS.register(modBus);
+		ATTACHMENT_TYPES.register(modBus);
+	}
+}
