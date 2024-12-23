@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
@@ -23,8 +24,9 @@ public record OpenMovingStorageInventoryPayload(int entityId) implements CustomP
 
 	public static void handlePayload(OpenMovingStorageInventoryPayload payload, IPayloadContext context) {
 		Player player = context.player();
-		if (player.level().getEntity(payload.entityId()) instanceof IMovingStorageEntity storageEntity) {
-			storageEntity.getStorageHolder().openContainerMenu(player, storageEntity);
+		Entity entity = player.level().getEntity(payload.entityId());
+		if (entity instanceof IMovingStorageEntity storageEntity) {
+			storageEntity.getStorageHolder().openContainerMenu(player);
 		}
 	}
 }

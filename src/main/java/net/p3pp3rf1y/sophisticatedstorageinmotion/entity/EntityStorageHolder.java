@@ -304,17 +304,17 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 		storageWrapper = NoopStorageWrapper.INSTANCE;
 	}
 
-	public InteractionResult openContainerMenu(Player player, IMovingStorageEntity storageEntity) {
-		ItemStack storageItem = storageEntity.getStorageItem();
-
-		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> {
-			if (isLimitedBarrel(storageItem)) {
-				return new MovingLimitedBarrelContainerMenu<>(w, pl, storageEntity.getId());
-			} else {
-				return new MovingStorageContainerMenu<>(w, pl, storageEntity.getId());
-			}
-		}, storageItem.getDisplayName(), false), buffer -> buffer.writeInt(storageEntity.getId()));
+	public InteractionResult openContainerMenu(Player player) {
+		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> createMenu(w, pl), entity.getName(), false), buffer -> buffer.writeInt(entity.getId()));
 		return player.level().isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+	}
+
+	public MovingStorageContainerMenu<? extends Entity> createMenu(int id, Player pl) {
+		if (isLimitedBarrel(entity.getStorageItem())) {
+			return new MovingLimitedBarrelContainerMenu<>(id, pl, entity.getId());
+		} else {
+			return new MovingStorageContainerMenu<>(id, pl, entity.getId());
+		}
 	}
 
 	public static boolean isLimitedBarrel(ItemStack storageItem) {

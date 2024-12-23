@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
@@ -83,4 +84,9 @@ public class StorageMinecartItem extends ItemBase {
 		}
 	}
 
+	@Override
+	public Component getName(ItemStack stack) {
+		SimpleItemContent storageItemContent = stack.get(ModDataComponents.STORAGE_ITEM);
+		return storageItemContent != null ? Component.translatable(getDescriptionId(), storageItemContent.copy().getHoverName()) : super.getName(stack);
+	}
 }
