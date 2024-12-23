@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
@@ -30,8 +31,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
 
-public class MovingStorageContainerMenu extends StorageContainerMenuBase<IStorageWrapper> implements ISyncedContainer {
-	protected final WeakReference<IMovingStorageEntity> storageEntity;
+public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity> extends StorageContainerMenuBase<IStorageWrapper> implements ISyncedContainer {
+	protected final WeakReference<T> storageEntity;
 
 	@Nullable
 	private CompoundTag lastSettingsNbt = null;
@@ -45,11 +46,11 @@ public class MovingStorageContainerMenu extends StorageContainerMenuBase<IStorag
 		if (!(player.level().getEntity(entityId) instanceof IMovingStorageEntity movingStorageEntity)) {
 			throw new IllegalArgumentException("Incorrect entity with id " + entityId + " expected to find IMovingStorageEntity");
 		}
-		storageEntity = new WeakReference<>(movingStorageEntity);
+		storageEntity = new WeakReference<T>((T) movingStorageEntity);
 		movingStorageEntity.getStorageHolder().startOpen(player);
 	}
 
-	public Optional<IMovingStorageEntity> getStorageEntity() {
+	public Optional<T> getStorageEntity() {
 		return Optional.ofNullable(storageEntity.get());
 	}
 
@@ -67,13 +68,18 @@ public class MovingStorageContainerMenu extends StorageContainerMenuBase<IStorag
 		return storageMinecart.getStorageHolder().getStorageWrapper();
 	}
 
-	public static MovingStorageContainerMenu fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
-		return new MovingStorageContainerMenu(windowId, playerInventory.player, buffer.readInt());
+	public static MovingStorageContainerMenu<?> fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
+		return new MovingStorageContainerMenu<>(windowId, playerInventory.player, buffer.readInt());
 	}
 
 	@Override
 	public Optional<BlockPos> getBlockPosition() {
 		return Optional.empty();
+	}
+
+	@Override
+	public Optional<Entity> getEntity() {
+		return getStorageEntity().map(e -> e);
 	}
 
 	@Override

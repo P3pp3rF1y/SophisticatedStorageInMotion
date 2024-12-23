@@ -1,19 +1,21 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 
 import java.util.List;
 
-public class MovingLimitedBarrelContainerMenu extends MovingStorageContainerMenu {
+public class MovingLimitedBarrelContainerMenu<T extends Entity & IMovingStorageEntity> extends MovingStorageContainerMenu<T> {
 	public MovingLimitedBarrelContainerMenu(int containerId, Player player, int entityId) {
 		super(ModEntities.MOVING_LIMITED_BARREL_CONTAINER_TYPE.get(), containerId, player, entityId);
 	}
 
-	public static MovingLimitedBarrelContainerMenu fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
-		return new MovingLimitedBarrelContainerMenu(windowId, playerInventory.player, buffer.readInt());
+	public static MovingLimitedBarrelContainerMenu<?> fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
+		return new MovingLimitedBarrelContainerMenu<>(windowId, playerInventory.player, buffer.readInt());
 	}
 
 	@Override

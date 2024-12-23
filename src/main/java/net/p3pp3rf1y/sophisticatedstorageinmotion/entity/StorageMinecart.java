@@ -81,7 +81,6 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 		}
 	}
 
-
 	@Override
 	protected void addAdditionalSaveData(CompoundTag tag) {
 		super.addAdditionalSaveData(tag);

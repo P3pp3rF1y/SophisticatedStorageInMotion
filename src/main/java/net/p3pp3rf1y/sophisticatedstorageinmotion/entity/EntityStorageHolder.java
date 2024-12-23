@@ -1,24 +1,34 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
+import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.block.*;
@@ -32,6 +42,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.data.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -146,10 +157,52 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 
 	public void tick() {
 		if (entity.level().isClientSide()) {
+			clientTick();
 			return;
 		}
 		getStorageWrapper().getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class).forEach(upgrade -> upgrade.tick(entity, entity.level(), entity.blockPosition()));
+		runPickupOnItemEntities();
 	}
+
+	private void clientTick() {
+		if (entity.level().random.nextInt(10) == 0) {
+			RenderInfo renderInfo = getStorageWrapper().getRenderInfo();
+			renderUpgrades(entity.level(), entity.level().random, renderInfo);
+		}
+	}
+
+	protected void renderUpgrades(Level level, RandomSource rand, RenderInfo renderInfo) {
+		if (Minecraft.getInstance().isPaused()) {
+			return;
+		}
+		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> {
+			renderUpgrade(renderer, level, rand, type, data);
+		}));
+	}
+
+	private <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, Level level, RandomSource rand, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
+		//noinspection unchecked
+		type.cast(data).ifPresent(renderData -> renderer.render(level, rand, vector -> vector.add((float) entity.position().x(), (float) entity.position().y() + 0.8f, (float) entity.position().z()), (T) renderData));
+	}
+
+	private void runPickupOnItemEntities() {
+		AABB aabb = entity.getBoundingBox();
+		List<ItemEntity> collidedWithItemEntities = entity.level().getEntitiesOfClass(ItemEntity.class, aabb);
+		collidedWithItemEntities.forEach(itemEntity -> {
+			if (itemEntity.isAlive()) {
+				tryToPickup(entity.level(), itemEntity);
+			}
+		});
+	}
+
+	protected void tryToPickup(Level level, ItemEntity itemEntity) {
+		ItemStack remainingStack = itemEntity.getItem().copy();
+		remainingStack = InventoryHelper.runPickupOnPickupResponseUpgrades(level, getStorageWrapper().getUpgradeHandler(), remainingStack, false);
+		if (remainingStack.getCount() < itemEntity.getItem().getCount()) {
+			itemEntity.setItem(remainingStack);
+		}
+	}
+
 
 	public static boolean isLocked(ItemStack stack) {
 		return stack.getOrDefault(ModDataComponents.LOCKED, false);
@@ -256,9 +309,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 
 		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> {
 			if (isLimitedBarrel(storageItem)) {
-				return new MovingLimitedBarrelContainerMenu(w, pl, storageEntity.getId());
+				return new MovingLimitedBarrelContainerMenu<>(w, pl, storageEntity.getId());
 			} else {
-				return new MovingStorageContainerMenu(w, pl, storageEntity.getId());
+				return new MovingStorageContainerMenu<>(w, pl, storageEntity.getId());
 			}
 		}, storageItem.getDisplayName(), false), buffer -> buffer.writeInt(storageEntity.getId()));
 		return player.level().isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME;

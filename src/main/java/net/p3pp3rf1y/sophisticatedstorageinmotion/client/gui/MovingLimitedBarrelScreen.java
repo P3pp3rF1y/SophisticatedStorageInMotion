@@ -9,7 +9,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContai
 public class MovingLimitedBarrelScreen extends MovingStorageScreen {
 	public static final int STORAGE_SLOTS_HEIGHT = 82;
 
-	public MovingLimitedBarrelScreen(MovingStorageContainerMenu menu, Inventory playerInventory, Component title) {
+	public MovingLimitedBarrelScreen(MovingStorageContainerMenu<?> menu, Inventory playerInventory, Component title) {
 		super(menu, playerInventory, title);
 	}
 

@@ -6,8 +6,8 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 
-public class MovingStorageScreen extends StorageScreenBase<MovingStorageContainerMenu> {
-	public static MovingStorageScreen constructScreen(MovingStorageContainerMenu screenContainer, Inventory inv, Component title) {
+public class MovingStorageScreen extends StorageScreenBase<MovingStorageContainerMenu<?>> {
+	public static MovingStorageScreen constructScreen(MovingStorageContainerMenu<?> screenContainer, Inventory inv, Component title) {
 		return new MovingStorageScreen(screenContainer, inv, title);
 	}
 
