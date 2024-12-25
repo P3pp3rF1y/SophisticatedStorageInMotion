@@ -1,4 +1,4 @@
-package net.p3pp3rf1y.sophisticatedstorageinmotion.data;
+package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -10,7 +10,6 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
 
 import java.io.File;
 import java.io.IOException;

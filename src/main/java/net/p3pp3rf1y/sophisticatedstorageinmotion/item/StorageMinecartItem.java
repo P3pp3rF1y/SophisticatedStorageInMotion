@@ -6,6 +6,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -19,15 +21,23 @@ import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class StorageMinecartItem extends ItemBase {
 	public StorageMinecartItem() {
 		super(new Properties().stacksTo(1));
+	}
+
+	public static ItemStack getStorageItem(ItemStack stack) {
+		return stack.getOrDefault(ModDataComponents.STORAGE_ITEM, SimpleItemContent.EMPTY).copy();
 	}
 
 	@Override
@@ -36,8 +46,8 @@ public class StorageMinecartItem extends ItemBase {
 			itemConsumer.accept(createWithStorage(WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.BARREL_ITEM.get()), WoodType.SPRUCE)));
 			ItemStack limitedIStack = new ItemStack(ModBlocks.LIMITED_GOLD_BARREL_1_ITEM.get());
 			if (limitedIStack.getItem() instanceof ITintableBlockItem tintableBlockItem) {
-				tintableBlockItem.setAccentColor(limitedIStack, 0xFF_EEEEEE);
-				tintableBlockItem.setMainColor(limitedIStack, 0xFF_222222);
+				tintableBlockItem.setMainColor(limitedIStack, DyeColor.YELLOW.getTextureDiffuseColor());
+				tintableBlockItem.setAccentColor(limitedIStack, DyeColor.LIME.getTextureDiffuseColor());
 			}
 			itemConsumer.accept(createWithStorage(limitedIStack));
 			itemConsumer.accept(createWithStorage(WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.LIMITED_COPPER_BARREL_2.get()), WoodType.BIRCH)));
@@ -49,10 +59,14 @@ public class StorageMinecartItem extends ItemBase {
 	}
 
 
-	private ItemStack createWithStorage(ItemStack storageStack) {
-		ItemStack stack = new ItemStack(this);
-		stack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageStack));
+	private static ItemStack createWithStorage(ItemStack storageStack) {
+		ItemStack stack = new ItemStack(ModItems.STORAGE_MINECART.get());
+		setStorage(storageStack, stack);
 		return stack;
+	}
+
+	public static void setStorage(ItemStack storageStack, ItemStack stack) {
+		stack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageStack));
 	}
 
 	@Override
@@ -88,5 +102,30 @@ public class StorageMinecartItem extends ItemBase {
 	public Component getName(ItemStack stack) {
 		SimpleItemContent storageItemContent = stack.get(ModDataComponents.STORAGE_ITEM);
 		return storageItemContent != null ? Component.translatable(getDescriptionId(), storageItemContent.copy().getHoverName()) : super.getName(stack);
+	}
+
+	public static Optional<Item> getStorageItemType(ItemStack stack) {
+		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM);
+		return storageItemContents == null ? Optional.empty() : Optional.of(storageItemContents.getItem());
+	}
+
+	public static Optional<WoodType> getStorageItemWoodType(ItemStack stack) {
+		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM);
+		return storageItemContents == null ? Optional.empty() : WoodStorageBlockItem.getWoodType(storageItemContents);
+	}
+
+	public static Optional<Integer> getStorageItemMainColor(ItemStack stack) {
+		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM);
+		return storageItemContents == null ? Optional.empty() : StorageBlockItem.getMainColorFromComponentHolder(storageItemContents);
+	}
+
+	public static Optional<Integer> getStorageItemAccentColor(ItemStack stack) {
+		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM);
+		return storageItemContents == null ? Optional.empty() : StorageBlockItem.getAccentColorFromComponentHolder(storageItemContents);
+	}
+
+	public static boolean isStorageItemFlatTopBarrel(ItemStack stack) {
+		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM);
+		return storageItemContents != null && BarrelBlockItem.isFlatTop(storageItemContents);
 	}
 }

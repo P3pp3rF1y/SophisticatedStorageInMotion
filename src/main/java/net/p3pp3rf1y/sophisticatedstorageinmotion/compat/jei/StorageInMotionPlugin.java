@@ -21,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ public class StorageInMotionPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		//TODO add
+		registration.registerSubtypeInterpreter(ModItems.STORAGE_MINECART.get(), new MovingStorageSubtypeInterpreter());
 	}
 
 	@Override
@@ -64,7 +65,7 @@ public class StorageInMotionPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		//TODO add
+		registration.addRecipes(RecipeTypes.CRAFTING, AssembleRecipesMaker.getShapelessCraftingRecipes(ModItems.STORAGE_MINECART.get()));
 	}
 
 	@Override

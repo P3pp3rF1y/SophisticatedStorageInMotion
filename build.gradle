@@ -114,7 +114,7 @@ neoForge {
             }
         }
         if (findProject(':SophisticatedStorage') != null) {
-            "sophisticatedcore" {
+            "sophisticatedstorage" {
                 sourceSet(project(':SophisticatedStorage').sourceSets.main)
             }
         }

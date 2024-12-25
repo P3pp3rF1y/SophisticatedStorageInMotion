@@ -34,7 +34,6 @@ import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.settings.StorageSettingsHandler;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.data.MovingStorageData;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -235,12 +234,12 @@ public class MovingStorageWrapper implements IStorageWrapper {
 
 	@Override
 	public int getMainColor() {
-		return StorageBlockItem.getMainColorFromStack(storageStack).orElse(-1);
+		return StorageBlockItem.getMainColorFromComponentHolder(storageStack).orElse(-1);
 	}
 
 	@Override
 	public int getAccentColor() {
-		return StorageBlockItem.getAccentColorFromStack(storageStack).orElse(-1);
+		return StorageBlockItem.getAccentColorFromComponentHolder(storageStack).orElse(-1);
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.data.MovingStorageData;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
 import java.util.UUID;
 

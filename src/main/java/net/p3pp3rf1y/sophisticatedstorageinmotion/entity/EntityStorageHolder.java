@@ -38,7 +38,6 @@ import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.data.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 
 import javax.annotation.Nullable;
