@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -9,6 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
@@ -17,16 +19,18 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.p3pp3rf1y.sophisticatedcore.Config;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
-import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
-import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
-import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.*;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -38,6 +42,30 @@ public class StorageMinecartItem extends ItemBase {
 
 	public static ItemStack getStorageItem(ItemStack stack) {
 		return stack.getOrDefault(ModDataComponents.STORAGE_ITEM, SimpleItemContent.EMPTY).copy();
+	}
+
+	@Override
+	public void onCraftedPostProcess(ItemStack stack, Level level) {
+		super.onCraftedPostProcess(stack, level);
+		if (level.isClientSide()) {
+			return;
+		}
+		ItemStack storageItem = getStorageItem(stack);
+		if (storageItem.getItem() instanceof ShulkerBoxItem) {
+			StackStorageWrapper shulkerStorageWrapper = StackStorageWrapper.fromStack(level.registryAccess(), storageItem);
+			shulkerStorageWrapper.getContentsUuid().ifPresent(id -> {
+				ItemContentsStorage itemContentsStorage = ItemContentsStorage.get();
+				CompoundTag contentsNbt = itemContentsStorage.getOrCreateStorageContents(id).getCompound(StorageBlockEntity.STORAGE_WRAPPER_TAG);
+				CompoundTag migratedContentsNbt = new CompoundTag();
+				migratedContentsNbt.put(StorageWrapper.CONTENTS_TAG, contentsNbt.getCompound(StorageWrapper.CONTENTS_TAG));
+				migratedContentsNbt.put(StorageWrapper.SETTINGS_TAG, contentsNbt.getCompound(StorageWrapper.SETTINGS_TAG));
+				MovingStorageData.get(id).setContents(migratedContentsNbt);
+				storageItem.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(contentsNbt.getCompound(StorageWrapper.RENDER_INFO_TAG)));
+				setStorageItem(storageItem, stack);
+				itemContentsStorage.removeStorageContents(id);
+			});
+			setStorageItem(storageItem, stack);
+		}
 	}
 
 	@Override
@@ -59,14 +87,14 @@ public class StorageMinecartItem extends ItemBase {
 	}
 
 
-	private static ItemStack createWithStorage(ItemStack storageStack) {
-		ItemStack stack = new ItemStack(ModItems.STORAGE_MINECART.get());
-		setStorage(storageStack, stack);
+	private ItemStack createWithStorage(ItemStack storageStack) {
+		ItemStack stack = new ItemStack(this);
+		setStorageItem(storageStack, stack);
 		return stack;
 	}
 
-	public static void setStorage(ItemStack storageStack, ItemStack stack) {
-		stack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageStack));
+	public static void setStorageItem(ItemStack storageItem, ItemStack movingStorageItem) {
+		movingStorageItem.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem));
 	}
 
 	@Override

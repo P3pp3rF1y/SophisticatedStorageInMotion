@@ -8,7 +8,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
@@ -59,7 +58,7 @@ public class MovingStorageWrapper implements IStorageWrapper {
 	private final Map<Class<? extends IUpgradeWrapper>, Consumer<? extends IUpgradeWrapper>> upgradeDefaultsHandlers = new HashMap<>();
 
 
-	private MovingStorageWrapper(ItemStack storageStack, Runnable onContentsChanged, Runnable onStackChanged, Level level) {
+	private MovingStorageWrapper(ItemStack storageStack, Runnable onContentsChanged, Runnable onStackChanged) {
 		this.storageStack = storageStack;
 		contentsChangeHandler = onContentsChanged;
 		stackChangeHandler = onStackChanged;
@@ -75,8 +74,8 @@ public class MovingStorageWrapper implements IStorageWrapper {
 		return stack.getItem() instanceof BarrelBlockItem ? 4 : 1;
 	}
 
-	public static MovingStorageWrapper fromStack(ItemStack stack, Runnable onContentsChanged, Runnable onStackChanged, Level level) {
-		MovingStorageWrapper movingStorageWrapper = StorageWrapperRepository.getStorageWrapper(stack, MovingStorageWrapper.class, s -> new MovingStorageWrapper(s, onContentsChanged, onStackChanged, level));
+	public static MovingStorageWrapper fromStack(ItemStack stack, Runnable onContentsChanged, Runnable onStackChanged) {
+		MovingStorageWrapper movingStorageWrapper = StorageWrapperRepository.getStorageWrapper(stack, MovingStorageWrapper.class, s -> new MovingStorageWrapper(s, onContentsChanged, onStackChanged));
 		UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID);
 		if (uuid != null) {
 			movingStorageWrapper.setContentsUuid(uuid); //setting here because client side the uuid isn't in contentsnbt before this data is synced from server and it would create a new one otherwise
@@ -159,11 +158,7 @@ public class MovingStorageWrapper implements IStorageWrapper {
 	public SettingsHandler getSettingsHandler() {
 		if (settingsHandler == null) {
 			if (getContentsUuid().isPresent()) {
-				CompoundTag contentsNbt = getContentsNbt();
-				if (!contentsNbt.contains(SETTINGS_TAG)) {
-					contentsNbt.put(SETTINGS_TAG, new CompoundTag());
-				}
-				settingsHandler = new StorageSettingsHandler(contentsNbt.getCompound(SETTINGS_TAG), contentsChangeHandler, this::getInventoryHandler, () -> renderInfo) {
+				settingsHandler = new StorageSettingsHandler(getSettingsNbt(), contentsChangeHandler, this::getInventoryHandler, () -> renderInfo) {
 					@Override
 					protected int getNumberOfDisplayItems() {
 						return MovingStorageWrapper.getNumberOfDisplayItems(storageStack);
@@ -228,8 +223,26 @@ public class MovingStorageWrapper implements IStorageWrapper {
 		return Optional.ofNullable(storageStack.get(ModCoreDataComponents.STORAGE_UUID));
 	}
 
+	private CompoundTag getSettingsNbt() {
+		UUID storageId = getContentsUuid().orElseGet(this::getNewUuid);
+		MovingStorageData storageData = MovingStorageData.get(storageId);
+		CompoundTag baseContentsNbt = storageData.getContents();
+		if (!baseContentsNbt.contains(SETTINGS_TAG)) {
+			baseContentsNbt.put(SETTINGS_TAG, new CompoundTag());
+			storageData.setContents(baseContentsNbt);
+		}
+		return baseContentsNbt.getCompound(SETTINGS_TAG);
+	}
+
 	private CompoundTag getContentsNbt() {
-		return MovingStorageData.get(getContentsUuid().orElseGet(this::getNewUuid)).getContents();
+		UUID storageId = getContentsUuid().orElseGet(this::getNewUuid);
+		MovingStorageData storageData = MovingStorageData.get(storageId);
+		CompoundTag baseContentsNbt = storageData.getContents();
+		if (!baseContentsNbt.contains(StorageWrapper.CONTENTS_TAG)) {
+			baseContentsNbt.put(StorageWrapper.CONTENTS_TAG, new CompoundTag());
+			storageData.setContents(baseContentsNbt);
+		}
+		return baseContentsNbt.getCompound(StorageWrapper.CONTENTS_TAG);
 	}
 
 	@Override

@@ -90,6 +90,11 @@ public class MovingStorageData extends SavedData {
 		return movingStorageContents;
 	}
 
+	public void setContents(CompoundTag contents) {
+		movingStorageContents = contents;
+		setDirty();
+	}
+
 	public boolean removeUpdatedStorageSettingsFlag(UUID backpackUuid) {
 		return updatedStorageSettingsFlags.remove(backpackUuid);
 	}

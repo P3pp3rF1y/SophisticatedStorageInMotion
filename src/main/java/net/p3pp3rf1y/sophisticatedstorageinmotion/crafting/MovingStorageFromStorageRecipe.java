@@ -47,7 +47,7 @@ public class MovingStorageFromStorageRecipe extends ShapelessRecipe implements I
 	@Override
 	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
 		ItemStack movingStorageItem = super.assemble(input, registries);
-		getStorage(input).ifPresent(storage -> StorageMinecartItem.setStorage(storage, movingStorageItem));
+		getStorage(input).ifPresent(storage -> StorageMinecartItem.setStorageItem(storage, movingStorageItem));
 		return movingStorageItem;
 	}
 

@@ -136,12 +136,6 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 		return getStorageEntity().map(se -> player.distanceToSqr(se.position()) <= 64.0D).orElse(false); //TODO if packing is allowed check if not packed here
 	}
 
-	/* TODO  base on storage wrapper in stack
-	public float getSlotFillPercentage(int slot) {
-		return storageBlockEntity.getSlotFillPercentage(slot);
-	}
-*/
-
 	@Override
 	protected void sendStorageSettingsToClient() {
 		if (player.level().isClientSide) {

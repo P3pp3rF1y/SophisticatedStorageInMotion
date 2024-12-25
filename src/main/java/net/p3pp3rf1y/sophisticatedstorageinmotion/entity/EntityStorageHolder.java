@@ -106,7 +106,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 			setStorageItem(storageItem);
 		}
 
-		storageWrapper = MovingStorageWrapper.fromStack(storageItem, this::onContentsChanged, this::onStackChanged, entity.level());
+		storageWrapper = MovingStorageWrapper.fromStack(storageItem, this::onContentsChanged, this::onStackChanged);
 	}
 
 	public IStorageWrapper getStorageWrapper() {
