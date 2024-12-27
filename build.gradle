@@ -35,7 +35,7 @@ repositories {
         url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedcore")
         credentials {
             username = System.getenv("USERNAME")
-            password = System.getenv("READ_PACKAGES_TOKEN")
+            password = System.getenv("GITHUB_TOKEN")
         }
         content {
             includeGroupByRegex "sophisticatedcore.*"
@@ -46,7 +46,7 @@ repositories {
         url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedstorage")
         credentials {
             username = System.getenv("USERNAME")
-            password = System.getenv("READ_PACKAGES_TOKEN")
+            password = System.getenv("GITHUB_TOKEN")
         }
         content {
             includeGroupByRegex "sophisticatedstorage.*"
