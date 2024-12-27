@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -33,7 +34,7 @@ public class ModItems {
 
 	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedStorageInMotion.MOD_ID);
 	public static final Supplier<RecipeSerializer<?>> MOVING_STORAGE_FROM_STORAGE_SERIALIZER = RECIPE_SERIALIZERS.register("moving_storage_from_storage", MovingStorageFromStorageRecipe.Serializer::new);
-	public static final Supplier<RecipeSerializer<?>> UNCRAFT_MOVING_STORAGE_SERIALIZER = RECIPE_SERIALIZERS.register("uncraft_moving_storage",() -> new SimpleCraftingRecipeSerializer<>(UncraftMovingStorageRecipe::new));
+	public static final Supplier<RecipeSerializer<?>> UNCRAFT_MOVING_STORAGE_SERIALIZER = RECIPE_SERIALIZERS.register("uncraft_moving_storage", () -> new SimpleCraftingRecipeSerializer<>(UncraftMovingStorageRecipe::new));
 
 	public static Supplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("main", () ->
 			CreativeModeTab.builder().icon(() -> new ItemStack(STORAGE_MINECART.get()))
@@ -48,5 +49,9 @@ public class ModItems {
 		CREATIVE_MODE_TABS.register(modBus);
 		ATTACHMENT_TYPES.register(modBus);
 		RECIPE_SERIALIZERS.register(modBus);
+	}
+
+	public static void registerDispenseBehavior() {
+		DispenserBlock.registerBehavior(STORAGE_MINECART.get(), StorageMinecartItem.DISPENSE_ITEM_BEHAVIOR);
 	}
 }

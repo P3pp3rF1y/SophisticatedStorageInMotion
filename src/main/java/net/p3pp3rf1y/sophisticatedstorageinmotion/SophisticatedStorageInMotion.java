@@ -5,6 +5,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.data.DataGenerators;
@@ -29,6 +30,7 @@ public class SophisticatedStorageInMotion {
 		}
 		modBus.addListener(ModPayloads::registerPayloads);
 		modBus.addListener(DataGenerators::gatherData);
+		modBus.addListener(SophisticatedStorageInMotion::setup);
 	}
 
 	public static ResourceLocation getRL(String regName) {
@@ -37,5 +39,9 @@ public class SophisticatedStorageInMotion {
 
 	public static String getRegistryName(String regName) {
 		return MOD_ID + ":" + regName;
+	}
+
+	private static void setup(FMLCommonSetupEvent event) {
+		event.enqueueWork(ModItems::registerDispenseBehavior);
 	}
 }
