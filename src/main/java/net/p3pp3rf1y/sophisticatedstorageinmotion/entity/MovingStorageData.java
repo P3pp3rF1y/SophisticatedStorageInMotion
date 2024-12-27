@@ -55,7 +55,7 @@ public class MovingStorageData extends SavedData {
 		return new CompoundTag();
 	}
 
-	public void removeStorageContents(UUID backpackUuid) {
+	public void removeStorageContents() {
 		toRemove = true;
 		setDirty();
 	}

@@ -6,6 +6,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.ClientEventHandler;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.data.DataGenerators;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.*;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +22,7 @@ public class SophisticatedStorageInMotion {
 		ModItems.registerHandlers(modBus);
 		ModEntities.registerHandlers(modBus);
 		ModDataComponents.register(modBus);
+		CommonEventHandler.registerHandlers();
 		if (dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers(modBus);
 			ModEntitiesClient.registerHandlers(modBus); //TODO move this to client event handler

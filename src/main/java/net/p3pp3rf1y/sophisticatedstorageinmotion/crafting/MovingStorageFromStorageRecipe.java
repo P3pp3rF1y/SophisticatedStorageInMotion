@@ -12,7 +12,7 @@ import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockBase;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageMinecartItem;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ public class MovingStorageFromStorageRecipe extends ShapelessRecipe implements I
 	@Override
 	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
 		ItemStack movingStorageItem = super.assemble(input, registries);
-		getStorage(input).ifPresent(storage -> StorageMinecartItem.setStorageItem(storage, movingStorageItem));
+		getStorage(input).ifPresent(storage -> MovingStorageItem.setStorageItem(storage, movingStorageItem));
 		return movingStorageItem;
 	}
 
