@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -23,7 +22,6 @@ import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -84,17 +82,11 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	@Override
 	public void destroy(DamageSource source) {
 		this.kill();
-		if (level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-			ItemStack drop = new ItemStack(ModItems.STORAGE_MINECART.get());
-			drop.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(getStorageItem()));
-			drop.set(DataComponents.CUSTOM_NAME, getCustomName());
-			spawnAtLocation(drop);
-			entityStorageHolder.dropAllItems();
-		}
+		getStorageHolder().onDestroy();
 	}
 
 	@Override
-	protected Item getDropItem() {
+	public Item getDropItem() {
 		return ModItems.STORAGE_MINECART.get();
 	}
 
@@ -184,7 +176,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public void chestVehicleDestroyed(DamageSource damageSource, Level level, Entity p_entity) {
-		//TODO implement
+		//noop
 	}
 
 	@Override

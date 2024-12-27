@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -34,6 +36,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.block.*;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelContainerMenu;
@@ -139,15 +142,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 		MovingStorageData.get(storageId).setDirty();
 	}
 
-	public void dropAllItems() {
-		//TODO implement
-	}
-
 	public void startOpen(Player player) {
 		entity.gameEvent(GameEvent.CONTAINER_OPEN, player);
 		PiglinAi.angerNearbyPiglins(player, true);
-
-		//TODO implement openers tracking? Would require stopOpen override in that case as well
 	}
 
 	public void stopOpen(Player player) {
@@ -318,5 +315,22 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 
 	public static boolean isLimitedBarrel(ItemStack storageItem) {
 		return storageItem.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof LimitedBarrelBlock;
+	}
+
+	public void onDestroy() {
+		if (entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			ItemStack drop = new ItemStack(entity.getDropItem());
+			drop.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(entity.getStorageItem()));
+			drop.set(DataComponents.CUSTOM_NAME, entity.getCustomName());
+			entity.spawnAtLocation(drop);
+			if (!(entity.getStorageItem().getItem() instanceof ShulkerBoxItem)) {
+				dropAllItems();
+			}
+		}
+	}
+
+	private void dropAllItems() {
+		InventoryHelper.dropItems(getStorageWrapper().getInventoryHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
+		InventoryHelper.dropItems(getStorageWrapper().getUpgradeHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
 	}
 }
