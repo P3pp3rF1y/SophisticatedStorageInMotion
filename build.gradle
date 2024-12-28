@@ -368,8 +368,8 @@ modrinth {
     loaders = ["neoforge"]
     dependencies {
         required.project "sophisticated-core"
+        required.project "sophisticated-storage"
         optional.project "jei"
-        optional.project "crafting-tweaks"
     }
     changelog = provider {
         project.ext.changelog
