@@ -12,6 +12,8 @@ import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.SettingsScreen;
 import net.p3pp3rf1y.sophisticatedcore.compat.jei.CraftingContainerRecipeTransferHandlerBase;
 import net.p3pp3rf1y.sophisticatedcore.compat.jei.SettingsGhostIngredientHandler;
@@ -72,11 +74,16 @@ public class StorageInMotionPlugin implements IModPlugin {
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		IRecipeTransferHandlerHelper handlerHelper = registration.getTransferHelper();
 		IStackHelper stackHelper = registration.getJeiHelpers().getStackHelper();
-		registration.addRecipeTransferHandler(new CraftingContainerRecipeTransferHandlerBase<MovingStorageContainerMenu<?>>(handlerHelper, stackHelper) {
+		registration.addRecipeTransferHandler(new CraftingContainerRecipeTransferHandlerBase<MovingStorageContainerMenu<?>, RecipeHolder<CraftingRecipe>>(handlerHelper, stackHelper) {
 			@Override
 			public Class<MovingStorageContainerMenu<?>> getContainerClass() {
 				//noinspection unchecked
 				return (Class<MovingStorageContainerMenu<?>>) (Class<?>) MovingStorageContainerMenu.class;
+			}
+
+			@Override
+			public mezz.jei.api.recipe.RecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
+				return RecipeTypes.CRAFTING;
 			}
 		}, RecipeTypes.CRAFTING);
 	}
