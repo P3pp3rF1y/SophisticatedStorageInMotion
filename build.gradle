@@ -354,8 +354,8 @@ task curseforge(type: net.darkhax.curseforgegradle.TaskPublishCurseForge) {
         mainFile.addGameVersion("${it}")
     }
     mainFile.addRequirement('sophisticated-core')
+    mainFile.addRequirement('sophisticated-storage')
     mainFile.addOptional('jei')
-    mainFile.addOptional('crafting-tweaks')
     onlyIf { !project.ext.changelog.isEmpty() }
 }
 
