@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 
@@ -19,15 +18,6 @@ public class StorageMinecartItemRenderer extends BlockEntityWithoutLevelRenderer
 	private static StorageMinecart MINECART = null;
 	public StorageMinecartItemRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet) {
 		super(blockEntityRenderDispatcher, entityModelSet);
-	}
-
-	public static IClientItemExtensions getItemRenderProperties() {
-		return new IClientItemExtensions() {
-			@Override
-			public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-				return new StorageMinecartItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
-			}
-		};
 	}
 
 	@Override

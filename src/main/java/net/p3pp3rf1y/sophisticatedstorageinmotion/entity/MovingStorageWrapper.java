@@ -1,18 +1,19 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
-import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
-import net.p3pp3rf1y.sophisticatedcore.inventory.*;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryIOHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsHandler;
 import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
@@ -24,6 +25,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.BlockItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
+import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.Config;
 import net.p3pp3rf1y.sophisticatedstorage.SophisticatedStorage;
@@ -75,12 +77,9 @@ public class MovingStorageWrapper implements IStorageWrapper {
 	}
 
 	public static MovingStorageWrapper fromStack(ItemStack stack, Runnable onContentsChanged, Runnable onStackChanged) {
-		MovingStorageWrapper movingStorageWrapper = StorageWrapperRepository.getStorageWrapper(stack, MovingStorageWrapper.class, s -> new MovingStorageWrapper(s, onContentsChanged, onStackChanged));
-		UUID uuid = stack.get(ModCoreDataComponents.STORAGE_UUID);
-		if (uuid != null) {
-			movingStorageWrapper.setContentsUuid(uuid); //setting here because client side the uuid isn't in contentsnbt before this data is synced from server and it would create a new one otherwise
-		}
-
+		MovingStorageWrapper movingStorageWrapper = new MovingStorageWrapper(stack, onContentsChanged, onStackChanged);
+		//setting here because client side the uuid isn't in contentsnbt before this data is synced from server and it would create a new one otherwise
+		NBTHelper.getUniqueId(stack, StorageWrapper.UUID_TAG).ifPresent(movingStorageWrapper::setContentsUuid);
 		return movingStorageWrapper;
 	}
 
@@ -135,15 +134,12 @@ public class MovingStorageWrapper implements IStorageWrapper {
 	}
 
 	public int getNumberOfInventorySlots() {
-		Integer numberOfInventorySlots = storageStack.get(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS);
-		if (numberOfInventorySlots != null) {
-			return numberOfInventorySlots;
-		}
-		numberOfInventorySlots = getDefaultNumberOfInventorySlots();
-		storageStack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, numberOfInventorySlots);
-		stackChangeHandler.run();
-
-		return numberOfInventorySlots;
+		return NBTHelper.getInt(storageStack, StorageWrapper.NUMBER_OF_INVENTORY_SLOTS_TAG).orElseGet(() -> {
+			int defaultNumberOfInventorySlots = getDefaultNumberOfInventorySlots();
+			NBTHelper.setInteger(storageStack, StorageWrapper.NUMBER_OF_INVENTORY_SLOTS_TAG, defaultNumberOfInventorySlots);
+			stackChangeHandler.run();
+			return defaultNumberOfInventorySlots;
+		});
 	}
 
 	@Override
@@ -193,7 +189,7 @@ public class MovingStorageWrapper implements IStorageWrapper {
 			}) {
 				@Override
 				public boolean isItemValid(int slot, ItemStack stack) {
-					return super.isItemValid(slot, stack) && (stack.isEmpty() || SophisticatedStorage.MOD_ID.equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace()) || stack.is(ModItems.STORAGE_UPGRADE_TAG));
+					return super.isItemValid(slot, stack) && (stack.isEmpty() || SophisticatedStorage.MOD_ID.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).getNamespace()) || stack.is(ModItems.STORAGE_UPGRADE_TAG));
 				}
 			};
 			upgradeDefaultsHandlers.forEach(this::registerUpgradeDefaultsHandlerInUpgradeHandler);
@@ -207,20 +203,17 @@ public class MovingStorageWrapper implements IStorageWrapper {
 	}
 
 	public int getNumberOfUpgradeSlots() {
-		@Nullable Integer numberOfUpgradeSlots = storageStack.get(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS);
-		if (numberOfUpgradeSlots != null) {
-			return numberOfUpgradeSlots;
-		}
-		numberOfUpgradeSlots = getDefaultNumberOfUpgradeSlots();
-		storageStack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, numberOfUpgradeSlots);
-		stackChangeHandler.run();
-
-		return numberOfUpgradeSlots;
+		return NBTHelper.getInt(storageStack, StorageWrapper.NUMBER_OF_UPGRADE_SLOTS_TAG).orElseGet(() -> {
+			int defaultNumberOfUpgradeSlots = getDefaultNumberOfUpgradeSlots();
+			NBTHelper.setInteger(storageStack, StorageWrapper.NUMBER_OF_UPGRADE_SLOTS_TAG, defaultNumberOfUpgradeSlots);
+			stackChangeHandler.run();
+			return defaultNumberOfUpgradeSlots;
+		});
 	}
 
 	@Override
 	public Optional<UUID> getContentsUuid() {
-		return Optional.ofNullable(storageStack.get(ModCoreDataComponents.STORAGE_UUID));
+		return NBTHelper.getUniqueId(storageStack, StorageWrapper.UUID_TAG);
 	}
 
 	private CompoundTag getSettingsNbt() {
@@ -247,47 +240,49 @@ public class MovingStorageWrapper implements IStorageWrapper {
 
 	@Override
 	public int getMainColor() {
-		return StorageBlockItem.getMainColorFromComponentHolder(storageStack).orElse(-1);
+		return StorageBlockItem.getMainColorFromStack(storageStack).orElse(-1);
 	}
 
 	@Override
 	public int getAccentColor() {
-		return StorageBlockItem.getAccentColorFromComponentHolder(storageStack).orElse(-1);
+		return StorageBlockItem.getAccentColorFromStack(storageStack).orElse(-1);
 	}
 
 	@Override
 	public Optional<Integer> getOpenTabId() {
-		return Optional.ofNullable(storageStack.get(ModCoreDataComponents.OPEN_TAB_ID));
+		return NBTHelper.getInt(storageStack, StorageWrapper.OPEN_TAB_ID_TAG);
 	}
 
 	@Override
 	public void setOpenTabId(int openTabId) {
-		storageStack.set(ModCoreDataComponents.OPEN_TAB_ID, openTabId);
+		NBTHelper.setInteger(storageStack, StorageWrapper.OPEN_TAB_ID_TAG, openTabId);
 		stackChangeHandler.run();
 	}
 
 	@Override
 	public void removeOpenTabId() {
-		storageStack.remove(ModCoreDataComponents.OPEN_TAB_ID);
+		NBTHelper.removeTag(storageStack, StorageWrapper.OPEN_TAB_ID_TAG);
 		stackChangeHandler.run();
 	}
 
 	@Override
 	public void setColors(int mainColor, int accentColor) {
-		storageStack.set(ModCoreDataComponents.MAIN_COLOR, mainColor);
-		storageStack.set(ModCoreDataComponents.ACCENT_COLOR, accentColor);
-		stackChangeHandler.run();
+		if (storageStack.getItem() instanceof ITintableBlockItem tintableBlockItem) {
+			tintableBlockItem.setMainColor(storageStack, mainColor);
+			tintableBlockItem.setAccentColor(storageStack, accentColor);
+			stackChangeHandler.run();
+		}
 	}
 
 	@Override
 	public void setSortBy(SortBy sortBy) {
-		storageStack.set(ModCoreDataComponents.SORT_BY, sortBy);
+		NBTHelper.setEnumConstant(storageStack, EntityStorageHolder.SORT_BY_TAG, sortBy);
 		stackChangeHandler.run();
 	}
 
 	@Override
 	public SortBy getSortBy() {
-		return storageStack.getOrDefault(ModCoreDataComponents.SORT_BY, SortBy.NAME);
+		return NBTHelper.getEnumConstant(storageStack, EntityStorageHolder.SORT_BY_TAG, SortBy::fromName).orElse(SortBy.NAME);
 	}
 
 	@Override
@@ -351,7 +346,7 @@ public class MovingStorageWrapper implements IStorageWrapper {
 	}
 
 	public void setContentsUuid(UUID contentsUuid) {
-		storageStack.set(ModCoreDataComponents.STORAGE_UUID, contentsUuid);
+		NBTHelper.setUniqueId(storageStack, StorageWrapper.UUID_TAG, contentsUuid);
 		onContentsNbtUpdated();
 	}
 
@@ -406,12 +401,12 @@ public class MovingStorageWrapper implements IStorageWrapper {
 	}
 
 	public void setNumberOfInventorySlots(int numberOfInventorySlots) {
-		storageStack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, numberOfInventorySlots);
+		NBTHelper.setInteger(storageStack, StorageWrapper.NUMBER_OF_INVENTORY_SLOTS_TAG, numberOfInventorySlots);
 		stackChangeHandler.run();
 	}
 
 	public void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
-		storageStack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, numberOfUpgradeSlots);
+		NBTHelper.setInteger(storageStack, StorageWrapper.NUMBER_OF_UPGRADE_SLOTS_TAG, numberOfUpgradeSlots);
 		stackChangeHandler.run();
 	}
 
@@ -438,11 +433,12 @@ public class MovingStorageWrapper implements IStorageWrapper {
 
 		@Override
 		protected void serializeRenderInfo(CompoundTag renderInfo) {
-			MovingStorageWrapper.this.storageStack.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(renderInfo));
+			NBTHelper.setCompoundNBT(storageStack, StorageWrapper.RENDER_INFO_TAG, renderInfo.copy());
 		}
 
 		@Override
 		protected Optional<CompoundTag> getRenderInfoTag() {
-			return Optional.ofNullable(MovingStorageWrapper.this.storageStack.get(ModCoreDataComponents.RENDER_INFO_TAG.get())).map(CustomData::copyTag);			}
+			return NBTHelper.getCompound(storageStack, StorageWrapper.RENDER_INFO_TAG);
+		}
 	}
 }
