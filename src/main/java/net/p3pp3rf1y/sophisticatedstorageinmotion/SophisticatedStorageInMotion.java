@@ -28,7 +28,7 @@ public class SophisticatedStorageInMotion {
 		ModEntities.registerHandlers(modBus);
 		CommonEventHandler.registerHandlers();
 		if (FMLEnvironment.dist == Dist.CLIENT) {
-			ModEntitiesClient.registerHandlers(modBus); //TODO move this to client event handler
+			ModEntitiesClient.registerHandlers(modBus);
 		}
 		modBus.addListener(DataGenerators::gatherData);
 		modBus.addListener(SophisticatedStorageInMotion::setup);
