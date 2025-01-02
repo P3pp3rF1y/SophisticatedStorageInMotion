@@ -25,6 +25,7 @@ public class CommonEventHandler {
 	public static void registerHandlers() {
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(CommonEventHandler::onMovingStorageUncrafted);
+		eventBus.addListener(TierUpgradeHandler::onTierUpgradeInteract);
 	}
 
 	private static void onMovingStorageUncrafted(PlayerEvent.ItemCraftedEvent event) {
