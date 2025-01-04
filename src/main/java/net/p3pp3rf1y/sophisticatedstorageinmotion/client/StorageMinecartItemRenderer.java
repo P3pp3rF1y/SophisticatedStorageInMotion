@@ -29,7 +29,7 @@ public class StorageMinecartItemRenderer extends BlockEntityWithoutLevelRenderer
 		}
 
 		StorageMinecart minecart = getStorageMinecart(mc);
-		minecart.getStorageHolder().setStorageItemFrom(stack);
+		minecart.getStorageHolder().setStorageItemFrom(stack, false);
 
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0, 0.5);
