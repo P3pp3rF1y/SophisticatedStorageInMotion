@@ -139,7 +139,7 @@ public class MovingStorageWrapper implements IStorageWrapper {
 		if (numberOfInventorySlots != null) {
 			return numberOfInventorySlots;
 		}
-		numberOfInventorySlots = getDefaultNumberOfInventorySlots();
+		numberOfInventorySlots = getDefaultNumberOfInventorySlots(storageStack);
 		storageStack.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, numberOfInventorySlots);
 		stackChangeHandler.run();
 
@@ -211,7 +211,7 @@ public class MovingStorageWrapper implements IStorageWrapper {
 		if (numberOfUpgradeSlots != null) {
 			return numberOfUpgradeSlots;
 		}
-		numberOfUpgradeSlots = getDefaultNumberOfUpgradeSlots();
+		numberOfUpgradeSlots = getDefaultNumberOfUpgradeSlots(storageStack);
 		storageStack.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, numberOfUpgradeSlots);
 		stackChangeHandler.run();
 
@@ -355,11 +355,11 @@ public class MovingStorageWrapper implements IStorageWrapper {
 		onContentsNbtUpdated();
 	}
 
-	public int getDefaultNumberOfInventorySlots() {
+	public static int getDefaultNumberOfInventorySlots(ItemStack storageStack) {
 		return storageStack.getItem() instanceof BlockItemBase blockItem && blockItem.getBlock() instanceof IStorageBlock storageBlock ? storageBlock.getNumberOfInventorySlots() : 0;
 	}
 
-	private int getDefaultNumberOfUpgradeSlots() {
+	public static int getDefaultNumberOfUpgradeSlots(ItemStack storageStack) {
 		return storageStack.getItem() instanceof BlockItemBase blockItem && blockItem.getBlock() instanceof IStorageBlock storageBlock ? storageBlock.getNumberOfUpgradeSlots() : 0;
 	}
 

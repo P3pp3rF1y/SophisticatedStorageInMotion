@@ -64,7 +64,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 		return storageItem.getOrDefault(ModDataComponents.UPGRADES_VISIBLE, false);
 	}
 
-	public void setStorageItemFrom(ItemStack stack) {
+	public void setStorageItemFrom(ItemStack stack, boolean setupDefaults) {
 		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM.get());
 		if (storageItemContents == null) {
 			ItemStack barrel = new ItemStack(ModBlocks.BARREL_ITEM.get());
@@ -73,7 +73,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> {
 		} else {
 			ItemStack storageItem = storageItemContents.copy();
 			setStorageItem(storageItem);
-			if (isLimitedBarrel(storageItem)) {
+			if (setupDefaults && isLimitedBarrel(storageItem)) {
 				LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper(), storageWrapper instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : storageWrapper.getInventoryHandler().getSlots());
 			}
 		}
