@@ -25,6 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
@@ -159,7 +160,6 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 		invalidateCaps();
 	}
 
-
 	@Override
 	public void invalidateCaps() {
 		super.invalidateCaps();
@@ -168,7 +168,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public int getContainerSize() {
-		return getStorageHolder().getStorageWrapper().getInventoryHandler().getSlots();
+		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().getSlots();
 	}
 
 	@Override
@@ -211,23 +211,28 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public ItemStack removeChestVehicleItemNoUpdate(int slot) {
-		InventoryHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryHandler();
+		ITrackedContentsItemHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryForInputOutput();
 		return inventoryHandler.extractItem(slot, inventoryHandler.getStackInSlot(slot).getCount(), false);
 	}
 
 	@Override
 	public ItemStack getChestVehicleItem(int slot) {
-		return getStorageHolder().getStorageWrapper().getInventoryHandler().getStackInSlot(slot);
+		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().getStackInSlot(slot);
 	}
 
 	@Override
 	public ItemStack removeChestVehicleItem(int slot, int amount) {
-		return getStorageHolder().getStorageWrapper().getInventoryHandler().extractItem(slot, amount, false);
+		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().extractItem(slot, amount, false);
 	}
 
 	@Override
 	public void setChestVehicleItem(int slot, ItemStack stack) {
-		getStorageHolder().getStorageWrapper().getInventoryHandler().setStackInSlot(slot, stack);
+		getStorageHolder().getStorageWrapper().getInventoryForInputOutput().setStackInSlot(slot, stack);
+	}
+
+	@Override
+	public boolean canPlaceItem(int pIndex, ItemStack pStack) {
+		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().isItemValid(pIndex, pStack);
 	}
 
 	@Override

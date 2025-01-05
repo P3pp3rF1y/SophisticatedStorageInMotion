@@ -27,6 +27,7 @@ public class CommonEventHandler {
 		eventBus.addListener(CommonEventHandler::onMovingStorageUncrafted);
 		eventBus.addListener(CommonEventHandler::onMovingStorageCraftedFromShulkerBox);
 		eventBus.addListener(TierUpgradeHandler::onTierUpgradeInteract);
+		eventBus.addListener(StorageToolHandler::onStorageToolInteract);
 	}
 
 	private static void onMovingStorageUncrafted(PlayerEvent.ItemCraftedEvent event) {
