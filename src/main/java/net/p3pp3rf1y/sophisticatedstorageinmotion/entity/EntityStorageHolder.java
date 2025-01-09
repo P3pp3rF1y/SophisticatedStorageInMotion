@@ -585,7 +585,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 	}
 
 	public boolean canBeHurtByWithFeedback(DamageSource source) {
-		if (Config.COMMON.dropPacked.get() || !(source.getEntity() instanceof Player player)) {
+		if (Config.COMMON.dropPacked.get() || isPacked() || !(source.getEntity() instanceof Player player)) {
 			return true;
 		}
 
@@ -613,5 +613,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 				packingTapeItemName)
 		);
 		return false;
+	}
+
+	public boolean isPacked() {
+		return isPacked(entity.getStorageItem());
 	}
 }
