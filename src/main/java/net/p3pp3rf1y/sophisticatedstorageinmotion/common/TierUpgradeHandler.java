@@ -44,7 +44,7 @@ public class TierUpgradeHandler {
 			return;
 		}
 
-		if (event.getTarget() instanceof IMovingStorageEntity movingStorage && !movingStorage.getStorageHolder().isOpen()) {
+		if (event.getTarget() instanceof IMovingStorageEntity movingStorage && !movingStorage.getStorageHolder().isOpen() && !movingStorage.getStorageHolder().isPacked()) {
 			upgradeEntity(event, event.getTarget(), player, itemInHand, tierDefinitions, movingStorage.getStorageItem().getItem(), movingStorage.getStorageItem());
 		} else if (event.getTarget() instanceof MinecartChest minecartChest) {
 			upgradeEntity(event, minecartChest, player, itemInHand, tierDefinitions, Items.CHEST, ItemStack.EMPTY);
