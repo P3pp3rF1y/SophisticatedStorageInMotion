@@ -24,6 +24,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.util.NonNullLazy;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageMinecartItemRenderer;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,7 +100,9 @@ public class StorageMinecartItem extends MovingStorageItem {
 
 	private static StorageMinecart createMinecart(ServerLevel serverlevel, BlockPos blockpos, double ascendingOffset, ItemStack stack, @Nullable Player player) {
 		StorageMinecart minecart = new StorageMinecart(serverlevel, blockpos.getX() + 0.5, blockpos.getY() + 0.0625 + ascendingOffset, blockpos.getZ() + 0.5);
-		minecart.getStorageHolder().setStorageItemFrom(stack, true);
+		EntityStorageHolder<?> storageHolder = minecart.getStorageHolder();
+		storageHolder.setStorageItemFrom(stack, true);
+		storageHolder.onPlace();
 		EntityType.createDefaultStackConfig(serverlevel, stack, player).accept(minecart);
 		return minecart;
 	}

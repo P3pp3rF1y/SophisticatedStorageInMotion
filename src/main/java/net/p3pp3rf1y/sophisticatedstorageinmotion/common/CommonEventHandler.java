@@ -2,17 +2,23 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedstorage.Config;
 import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
@@ -28,6 +34,26 @@ public class CommonEventHandler {
 		eventBus.addListener(CommonEventHandler::onMovingStorageCraftedFromShulkerBox);
 		eventBus.addListener(TierUpgradeHandler::onTierUpgradeInteract);
 		eventBus.addListener(StorageToolHandler::onStorageToolInteract);
+		eventBus.addListener(CommonEventHandler::onPacked);
+	}
+
+	private static void onPacked(PlayerInteractEvent.EntityInteract event) {
+		Player player = event.getEntity();
+		ItemStack itemInHand = player.getItemInHand(event.getHand());
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || itemInHand.getItem() != ModItems.PACKING_TAPE.get() || Config.COMMON.dropPacked.get()) {
+			return;
+		}
+
+		if (movingStorage.getStorageHolder().pack()) {
+			if (!player.isCreative()) {
+				itemInHand.setDamageValue(itemInHand.getDamageValue() + 1);
+				if (itemInHand.getDamageValue() >= itemInHand.getMaxDamage()) {
+					player.setItemInHand(event.getHand(), ItemStack.EMPTY);
+				}
+			}
+			event.setCanceled(true);
+			event.setCancellationResult(InteractionResult.SUCCESS);
+		}
 	}
 
 	private static void onMovingStorageUncrafted(PlayerEvent.ItemCraftedEvent event) {
