@@ -33,28 +33,21 @@ public class TierUpgradeHandler {
 
 	public static void onTierUpgradeInteract(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
-		ItemStack tierUpgrade;
-		StorageTierUpgradeItem storageTierUpgradeItem;
-		if (player.getMainHandItem().getItem() instanceof StorageTierUpgradeItem item) {
-			tierUpgrade = player.getMainHandItem();
-			storageTierUpgradeItem = item;
-		} else if (player.getOffhandItem().getItem() instanceof StorageTierUpgradeItem item) {
-			tierUpgrade = player.getOffhandItem();
-			storageTierUpgradeItem = item;
-		} else {
+		ItemStack itemInHand = player.getItemInHand(event.getHand());
+		if (!(itemInHand.getItem() instanceof StorageTierUpgradeItem tierUpgradeItem)) {
 			return;
 		}
 
-		Map<Item, IEntityTierUpgradeDefinition> tierDefinitions = ENTITY_TIER_UPGRADE_DEFINITIONS.get(storageTierUpgradeItem.getTier());
+		Map<Item, IEntityTierUpgradeDefinition> tierDefinitions = ENTITY_TIER_UPGRADE_DEFINITIONS.get(tierUpgradeItem.getTier());
 		if (tierDefinitions == null) {
-			SophisticatedStorageInMotion.LOGGER.warn("No tier upgrade definitions found for {}", storageTierUpgradeItem.getTier());
+			SophisticatedStorageInMotion.LOGGER.warn("No tier upgrade definitions found for {}", tierUpgradeItem.getTier());
 			return;
 		}
 
 		if (event.getTarget() instanceof IMovingStorageEntity movingStorage && !movingStorage.getStorageHolder().isOpen()) {
-			upgradeEntity(event, event.getTarget(), player, tierUpgrade, tierDefinitions, movingStorage.getStorageItem().getItem(), movingStorage.getStorageItem());
+			upgradeEntity(event, event.getTarget(), player, itemInHand, tierDefinitions, movingStorage.getStorageItem().getItem(), movingStorage.getStorageItem());
 		} else if (event.getTarget() instanceof MinecartChest minecartChest) {
-			upgradeEntity(event, minecartChest, player, tierUpgrade, tierDefinitions, Items.CHEST, ItemStack.EMPTY);
+			upgradeEntity(event, minecartChest, player, itemInHand, tierDefinitions, Items.CHEST, ItemStack.EMPTY);
 		}
 	}
 

@@ -1,17 +1,20 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
@@ -35,10 +38,14 @@ import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsC
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
+import net.p3pp3rf1y.sophisticatedstorage.Config;
 import net.p3pp3rf1y.sophisticatedstorage.block.*;
+import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorage.item.*;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
@@ -48,8 +55,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implements ILockable, ICountDisplay, ITierDisplay, IUpgradeDisplay, IFillLevelDisplay {
+	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
 	private final T entity;
 
 	@Nullable
@@ -353,7 +362,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 						woodStorage.setWoodType(woodType);
 					}
 				});
-				boolean isPacked = WoodStorageBlockItem.isPacked(storageItem);
+				boolean isPacked = EntityStorageHolder.isPacked(storageItem);
 				if (woodStorage.isPacked() != isPacked) {
 					woodStorage.setPacked(isPacked);
 				}
@@ -394,6 +403,10 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 		return renderBlockEntity;
 	}
 
+	private static boolean isPacked(ItemStack storageItem) {
+		return WoodStorageBlockItem.isPacked(storageItem);
+	}
+
 	public void onStorageItemSynced() {
 		if (renderBlockEntity != null && renderBlockEntity.getBlockState().getBlock().asItem() != entity.getStorageItem().getItem()) {
 			renderBlockEntity = null;
@@ -403,6 +416,10 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 	}
 
 	public InteractionResult openContainerMenu(Player player) {
+		if (isPacked(entity.getStorageItem())) {
+			return InteractionResult.PASS;
+		}
+
 		player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> createMenu(w, pl), entity.getName(), false), buffer -> buffer.writeInt(entity.getId()));
 		return player.level().isClientSide ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
 	}
@@ -421,13 +438,16 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 
 	public void onDestroy() {
 		if (entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			if (Config.COMMON.dropPacked.get()) {
+				pack();
+			}
 			ItemStack drop = new ItemStack(entity.getDropItem());
 			drop.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(entity.getStorageItem()));
 			if (entity.hasCustomName()) {
 				drop.set(DataComponents.CUSTOM_NAME, entity.getCustomName());
 			}
 			entity.spawnAtLocation(drop);
-			if (!(entity.getStorageItem().getItem() instanceof ShulkerBoxItem)) {
+			if (!isShulkerBox(entity.getStorageItem()) && !isPacked(entity.getStorageItem())) {
 				dropAllItems();
 			}
 		}
@@ -542,5 +562,56 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 
 	public boolean isOpen() {
 		return openersCounter.getOpenerCount() > 0;
+	}
+
+	public boolean pack() {
+		if (isShulkerBox(entity.getStorageItem()) || isPacked(entity.getStorageItem())) {
+			return false;
+		}
+
+		ItemStack storageItem = entity.getStorageItem();
+		WoodStorageBlockItem.setPacked(storageItem, true);
+		setStorageItem(storageItem);
+
+		return true;
+	}
+
+	public void onPlace() {
+		if (isPacked(entity.getStorageItem())) {
+			ItemStack storageItem = entity.getStorageItem();
+			WoodStorageBlockItem.setPacked(storageItem, false);
+			setStorageItem(storageItem);
+		}
+	}
+
+	public boolean canBeHurtByWithFeedback(DamageSource source) {
+		if (Config.COMMON.dropPacked.get() || !(source.getEntity() instanceof Player player)) {
+			return true;
+		}
+
+		if (player.isCrouching() || isShulkerBox(entity.getStorageItem())) {
+			return true;
+		}
+
+		AtomicInteger droppedItemEntityCount = new AtomicInteger(0);
+		InventoryHelper.iterate(getStorageWrapper().getInventoryHandler(), (slot, stack) -> {
+			if (stack.isEmpty()) {
+				return;
+			}
+			droppedItemEntityCount.addAndGet((int) Math.ceil(stack.getCount() / (double) Math.min(stack.getMaxStackSize(), AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE)));
+		});
+
+		if (droppedItemEntityCount.get() <= Config.SERVER.tooManyItemEntityDrops.get()) {
+			return true;
+		}
+
+		ItemBase packingTapeItem = ModItems.PACKING_TAPE.get();
+		Component packingTapeItemName = packingTapeItem.getName(new ItemStack(packingTapeItem)).copy().withStyle(ChatFormatting.GREEN);
+		player.sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
+				entity.getName().copy().withStyle(ChatFormatting.GREEN),
+				Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED),
+				packingTapeItemName)
+		);
+		return false;
 	}
 }

@@ -4,7 +4,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.*;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageToolItem;
@@ -19,12 +18,12 @@ public class StorageToolHandler {
 
 	public static void onStorageToolInteract(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
-		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorageEntity)) {
+		ItemStack itemInHand = player.getItemInHand(event.getHand());
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorageEntity) || itemInHand.getItem() != ModItems.STORAGE_TOOL.get()) {
 			return;
 		}
 
-		InteractionResult result = InventoryHelper.getItemFromEitherHand(player, ModItems.STORAGE_TOOL.get())
-				.map(storageTool -> tryStorageToolInteract(movingStorageEntity, storageTool)).orElse(InteractionResult.PASS);
+		InteractionResult result = tryStorageToolInteract(movingStorageEntity, itemInHand);
 
 		if (result.consumesAction()) {
 			event.setCanceled(true);
