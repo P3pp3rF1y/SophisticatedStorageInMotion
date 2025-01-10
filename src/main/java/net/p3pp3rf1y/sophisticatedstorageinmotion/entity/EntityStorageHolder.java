@@ -52,12 +52,13 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContai
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implements ILockable, ICountDisplay, ITierDisplay, IUpgradeDisplay, IFillLevelDisplay {
+public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implements ILockable, ICountDisplay, ITierDisplay, IUpgradeDisplay, IFillLevelDisplay, IMaterialHolder {
 	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
 	private final T entity;
 
@@ -353,8 +354,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 				renderBlockEntity.toggleUpgradesVisiblity();
 			}
 			if (storageItem.getItem() instanceof ITintableBlockItem tintableBlockItem) {
-				renderBlockEntity.getStorageWrapper().setMainColor(tintableBlockItem.getMainColor(storageItem).orElse(-1));
-				renderBlockEntity.getStorageWrapper().setAccentColor(tintableBlockItem.getAccentColor(storageItem).orElse(-1));
+				renderBlockEntity.getStorageWrapper().setColors(tintableBlockItem.getMainColor(storageItem).orElse(-1), tintableBlockItem.getAccentColor(storageItem).orElse(-1));
 			}
 			if (renderBlockEntity instanceof WoodStorageBlockEntity woodStorage) {
 				WoodStorageBlockItem.getWoodType(storageItem).ifPresent(woodType -> {
@@ -617,5 +617,24 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 
 	public boolean isPacked() {
 		return isPacked(entity.getStorageItem());
+	}
+
+	@Override
+	public void setMaterials(Map<BarrelMaterial, ResourceLocation> materials) {
+		ItemStack storageItem = entity.getStorageItem();
+		if (isBarrel(storageItem)) {
+			BarrelBlockItem.setMaterials(storageItem, materials);
+			setStorageItem(storageItem);
+		}
+	}
+
+	@Override
+	public Map<BarrelMaterial, ResourceLocation> getMaterials() {
+		return isBarrel(entity.getStorageItem()) ? BarrelBlockItem.getMaterials(entity.getStorageItem()) : Collections.emptyMap();
+	}
+
+	@Override
+	public boolean canHoldMaterials() {
+		return isBarrel(entity.getStorageItem());
 	}
 }
