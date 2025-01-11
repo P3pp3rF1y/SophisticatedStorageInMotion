@@ -1,11 +1,15 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -16,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
+import net.p3pp3rf1y.sophisticatedstorage.item.PaintbrushItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
@@ -35,6 +40,26 @@ public class CommonEventHandler {
 		eventBus.addListener(TierUpgradeHandler::onTierUpgradeInteract);
 		eventBus.addListener(StorageToolHandler::onStorageToolInteract);
 		eventBus.addListener(CommonEventHandler::onPacked);
+		eventBus.addListener(CommonEventHandler::onPaintbrushInteract);
+	}
+
+	private static void onPaintbrushInteract(PlayerInteractEvent.EntityInteract event) {
+		Player player = event.getEntity();
+		ItemStack itemInHand = player.getItemInHand(event.getHand());
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || itemInHand.getItem() != ModItems.PAINTBRUSH.get()) {
+			return;
+		}
+
+		if (!(movingStorage.getStorageItem().getItem() instanceof BlockItem blockItem)) {
+			return;
+		}
+		BlockState state = blockItem.getBlock().defaultBlockState();
+		SoundEvent placeSound = state.getSoundType().getPlaceSound();
+		if (PaintbrushItem.paint(player, itemInHand, movingStorage.getStorageHolder(), movingStorage.getStorageHolder().getStorageWrapper(),
+				event.getTarget().position(), Direction.UP, placeSound)) {
+			event.setCanceled(true);
+			event.setCancellationResult(InteractionResult.SUCCESS);
+		}
 	}
 
 	private static void onPacked(PlayerInteractEvent.EntityInteract event) {
