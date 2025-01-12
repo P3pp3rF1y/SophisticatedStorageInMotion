@@ -184,7 +184,6 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 		entity.setStorageItem(storageItem);
 		storageWrapper = NoopStorageWrapper.INSTANCE; //reset storage wrapper to force update when it's next requested
 		updateRenderBlockEntityAttributes = true;
-		entity.invalidateCaps();
 	}
 
 	public void updateStorageWrapper() {
