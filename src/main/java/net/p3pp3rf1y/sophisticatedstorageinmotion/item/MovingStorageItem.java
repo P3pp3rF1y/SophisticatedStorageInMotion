@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -9,6 +10,8 @@ import net.p3pp3rf1y.sophisticatedcore.Config;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
+import net.p3pp3rf1y.sophisticatedstorage.block.BarrelMaterial;
+import net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
@@ -16,8 +19,11 @@ import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import static net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity.STORAGE_DECORATOR;
 
 public abstract class MovingStorageItem extends ItemBase {
 	public MovingStorageItem(Properties properties) {
@@ -81,5 +87,51 @@ public abstract class MovingStorageItem extends ItemBase {
 	@Override
 	public Component getName(ItemStack stack) {
 		return NBTHelper.getCompound(stack, EntityStorageHolder.STORAGE_ITEM_TAG).map(ItemStack::of).<Component>map(storageItem -> Component.translatable(getDescriptionId(), storageItem.getHoverName())).orElse(super.getName(stack));
+	}
+
+	static {
+		DecorationTableBlockEntity.registerItemDecorator(stack -> stack.getItem() instanceof MovingStorageItem, new DecorationTableBlockEntity.IItemDecorator() {
+			@Override
+			public boolean supportsMaterials(ItemStack input) {
+				ItemStack storageItem = getStorageItem(input);
+				return STORAGE_DECORATOR.supportsMaterials(storageItem);
+			}
+
+			@Override
+			public boolean supportsTints(ItemStack input) {
+				ItemStack storageItem = getStorageItem(input);
+				return STORAGE_DECORATOR.supportsTints(storageItem);
+			}
+
+			@Override
+			public boolean supportsTopInnerTrim(ItemStack input) {
+				ItemStack storageItem = getStorageItem(input);
+				return STORAGE_DECORATOR.supportsTopInnerTrim(storageItem);
+			}
+
+			@Override
+			public ItemStack decorateWithMaterials(ItemStack input, Map<BarrelMaterial, ResourceLocation> materialsToApply) {
+				ItemStack storageItem = getStorageItem(input);
+				ItemStack storageResult = STORAGE_DECORATOR.decorateWithMaterials(storageItem, materialsToApply);
+				if (storageResult.isEmpty()) {
+					return ItemStack.EMPTY;
+				}
+				ItemStack result = input.copy();
+				setStorageItem(result, storageResult);
+				return result;
+			}
+
+			@Override
+			public DecorationTableBlockEntity.TintDecorationResult decorateWithTints(ItemStack input, int mainColorToSet, int accentColorToSet) {
+				ItemStack storageItem = getStorageItem(input);
+				DecorationTableBlockEntity.TintDecorationResult tintResult = STORAGE_DECORATOR.decorateWithTints(storageItem, mainColorToSet, accentColorToSet);
+				if (tintResult.result().isEmpty()) {
+					return DecorationTableBlockEntity.TintDecorationResult.EMPTY;
+				}
+				ItemStack result = input.copy();
+				setStorageItem(result, tintResult.result());
+				return new DecorationTableBlockEntity.TintDecorationResult(result, tintResult.requiredDyeParts());
+			}
+		});
 	}
 }
