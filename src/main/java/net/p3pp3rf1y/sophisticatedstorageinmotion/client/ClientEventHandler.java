@@ -6,6 +6,7 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.PaintbrushMovingStorageOverlay;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 
@@ -14,6 +15,8 @@ public class  ClientEventHandler{
 	public static void registerHandlers(IEventBus modBus) {
 		modBus.addListener(ClientEventHandler::registerClientExtensions);
 		modBus.addListener(ClientEventHandler::registerOverlay);
+
+		net.p3pp3rf1y.sophisticatedstorage.client.ClientEventHandler.addSortScreenMatcher(screen -> screen instanceof MovingStorageScreen);
 	}
 
 	private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
