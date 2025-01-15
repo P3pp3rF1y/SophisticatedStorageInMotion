@@ -50,6 +50,10 @@ public class PaintbrushMovingStorageOverlay {
 	private static <T extends Entity & IMovingStorageEntity> Optional<PaintbrushItem.ItemRequirements> getItemRequirements(ItemStack paintbrush, Player player, T movingStorage) {
 		Map<BarrelMaterial, ResourceLocation> materialsToApply = new HashMap<>(PaintbrushItem.getBarrelMaterials(paintbrush));
 		if (!materialsToApply.isEmpty()) {
+			if (!movingStorage.getStorageHolder().canHoldMaterials()) {
+				return Optional.empty();
+			}
+
 			return PaintbrushItem.getItemRequirements(paintbrush, player, PaintbrushItem.getMaterialHolderPartsNeeded(materialsToApply, movingStorage.getStorageHolder()));
 		} else {
 			int mainColorToSet = PaintbrushItem.getMainColor(paintbrush);
