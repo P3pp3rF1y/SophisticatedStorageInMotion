@@ -398,6 +398,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 					}
 				}
 			}
+			if (renderBlockEntity instanceof ChestBlockEntity chestBlockEntity) {
+				chestBlockEntity.showUpgradesOnTop = true;
+			}
 		}
 
 		return renderBlockEntity;
