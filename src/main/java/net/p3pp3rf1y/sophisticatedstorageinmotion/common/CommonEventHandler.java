@@ -16,8 +16,10 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedstorage.Config;
 import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockBase;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
@@ -44,6 +46,20 @@ public class CommonEventHandler {
 		eventBus.addListener(StorageToolHandler::onStorageToolInteract);
 		eventBus.addListener(CommonEventHandler::onPacked);
 		eventBus.addListener(CommonEventHandler::onPaintbrushInteract);
+		eventBus.addListener(CommonEventHandler::onStorageUpgradeInteract);
+	}
+
+	private static void onStorageUpgradeInteract(PlayerInteractEvent.EntityInteract event) {
+		Player player = event.getEntity();
+		ItemStack itemInHand = player.getItemInHand(event.getHand());
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof UpgradeItemBase<?>)) {
+			return;
+		}
+
+		if (StorageBlockBase.tryAddSingleUpgrade(player, event.getHand(), itemInHand, movingStorage.getStorageHolder().getStorageWrapper())) {
+			event.setCanceled(true);
+			event.setCancellationResult(InteractionResult.SUCCESS);
+		}
 	}
 
 	private static void onPaintbrushInteract(PlayerInteractEvent.EntityInteract event) {

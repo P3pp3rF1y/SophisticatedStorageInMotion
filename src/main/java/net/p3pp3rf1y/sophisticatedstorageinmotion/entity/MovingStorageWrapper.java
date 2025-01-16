@@ -397,10 +397,10 @@ public class MovingStorageWrapper implements IStorageWrapper {
 			return ChestBlockEntity.STORAGE_TYPE;
 		} else if (blockItem.getBlock() instanceof ShulkerBoxBlock) {
 			return ShulkerBoxBlockEntity.STORAGE_TYPE;
-		} else if (blockItem.getBlock() instanceof BarrelBlock) {
-			return BarrelBlockEntity.STORAGE_TYPE;
 		} else if (blockItem.getBlock() instanceof LimitedBarrelBlock) {
 			return LimitedBarrelBlockEntity.STORAGE_TYPE;
+		} else if (blockItem.getBlock() instanceof BarrelBlock) {
+			return BarrelBlockEntity.STORAGE_TYPE;
 		}
 
 		return "undefined";
