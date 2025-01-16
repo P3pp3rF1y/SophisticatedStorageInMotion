@@ -7,6 +7,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
@@ -28,5 +29,6 @@ public record MovingStorageContentsPayload(UUID storageUuid, CompoundTag content
 
 	public static void handlePayload(MovingStorageContentsPayload payload, IPayloadContext context) {
 		MovingStorageData.get(payload.storageUuid).setContents(payload.storageUuid, payload.contents);
+		ClientStorageContentsTooltipBase.refreshContents();
 	}
 }

@@ -11,6 +11,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
@@ -29,19 +30,25 @@ public record RequestMovingStorageInventoryContentsPayload(UUID storageUuid) imp
 	}
 
 	public static void handlePayload(RequestMovingStorageInventoryContentsPayload payload, IPayloadContext context) {
-		CompoundTag movingStorageContents = MovingStorageData.get(payload.storageUuid).getContents();
+		CompoundTag baseContentsTag = MovingStorageData.get(payload.storageUuid).getContents();
+		if (!baseContentsTag.contains(StorageWrapper.CONTENTS_TAG)) {
+			return;
+		}
+		CompoundTag contentsTag = baseContentsTag.getCompound(StorageWrapper.CONTENTS_TAG);
 
 		CompoundTag inventoryContents = new CompoundTag();
-		Tag inventoryNbt = movingStorageContents.get(InventoryHandler.INVENTORY_TAG);
+		Tag inventoryNbt = contentsTag.get(InventoryHandler.INVENTORY_TAG);
 		if (inventoryNbt != null) {
 			inventoryContents.put(InventoryHandler.INVENTORY_TAG, inventoryNbt);
 		}
-		Tag upgradeNbt = movingStorageContents.get(UpgradeHandler.UPGRADE_INVENTORY_TAG);
+		Tag upgradeNbt = contentsTag.get(UpgradeHandler.UPGRADE_INVENTORY_TAG);
 		if (upgradeNbt != null) {
 			inventoryContents.put(UpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
 		}
+		CompoundTag newBaseContentsTag = new CompoundTag();
+		newBaseContentsTag.put(StorageWrapper.CONTENTS_TAG, inventoryContents);
 		if (context.player() instanceof ServerPlayer serverPlayer) {
-			PacketDistributor.sendToPlayer(serverPlayer, new MovingStorageContentsPayload(payload.storageUuid, inventoryContents));
+			PacketDistributor.sendToPlayer(serverPlayer, new MovingStorageContentsPayload(payload.storageUuid, newBaseContentsTag));
 		}
 	}
 }

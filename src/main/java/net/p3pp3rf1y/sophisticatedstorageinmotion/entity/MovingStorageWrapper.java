@@ -67,7 +67,6 @@ public class MovingStorageWrapper implements IStorageWrapper {
 		contentsChangeHandler = onContentsChanged;
 		stackChangeHandler = onStackChanged;
 		renderInfo = new MovingStorageRenderInfo(storageStack);
-		MovingStorageData.get(getContentsUuid().orElseGet(this::getNewUuid));
 
 		if (EntityStorageHolder.isLimitedBarrel(storageStack)) {
 			registerUpgradeDefaultsHandler(VoidUpgradeWrapper.class, LimitedBarrelBlockEntity.VOID_UPGRADE_VOIDING_OVERFLOW_OF_EVERYTHING_BY_DEFAULT);
