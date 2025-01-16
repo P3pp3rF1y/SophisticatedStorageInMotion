@@ -2,11 +2,15 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedcore.Config;
+import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
+import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
@@ -15,9 +19,11 @@ import net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
 
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +31,7 @@ import java.util.function.Consumer;
 
 import static net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity.STORAGE_DECORATOR;
 
-public abstract class MovingStorageItem extends ItemBase {
+public abstract class MovingStorageItem extends ItemBase implements IStashStorageItem {
 	public MovingStorageItem(Properties properties) {
 		super(properties);
 	}
@@ -87,6 +93,43 @@ public abstract class MovingStorageItem extends ItemBase {
 	@Override
 	public Component getName(ItemStack stack) {
 		return NBTHelper.getCompound(stack, EntityStorageHolder.STORAGE_ITEM_TAG).map(ItemStack::of).<Component>map(storageItem -> Component.translatable(getDescriptionId(), storageItem.getHoverName())).orElse(super.getName(stack));
+	}
+
+	@Override
+	public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+		if (FMLEnvironment.dist.isClient()) {
+			return Optional.ofNullable(MovingStorageItemClient.getTooltipImage(getStorageItem(stack)));
+		}
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<TooltipComponent> getInventoryTooltip(ItemStack stack) {
+		return Optional.of(new MovingStorageContentsTooltip(stack));
+	}
+
+	@Override
+	public StashResult getItemStashable(ItemStack storageStack, ItemStack stack) {
+		if (getStorageItemType(stack).map(item -> item instanceof ShulkerBoxItem).orElse(false)) {
+			MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(getStorageItem(storageStack), () -> {}, () -> {});
+
+			if (wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() == stack.getCount()) {
+				return StashResult.NO_SPACE;
+			}
+			if (wrapper.getInventoryHandler().getSlotTracker().getItems().contains(stack.getItem()) || wrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(stack)) {
+				return StashResult.MATCH_AND_SPACE;
+			}
+
+			return StashResult.SPACE;
+		}
+
+		return StashResult.NO_SPACE;
+	}
+
+	public record MovingStorageContentsTooltip(ItemStack movingStorage) implements TooltipComponent {
+		public ItemStack getMovingStorage() {
+			return movingStorage;
+		}
 	}
 
 	static {
