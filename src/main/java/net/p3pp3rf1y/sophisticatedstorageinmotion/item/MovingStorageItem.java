@@ -1,7 +1,12 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -27,6 +32,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity.STORAGE_DECORATOR;
@@ -98,7 +104,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	@Override
 	public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
 		if (FMLEnvironment.dist.isClient()) {
-			return Optional.ofNullable(MovingStorageItemClient.getTooltipImage(getStorageItem(stack)));
+			return Optional.ofNullable(MovingStorageItemClient.getTooltipImage(stack));
 		}
 		return Optional.empty();
 	}
@@ -110,8 +116,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public StashResult getItemStashable(ItemStack storageStack, ItemStack stack) {
-		if (getStorageItemType(stack).map(item -> item instanceof ShulkerBoxItem).orElse(false)) {
-			MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(getStorageItem(storageStack), () -> {}, () -> {});
+		if (getStorageItemType(storageStack).map(item -> item instanceof ShulkerBoxItem).orElse(false)) {
+			MovingStorageWrapper wrapper = getMovingStorageWrapper(storageStack);
 
 			if (wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() == stack.getCount()) {
 				return StashResult.NO_SPACE;
@@ -124,6 +130,63 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		}
 
 		return StashResult.NO_SPACE;
+	}
+
+	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
+		ItemStack storageItem = getStorageItem(movingStorageStack);
+		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {},
+				() -> MovingStorageItem.setStorageItem(movingStorageStack, storageItem));
+		return wrapper;
+	}
+
+	public ItemStack stash(ItemStack movingStorageStack, ItemStack stack, boolean simulate) {
+		MovingStorageWrapper wrapper = getMovingStorageWrapper(movingStorageStack);
+		if (wrapper.getContentsUuid().isEmpty()) {
+			wrapper.setContentsUuid(UUID.randomUUID());
+		}
+		return wrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
+	}
+
+	@Override
+	public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
+		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPickup(player) || slot.getItem().isEmpty() || action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
+			return super.overrideStackedOnOther(stack, slot, action, player);
+		}
+
+		ItemStack stackToStash = slot.getItem();
+		ItemStack stashResult = stash(stack, stackToStash, true);
+		if (stashResult.getCount() != stackToStash.getCount()) {
+			int countToTake = stackToStash.getCount() - stashResult.getCount();
+			ItemStack takeResult = slot.safeTake(countToTake, countToTake, player);
+			stash(stack, takeResult, false);
+			return true;
+		}
+
+		return super.overrideStackedOnOther(stack, slot, action, player);
+	}
+
+	private boolean isShulkerBoxMovingStorage(ItemStack movingStorageStack) {
+		return getStorageItemType(movingStorageStack).map(item -> item instanceof ShulkerBoxItem).orElse(false);
+	}
+
+	@Override
+	public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess carriedAccess) {
+		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPlace(stack) || action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
+			return super.overrideOtherStackedOnMe(stack, otherStack, slot, action, player, carriedAccess);
+		}
+
+		ItemStack result = stash(stack, otherStack, false);
+		if (result.getCount() != otherStack.getCount()) {
+			carriedAccess.set(result);
+			slot.set(stack);
+			return true;
+		}
+
+		return super.overrideOtherStackedOnMe(stack, otherStack, slot, action, player, carriedAccess);
+	}
+
+	private boolean hasCreativeScreenContainerOpen(Player player) {
+		return player.level().isClientSide() && player.containerMenu instanceof CreativeModeInventoryScreen.ItemPickerMenu;
 	}
 
 	public record MovingStorageContentsTooltip(ItemStack movingStorage) implements TooltipComponent {
