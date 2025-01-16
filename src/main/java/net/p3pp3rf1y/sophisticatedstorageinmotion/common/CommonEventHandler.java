@@ -13,10 +13,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedstorage.Config;
 import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockBase;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
@@ -41,6 +44,24 @@ public class CommonEventHandler {
 		eventBus.addListener(StorageToolHandler::onStorageToolInteract);
 		eventBus.addListener(CommonEventHandler::onPacked);
 		eventBus.addListener(CommonEventHandler::onPaintbrushInteract);
+		eventBus.addListener(CommonEventHandler::onStorageUpgradeInteract);
+	}
+
+	private static void onStorageUpgradeInteract(Event event) {
+		if (!(event instanceof PlayerInteractEvent.EntityInteract entityInteractEvent)) {
+			return;
+		}
+
+		Player player = entityInteractEvent.getEntity();
+		ItemStack itemInHand = player.getItemInHand(entityInteractEvent.getHand());
+		if (!(entityInteractEvent.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof UpgradeItemBase<?>)) {
+			return;
+		}
+
+		if (StorageBlockBase.tryAddSingleUpgrade(player, entityInteractEvent.getHand(), itemInHand, movingStorage.getStorageHolder().getStorageWrapper())) {
+			entityInteractEvent.setCanceled(true);
+			entityInteractEvent.setCancellationResult(InteractionResult.SUCCESS);
+		}
 	}
 
 	private static void onPaintbrushInteract(PlayerInteractEvent.EntityInteract event) {
