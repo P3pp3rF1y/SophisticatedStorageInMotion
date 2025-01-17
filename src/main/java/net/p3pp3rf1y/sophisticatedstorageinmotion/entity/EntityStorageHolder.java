@@ -444,15 +444,20 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 			if (Config.COMMON.dropPacked.get()) {
 				pack();
 			}
+			ItemStack storageItem = entity.getStorageItem();
+			if (!isShulkerBox(storageItem) && !isPacked(storageItem)) {
+				dropAllItems();
+				if (storageItem.has(ModCoreDataComponents.STORAGE_UUID)) {
+					MovingStorageData.get(storageItem.get(ModCoreDataComponents.STORAGE_UUID)).removeStorageContents();
+					storageItem.remove(ModCoreDataComponents.STORAGE_UUID);
+				}
+			}
 			ItemStack drop = new ItemStack(entity.getDropItem());
-			drop.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(entity.getStorageItem()));
+			drop.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem));
 			if (entity.hasCustomName()) {
 				drop.set(DataComponents.CUSTOM_NAME, entity.getCustomName());
 			}
 			entity.spawnAtLocation(drop);
-			if (!isShulkerBox(entity.getStorageItem()) && !isPacked(entity.getStorageItem())) {
-				dropAllItems();
-			}
 		}
 	}
 

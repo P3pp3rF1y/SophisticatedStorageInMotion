@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
@@ -12,10 +14,12 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedcore.Config;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
@@ -30,6 +34,7 @@ import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -99,6 +104,26 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		ItemStack movingStorage = new ItemStack(movingStorageItem);
 		MovingStorageItem.setStorageItem(movingStorage, storageStack);
 		return movingStorage;
+	}
+
+	@Override
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
+		super.appendHoverText(stack, context, tooltip, tooltipFlag);
+		if (tooltipFlag.isAdvanced()) {
+			HolderLookup.Provider registries = context.registries();
+			if (registries != null) {
+				getMovingStorageWrapper(stack).getContentsUuid().ifPresent(uuid -> {
+					tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY));
+
+				});
+			}
+		}
+		if (!Screen.hasShiftDown() && getMovingStorageWrapper(stack).getContentsUuid().isPresent()) {
+			tooltip.add(Component.translatable(
+					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
+					Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
+			).withStyle(ChatFormatting.GRAY));
+		}
 	}
 
 	@Override
