@@ -13,6 +13,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrel
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageSettingsContainerMenu;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 
 public class ModEntities {
@@ -24,6 +25,7 @@ public class ModEntities {
 	public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, SophisticatedStorageInMotion.MOD_ID);
 
 	public static final RegistryObject<EntityType<StorageMinecart>> STORAGE_MINECART = ENTITY_TYPES.register("storage_minecart", () -> EntityType.Builder.of((EntityType.EntityFactory<StorageMinecart>) StorageMinecart::new, MobCategory.MISC).sized(0.98F, 0.7F).clientTrackingRange(8).build(SophisticatedStorageInMotion.MOD_ID + ":storage_minecart"));
+	public static final RegistryObject<EntityType<StorageBoat>> STORAGE_BOAT = ENTITY_TYPES.register("storage_boat", () -> EntityType.Builder.of((EntityType.EntityFactory<StorageBoat>) StorageBoat::new, MobCategory.MISC).sized(1.375F, 0.5625F).clientTrackingRange(10).build(SophisticatedStorageInMotion.MOD_ID + ":storage_boat"));
 
 	public static final RegistryObject<MenuType<MovingStorageContainerMenu<?>>> MOVING_STORAGE_CONTAINER_TYPE = MENU_TYPES.register("moving_storage",
 			() -> IForgeMenuType.create(MovingStorageContainerMenu::fromBuffer));

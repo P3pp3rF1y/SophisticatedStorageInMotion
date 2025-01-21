@@ -19,6 +19,7 @@ import net.minecraftforge.registries.RegistryObject;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.crafting.*;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageMinecartItem;
 
 import java.util.function.Supplier;
@@ -30,7 +31,9 @@ public class ModItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, SophisticatedStorageInMotion.MOD_ID);
 	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.location(), SophisticatedStorageInMotion.MOD_ID);
 
-	public static final RegistryObject<StorageMinecartItem> STORAGE_MINECART = ITEMS.register("storage_minecart", StorageMinecartItem::new);
+	public static final RegistryObject<Item> STORAGE_MINECART = ITEMS.register("storage_minecart", StorageMinecartItem::new);
+
+	public static final RegistryObject<Item> STORAGE_BOAT = ITEMS.register("storage_boat", StorageBoatItem::new);
 
 	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, SophisticatedStorageInMotion.MOD_ID);
 	public static final RegistryObject<RecipeSerializer<?>> MOVING_STORAGE_FROM_STORAGE_SERIALIZER = RECIPE_SERIALIZERS.register("moving_storage_from_storage", MovingStorageFromStorageRecipe.Serializer::new);

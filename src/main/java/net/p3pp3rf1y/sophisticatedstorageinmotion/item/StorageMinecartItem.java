@@ -91,9 +91,9 @@ public class StorageMinecartItem extends MovingStorageItem {
 
 				serverlevel.addFreshEntity(createMinecart(serverlevel, blockpos, ascendingOffset, stack, player));
 				serverlevel.gameEvent(GameEvent.ENTITY_PLACE, blockpos, GameEvent.Context.of(player, serverlevel.getBlockState(blockpos.below())));
+				stack.shrink(1);
 			}
 
-			stack.shrink(1);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
@@ -108,7 +108,7 @@ public class StorageMinecartItem extends MovingStorageItem {
 	}
 
 	@Override
-	public ItemStack getUncraftRemainingItem() {
+	public ItemStack getUncraftRemainingItem(ItemStack input) {
 		return new ItemStack(Items.MINECART);
 	}
 

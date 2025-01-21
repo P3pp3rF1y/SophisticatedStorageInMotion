@@ -447,7 +447,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 					storageItem.removeTagKey(StorageWrapper.UUID_TAG);
 				});
 			}
-			ItemStack drop = new ItemStack(entity.getDropItem());
+			ItemStack drop = entity.getDropStack();
 			drop.getOrCreateTag().put(STORAGE_ITEM_TAG, storageItem.save(new CompoundTag()));
 			if (entity.hasCustomName()) {
 				drop.setHoverName(entity.getCustomName());

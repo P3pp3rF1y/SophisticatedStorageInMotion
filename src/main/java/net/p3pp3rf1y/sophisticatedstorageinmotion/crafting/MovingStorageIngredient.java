@@ -53,7 +53,7 @@ public class MovingStorageIngredient extends AbstractIngredient {
 
 	@Override
 	public boolean test(@Nullable ItemStack itemStack) {
-		return itemStack != null && itemStack.getItem() instanceof MovingStorageItem && MovingStorageItem.getStorageItem(itemStack).getItem() == storageItem.value();
+		return itemStack != null && itemStack.getItem() == movingStorageItem.get() && MovingStorageItem.getStorageItem(itemStack).getItem() == storageItem.value();
 	}
 
 	@Override
