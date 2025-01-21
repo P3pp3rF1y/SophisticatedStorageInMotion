@@ -21,7 +21,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -47,8 +46,16 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 		entityStorageHolder = new EntityStorageHolder<>(this);
 	}
 
-	private StorageMinecart(Level level) {
+	public StorageMinecart(Level level) {
 		this(ModEntities.STORAGE_MINECART.get(), level);
+	}
+
+	public StorageMinecart(Level level, double x, double y, double z) {
+		this(level);
+		this.setPos(x, y, z);
+		this.xo = x;
+		this.yo = y;
+		this.zo = z;
 	}
 
 	@Override
@@ -73,14 +80,6 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 		return entityStorageHolder;
 	}
 
-	public StorageMinecart(Level level, double x, double y, double z) {
-		this(level);
-		this.setPos(x, y, z);
-		this.xo = x;
-		this.yo = y;
-		this.zo = z;
-	}
-
 	@Override
 	public boolean hurt(DamageSource source, float amount) {
 		if (getStorageHolder().canBeHurtByWithFeedback(source)) {
@@ -96,8 +95,8 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	}
 
 	@Override
-	public Item getDropItem() {
-		return ModItems.STORAGE_MINECART.get();
+	public ItemStack getDropStack() {
+		return new ItemStack(ModItems.STORAGE_MINECART.get());
 	}
 
 	@Override

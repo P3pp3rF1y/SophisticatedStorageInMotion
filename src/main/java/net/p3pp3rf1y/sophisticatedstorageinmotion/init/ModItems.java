@@ -18,6 +18,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.crafting.*;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageMinecartItem;
 
 import java.util.function.Supplier;
@@ -30,6 +31,8 @@ public class ModItems {
 	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.location(), SophisticatedStorageInMotion.MOD_ID);
 
 	public static final DeferredHolder<Item, StorageMinecartItem> STORAGE_MINECART = ITEMS.register("storage_minecart", StorageMinecartItem::new);
+
+	public static final DeferredHolder<Item, StorageBoatItem> STORAGE_BOAT = ITEMS.register("storage_boat", StorageBoatItem::new);
 
 	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SophisticatedStorageInMotion.MOD_ID);
 

@@ -105,7 +105,7 @@ public class StorageMinecartItem extends MovingStorageItem {
 	}
 
 	@Override
-	public ItemStack getUncraftRemainingItem() {
+	public ItemStack getUncraftRemainingItem(ItemStack input) {
 		return new ItemStack(Items.MINECART);
 	}
 }

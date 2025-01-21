@@ -81,7 +81,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 					playSound(SoundEvents.BARREL_OPEN);
 					updateBarrelOpenBlockState(true);
 				} else if (isShulkerBox(entity.getStorageItem())) {
-					playSound(SoundEvents.SHULKER_BOX_OPEN);
+                      					playSound(SoundEvents.SHULKER_BOX_OPEN);
 					if (renderBlockEntity instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
 						shulkerBoxBlockEntity.setAnimationStatus(ShulkerBoxBlockEntity.AnimationStatus.OPENING);
 					}
@@ -452,7 +452,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 					storageItem.remove(ModCoreDataComponents.STORAGE_UUID);
 				}
 			}
-			ItemStack drop = new ItemStack(entity.getDropItem());
+			ItemStack drop = entity.getDropStack();
 			drop.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem));
 			if (entity.hasCustomName()) {
 				drop.set(DataComponents.CUSTOM_NAME, entity.getCustomName());

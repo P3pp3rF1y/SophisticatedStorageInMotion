@@ -28,6 +28,7 @@ public class  ClientEventHandler{
 
 	private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
 		event.registerItem(StorageMinecartItemRenderer.getItemRenderProperties(), ModItems.STORAGE_MINECART.get());
+		event.registerItem(StorageBoatItemRenderer.getItemRenderProperties(), ModItems.STORAGE_BOAT.get());
 	}
 
 	private static void registerOverlay(RegisterGuiLayersEvent event) {

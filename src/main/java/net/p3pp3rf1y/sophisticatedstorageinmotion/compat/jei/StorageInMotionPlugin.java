@@ -24,9 +24,11 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 @JeiPlugin
@@ -39,6 +41,14 @@ public class StorageInMotionPlugin implements IModPlugin {
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
 		registration.registerSubtypeInterpreter(ModItems.STORAGE_MINECART.get(), new MovingStorageSubtypeInterpreter());
+		registration.registerSubtypeInterpreter(ModItems.STORAGE_BOAT.get(), new StorageBoatSubtypeInterpreter());
+	}
+
+	private static class StorageBoatSubtypeInterpreter extends MovingStorageSubtypeInterpreter {
+		public StorageBoatSubtypeInterpreter() {
+			super();
+			addOptionalProperty(boatStack -> Optional.of(StorageBoatItem.getBoatType(boatStack)));
+		}
 	}
 
 	@Override
@@ -67,7 +77,7 @@ public class StorageInMotionPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipes(IRecipeRegistration registration) {
-		registration.addRecipes(RecipeTypes.CRAFTING, AssembleRecipesMaker.getShapelessCraftingRecipes(ModItems.STORAGE_MINECART.get()));
+		registration.addRecipes(RecipeTypes.CRAFTING, AssembleRecipesMaker.getShapelessCraftingRecipes());
 		registration.addRecipes(RecipeTypes.CRAFTING, MovingStorageTierUpgradeRecipesMaker.getShapedCraftingRecipes());
 		registration.addRecipes(RecipeTypes.CRAFTING, MovingStorageTierUpgradeRecipesMaker.getShapelessCraftingRecipes());
 	}

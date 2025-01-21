@@ -11,7 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.p3pp3rf1y.sophisticatedcore.compat.jei.ClientRecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.crafting.MovingStorageFromStorageRecipe;
@@ -22,13 +21,13 @@ import java.util.*;
 public class AssembleRecipesMaker {
 	private AssembleRecipesMaker() {}
 
-	public static List<RecipeHolder<CraftingRecipe>> getShapelessCraftingRecipes(ItemBase item) {
+	public static List<RecipeHolder<CraftingRecipe>> getShapelessCraftingRecipes() {
 		RecipeConstructor<MovingStorageFromStorageRecipe> constructRecipe = (originalRecipe, ingredients, result) -> new ShapelessRecipe("", CraftingBookCategory.MISC, result, ingredients);
-		return getCraftingRecipes(item, constructRecipe, MovingStorageFromStorageRecipe.class);
+		return getCraftingRecipes(constructRecipe, MovingStorageFromStorageRecipe.class);
 	}
 
 	@NotNull
-	private static <T extends CraftingRecipe> List<RecipeHolder<CraftingRecipe>> getCraftingRecipes(ItemBase item, RecipeConstructor<T> constructRecipe, Class<T> originalRecipeClass) {
+	private static <T extends CraftingRecipe> List<RecipeHolder<CraftingRecipe>> getCraftingRecipes(RecipeConstructor<T> constructRecipe, Class<T> originalRecipeClass) {
 		return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(RecipeType.CRAFTING, originalRecipeClass, recipe -> {
 			List<RecipeHolder<CraftingRecipe>> itemGroupRecipes = new ArrayList<>();
 

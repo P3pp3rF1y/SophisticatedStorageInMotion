@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.init;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageBoatRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageMinecartRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingLimitedBarrelScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingLimitedBarrelSettingsScreen;
@@ -17,6 +18,7 @@ public class ModEntitiesClient {
 
 	private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
 		event.registerEntityRenderer(ModEntities.STORAGE_MINECART.get(), StorageMinecartRenderer::new);
+		event.registerEntityRenderer(ModEntities.STORAGE_BOAT.get(), StorageBoatRenderer::new);
 	}
 
 	private static void onMenuScreenRegister(RegisterMenuScreensEvent event) {

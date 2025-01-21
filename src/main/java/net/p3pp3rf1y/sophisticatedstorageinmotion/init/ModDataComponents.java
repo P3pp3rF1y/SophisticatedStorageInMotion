@@ -3,8 +3,12 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.init;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.network.codec.NeoForgeStreamCodecs;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
@@ -14,6 +18,8 @@ import java.util.function.Supplier;
 public class ModDataComponents {
 	private ModDataComponents() {
 	}
+
+	private static final StreamCodec<FriendlyByteBuf, Boat.Type> BOAT_TYPE_STREAM_CODEC = NeoForgeStreamCodecs.enumCodec(Boat.Type.class);
 
 	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, SophisticatedStorageInMotion.MOD_ID);
 
@@ -34,6 +40,9 @@ public class ModDataComponents {
 
 	public static final Supplier<DataComponentType<Boolean>> FILL_LEVELS_VISIBLE = DATA_COMPONENT_TYPES.register("fill_levels_visible",
 			() -> new DataComponentType.Builder<Boolean>().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
+
+	public static final Supplier<DataComponentType<Boat.Type>> BOAT_TYPE = DATA_COMPONENT_TYPES.register("boat_type",
+			() -> new DataComponentType.Builder<Boat.Type>().persistent(Boat.Type.CODEC).networkSynchronized(BOAT_TYPE_STREAM_CODEC).build());
 
 	public static void register(IEventBus modBus) {
 		DATA_COMPONENT_TYPES.register(modBus);
