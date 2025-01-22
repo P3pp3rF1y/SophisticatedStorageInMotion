@@ -276,7 +276,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 	}
 
 	private void runPickupOnItemEntities() {
-		AABB aabb = entity.getBoundingBox();
+		AABB aabb = entity.getBoundingBox().inflate(0.2D);
 		List<ItemEntity> collidedWithItemEntities = entity.level().getEntitiesOfClass(ItemEntity.class, aabb);
 		collidedWithItemEntities.forEach(itemEntity -> {
 			if (itemEntity.isAlive()) {
