@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implements ILockable, ICountDisplay, ITierDisplay, IUpgradeDisplay, IFillLevelDisplay, IMaterialHolder {
 	public static final String UPGRADES_VISIBLE_TAG = "upgradesVisible";
@@ -587,7 +588,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 		}
 	}
 
-	public boolean canBeHurtByWithFeedback(DamageSource source) {
+	private boolean canBeHurtByWithFeedback(DamageSource source) {
 		if (Config.COMMON.dropPacked.get() || isPacked() || !(source.getEntity() instanceof Player player)) {
 			return true;
 		}
@@ -639,5 +640,15 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> implem
 	@Override
 	public boolean canHoldMaterials() {
 		return isBarrel(entity.getStorageItem());
+	}
+
+	public boolean hurt(DamageSource source, float amount, BiFunction<DamageSource, Float, Boolean> superHurt) {
+		if (canBeHurtByWithFeedback(source) && superHurt.apply(source, amount)) {
+			if (source.getEntity() instanceof Player player && player.getAbilities().instabuild && entity.isRemoved()) {
+				dropAllItems();
+			}
+			return true;
+		}
+		return false;
 	}
 }

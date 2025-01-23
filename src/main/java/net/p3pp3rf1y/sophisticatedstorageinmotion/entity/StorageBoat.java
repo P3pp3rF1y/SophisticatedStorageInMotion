@@ -89,10 +89,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public boolean hurt(DamageSource source, float amount) {
-		if (getStorageHolder().canBeHurtByWithFeedback(source)) {
-			return super.hurt(source, amount);
-		}
-		return false;
+		return getStorageHolder().hurt(source, amount, super::hurt);
 	}
 
 	@Override
