@@ -82,10 +82,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public boolean hurt(DamageSource source, float amount) {
-		if (getStorageHolder().canBeHurtByWithFeedback(source)) {
-			return super.hurt(source, amount);
-		}
-		return false;
+		return getStorageHolder().hurt(source, amount, super::hurt);
 	}
 
 	@Override
