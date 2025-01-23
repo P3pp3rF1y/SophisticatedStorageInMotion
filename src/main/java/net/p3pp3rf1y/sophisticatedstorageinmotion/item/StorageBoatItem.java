@@ -2,6 +2,10 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockSource;
+import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
@@ -17,6 +21,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -30,6 +36,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageBoatItemRenderer
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,6 +59,41 @@ public class StorageBoatItem extends MovingStorageItem {
 			Boat.Type.OAK, () -> Items.OAK_BOAT,
 			Boat.Type.SPRUCE, () -> Items.SPRUCE_BOAT
 	);
+
+	public static final DefaultDispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {
+		private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
+
+		public ItemStack execute(BlockSource source, ItemStack stack) {
+			Direction direction = source.getBlockState().getValue(DispenserBlock.FACING);
+			Level level = source.getLevel();
+			double halfWidth = 0.5625D + EntityType.BOAT.getWidth() / 2D;
+			double x = source.x() + direction.getStepX() * halfWidth;
+			double y = source.y() + direction.getStepY() * 1.125D;
+			double z = source.z() + direction.getStepZ() * halfWidth;
+			BlockPos blockpos = source.getPos().relative(direction);
+			Boat boat = createBoat(level, null, stack, x, y, z);
+			boat.setYRot(direction.toYRot());
+			double yOffset;
+			if (boat.canBoatInFluid(level.getFluidState(blockpos))) {
+				yOffset = 1;
+			} else {
+				if (!level.getBlockState(blockpos).isAir() || !boat.canBoatInFluid(level.getFluidState(blockpos.below()))) {
+					return this.defaultDispenseItemBehavior.dispense(source, stack);
+				}
+
+				yOffset = 0;
+			}
+
+			boat.setPos(x, y + yOffset, z);
+			level.addFreshEntity(boat);
+			stack.shrink(1);
+			return stack;
+		}
+
+		protected void playSound(BlockSource pSource) {
+			pSource.getLevel().levelEvent(LevelEvent.SOUND_DISPENSER_DISPENSE, pSource.getPos(), 0);
+		}
+	};
 
 	public StorageBoatItem() {
 		super(new Properties().stacksTo(1));
@@ -109,7 +151,8 @@ public class StorageBoatItem extends MovingStorageItem {
 			}
 
 			if (hitresult.getType() == HitResult.Type.BLOCK) {
-				Boat boat = createBoat(level, player, hitresult, itemstack);
+				Vec3 location = hitresult.getLocation();
+				Boat boat = createBoat(level, player, itemstack, location.x, location.y, location.z);
 				if (!level.noCollision(boat, boat.getBoundingBox())) {
 					return InteractionResultHolder.fail(itemstack);
 				} else {
@@ -128,14 +171,15 @@ public class StorageBoatItem extends MovingStorageItem {
 		}
 	}
 
-	private Boat createBoat(Level level, Player player, HitResult hitResult, ItemStack stack) {
-		Vec3 vec3 = hitResult.getLocation();
-		StorageBoat boat = new StorageBoat(level, vec3.x, vec3.y, vec3.z);
+	private static Boat createBoat(Level level, @Nullable Player player, ItemStack stack, double x, double y, double z) {
+		StorageBoat boat = new StorageBoat(level, x, y, z);
 		EntityStorageHolder<?> storageHolder = boat.getStorageHolder();
 		storageHolder.setStorageItemFrom(stack, true);
 		storageHolder.onPlace();
 		boat.setVariant(StorageBoatItem.getBoatType(stack));
-		boat.setYRot(player.getYRot());
+		if (player != null) {
+			boat.setYRot(player.getYRot());
+		}
 		if (level instanceof ServerLevel serverLevel) {
 			EntityType.createDefaultStackConfig(serverLevel, stack, player).accept(boat);
 		}
