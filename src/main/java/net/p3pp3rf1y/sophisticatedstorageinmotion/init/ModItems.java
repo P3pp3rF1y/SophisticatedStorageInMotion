@@ -62,5 +62,6 @@ public class ModItems {
 
 	public static void registerDispenseBehavior() {
 		DispenserBlock.registerBehavior(STORAGE_MINECART.get(), StorageMinecartItem.DISPENSE_ITEM_BEHAVIOR);
+		DispenserBlock.registerBehavior(STORAGE_BOAT.get(), StorageBoatItem.DISPENSE_ITEM_BEHAVIOR);
 	}
 }
