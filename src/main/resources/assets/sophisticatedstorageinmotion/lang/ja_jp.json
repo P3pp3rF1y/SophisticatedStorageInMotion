@@ -1,5 +1,9 @@
 {
   "itemGroup.sophisticatedstorageinmotion": "Sophisticated Storage In Motion",
   "item.sophisticatedstorageinmotion.storage_minecart": "%s付きのトロッコ",
-  "entity.sophisticatedstorageinmotion.storage_minecart": "%s付きのトロッコ"
+  "item.sophisticatedstorageinmotion.storage_boat": "%2$s付きの%1$sボート",
+  "item.sophisticatedstorageinmotion.storage_raft": "%2$s付きの%1$sイカダ",
+  "entity.sophisticatedstorageinmotion.storage_minecart": "%s付きのトロッコ",
+  "entity.sophisticatedstorageinmotion.storage_boat": "%2$s付きの%1$sボート",
+  "entity.sophisticatedstorageinmotion.storage_raft": "%2$s付きの%1$sイカダ"
 }
