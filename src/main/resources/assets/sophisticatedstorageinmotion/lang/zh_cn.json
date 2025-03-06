@@ -1,5 +1,9 @@
 {
-  "itemGroup.sophisticatedstorageinmotion": "精妙存储：矿车物流",
-  "item.sophisticatedstorageinmotion.storage_minecart": "%s矿车",
-  "entity.sophisticatedstorageinmotion.storage_minecart": "%s矿车"
+  "itemGroup.sophisticatedstorageinmotion": "精妙物流",
+  "item.sophisticatedstorageinmotion.storage_minecart": "带%s的矿车",
+  "item.sophisticatedstorageinmotion.storage_boat": "带%2$s的%1$s船",
+  "item.sophisticatedstorageinmotion.storage_raft": "带%2$s的%1$s筏",
+  "entity.sophisticatedstorageinmotion.storage_minecart": "带%s的矿车",
+  "entity.sophisticatedstorageinmotion.storage_boat": "带%2$s的%1$s船",
+  "entity.sophisticatedstorageinmotion.storage_raft": "带%2$s的%1$s筏"
 }
