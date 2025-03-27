@@ -9,6 +9,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
+import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 
 import java.io.File;
@@ -16,7 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
-public class MovingStorageData extends SavedData {
+public class MovingStorageData extends SavedData implements IStorageSavedData {
 	private static final String SAVED_DATA_PREFIX = SophisticatedStorageInMotion.MOD_ID + "/";
 
 	private CompoundTag movingStorageContents = new CompoundTag();

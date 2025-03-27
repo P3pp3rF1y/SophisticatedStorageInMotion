@@ -26,12 +26,13 @@ import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelMaterial;
 import net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 
 import java.util.List;
@@ -172,7 +173,10 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
 		ItemStack storageItem = getStorageItem(movingStorageStack);
 		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {},
-				() -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)));
+				() -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)), MovingStorageData::get,
+				() -> movingStorageStack.getOrDefault(ModDataComponents.LOCKED, false),
+				locked -> movingStorageStack.set(ModDataComponents.LOCKED, locked),
+				upgrade -> true);
 		return wrapper;
 	}
 

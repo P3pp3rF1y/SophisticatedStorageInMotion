@@ -22,6 +22,7 @@ import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockBase;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderToolHandler;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorage.item.PaintbrushItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
@@ -43,7 +44,7 @@ public class CommonEventHandler {
 		eventBus.addListener(CommonEventHandler::onMovingStorageUncrafted);
 		eventBus.addListener(CommonEventHandler::onMovingStorageCraftedFromShulkerBox);
 		eventBus.addListener(TierUpgradeHandler::onTierUpgradeInteract);
-		eventBus.addListener(StorageToolHandler::onStorageToolInteract);
+		eventBus.addListener(CommonEventHandler::onStorageToolInteract);
 		eventBus.addListener(CommonEventHandler::onPacked);
 		eventBus.addListener(CommonEventHandler::onPaintbrushInteract);
 		eventBus.addListener(CommonEventHandler::onStorageUpgradeInteract);
@@ -176,5 +177,20 @@ public class CommonEventHandler {
 			}
 		}
 		return foundShulker;
+	}
+
+	public static void onStorageToolInteract(PlayerInteractEvent.EntityInteract event) {
+		Player player = event.getEntity();
+		ItemStack itemInHand = player.getItemInHand(event.getHand());
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorageEntity) || itemInHand.getItem() != ModItems.STORAGE_TOOL.get() || movingStorageEntity.getStorageHolder().isPacked()) {
+			return;
+		}
+
+		InteractionResult result = StorageHolderToolHandler.tryStorageToolInteract(itemInHand, movingStorageEntity.getStorageHolder());
+
+		if (result.consumesAction()) {
+			event.setCanceled(true);
+			event.setCancellationResult(result);
+		}
 	}
 }

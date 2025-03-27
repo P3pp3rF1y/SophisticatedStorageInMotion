@@ -19,9 +19,9 @@ import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsC
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
+import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsPayload;
 
@@ -46,7 +46,7 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 			throw new IllegalArgumentException("Incorrect entity with id " + entityId + " expected to find IMovingStorageEntity");
 		}
 		storageEntity = new WeakReference<T>((T) movingStorageEntity);
-		movingStorageEntity.getStorageHolder().startOpen(player);
+		movingStorageEntity.getStorageHolder().startOpen(player, storageEntity.get());
 	}
 
 	public Optional<T> getStorageEntity() {
@@ -56,7 +56,7 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
-		getStorageEntity().ifPresent(storageEntity -> storageEntity.getStorageHolder().stopOpen(player));
+		getStorageEntity().ifPresent(storageEntity -> storageEntity.getStorageHolder().stopOpen(player, storageEntity));
 	}
 
 	private static IStorageWrapper getWrapper(Level level, int entityId) {
