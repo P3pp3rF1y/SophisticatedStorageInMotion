@@ -27,13 +27,15 @@ import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelMaterial;
 import net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderBase;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -113,9 +115,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag tooltipFlag) {
 		super.appendHoverText(stack, level, tooltip, tooltipFlag);
 		if (tooltipFlag.isAdvanced()) {
-			getMovingStorageWrapper(stack).getContentsUuid().ifPresent(uuid -> {
-				tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY));
-			});
+			getMovingStorageWrapper(stack).getContentsUuid().ifPresent(uuid ->
+					tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY)));
 		}
 		if (!Screen.hasShiftDown() && getMovingStorageWrapper(stack).getContentsUuid().isPresent()) {
 			tooltip.add(Component.translatable(
@@ -163,9 +164,11 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
 		ItemStack storageItem = getStorageItem(movingStorageStack);
-		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {},
-				() -> MovingStorageItem.setStorageItem(movingStorageStack, storageItem));
-		return wrapper;
+		return MovingStorageWrapper.fromStack(storageItem, () -> {},
+				() -> MovingStorageItem.setStorageItem(movingStorageStack, storageItem), MovingStorageData::get,
+				() -> NBTHelper.getBoolean(movingStorageStack, StorageHolderBase.LOCKED_TAG).orElse(false),
+				locked -> movingStorageStack.getOrCreateTag().putBoolean(StorageHolderBase.LOCKED_TAG, locked),
+				upgrade -> true);
 	}
 
 	public ItemStack stash(ItemStack movingStorageStack, ItemStack stack, boolean simulate) {

@@ -10,8 +10,8 @@ import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsMessage;
@@ -70,7 +70,7 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 				CompoundTag settingsContents = new CompoundTag();
 				CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
 				if (!settingsNbt.isEmpty()) {
-					settingsContents.put(MovingStorageWrapper.SETTINGS_TAG, settingsNbt);
+					settingsContents.put(IStorageWrapper.SETTINGS_TAG, settingsNbt);
 					if (player instanceof ServerPlayer serverPlayer) {
 						StorageInMotionPacketHandler.INSTANCE.sendToClient(serverPlayer, new MovingStorageContentsMessage(uuid, settingsContents));
 					}

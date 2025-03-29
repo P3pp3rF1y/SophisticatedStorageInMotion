@@ -127,7 +127,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	@Override
 	public void tick() {
 		super.tick();
-		entityStorageHolder.tick();
+		entityStorageHolder.tick(this);
 	}
 
 	@Override

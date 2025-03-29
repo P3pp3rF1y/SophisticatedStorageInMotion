@@ -122,7 +122,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	@Override
 	public void tick() {
 		super.tick();
-		entityStorageHolder.tick();
+		entityStorageHolder.tick(this);
 	}
 
 	@Override
