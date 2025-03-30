@@ -170,7 +170,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 				pack();
 			}
 			ItemStack storageItem = entity.getStorageItem();
-			if (!isShulkerBox(storageItem) && !isPacked(storageItem)) {
+			if (!isShulkerBox() && !isPacked(storageItem)) {
 				dropAllItems();
 				if (storageItem.has(ModCoreDataComponents.STORAGE_UUID)) {
 					MovingStorageData.get(storageItem.get(ModCoreDataComponents.STORAGE_UUID)).removeStorageContents();
@@ -197,7 +197,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	public boolean pack() {
-		if (isShulkerBox(entity.getStorageItem()) || isPacked(entity.getStorageItem())) {
+		if (isShulkerBox() || isPacked(entity.getStorageItem())) {
 			return false;
 		}
 
@@ -221,7 +221,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			return true;
 		}
 
-		if (player.isCrouching() || isShulkerBox(entity.getStorageItem())) {
+		if (player.isCrouching() || isShulkerBox()) {
 			return true;
 		}
 
