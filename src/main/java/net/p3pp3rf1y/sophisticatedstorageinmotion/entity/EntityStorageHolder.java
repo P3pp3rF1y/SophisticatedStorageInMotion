@@ -76,8 +76,11 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		} else {
 			ItemStack storageItem = storageItemContents.copy();
 			setStorageItem(storageItem);
-			if (setupDefaults && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
-				LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
+			if (MovingStorageWrapper.isLimitedBarrel(storageItem)) {
+				LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
+				if (setupDefaults) {
+					LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
+				}
 			}
 		}
 	}
