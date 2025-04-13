@@ -167,24 +167,6 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		return renderBlockEntity;
 	}
 
-	@Override
-	protected void updateRenderBlockEntityAttributes(ItemStack storageItem, StorageBlockEntity renderBlockEntity) {
-		if (updateRenderAttributes && renderBlockEntity instanceof BarrelBlockEntity barrelBlockEntity && entity.level().isClientSide()) {
-			barrelBlockEntity.setDynamicRenderTracker(new DynamicRenderTracker(barrelBlockEntity) {
-				@Override
-				public boolean isDynamicRenderer() {
-					return true;
-				}
-
-				@Override
-				public boolean isFullyDynamicRenderer() {
-					return true;
-				}
-			});
-		}
-		super.updateRenderBlockEntityAttributes(storageItem, renderBlockEntity);
-	}
-
 	public void onDestroy() {
 		if (entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			if (Config.COMMON.dropPacked.get()) {
