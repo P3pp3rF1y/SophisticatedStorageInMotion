@@ -5,6 +5,7 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
+import net.p3pp3rf1y.sophisticatedcore.compat.trashslot.TrashSlotScreenRegistry;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageBoatRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageMinecartRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingLimitedBarrelScreen;
@@ -32,5 +33,7 @@ public class ModEntitiesClient {
 		MenuScreens.register(ModEntities.MOVING_STORAGE_SETTINGS_CONTAINER_TYPE.get(), MovingStorageSettingsScreen::constructScreen);
 		MenuScreens.register(ModEntities.MOVING_LIMITED_BARREL_CONTAINER_TYPE.get(), MovingLimitedBarrelScreen::new);
 		MenuScreens.register(ModEntities.MOVING_LIMITED_BARREL_SETTINGS_CONTAINER_TYPE.get(), MovingLimitedBarrelSettingsScreen::new);
+
+		TrashSlotScreenRegistry.registerScreen(MovingStorageScreen.class);
 	}
 }
