@@ -114,15 +114,7 @@ public class CommonEventHandler {
 			return;
 		}
 
-		MovingStorageData storageData = MovingStorageData.get(storageId);
-		CompoundTag contents = storageData.getContents();
-		contents.put(StorageWrapper.RENDER_INFO_TAG, result.getOrDefault(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.EMPTY).copyTag());
-		CompoundTag fullContents = new CompoundTag();
-		fullContents.put(StorageBlockEntity.STORAGE_WRAPPER_TAG, contents);
-
-		ItemContentsStorage.get().setStorageContents(storageId, fullContents);
-
-		storageData.removeStorageContents();
+		MovingStorageData.moveToItemStorage(result, storageId);
 	}
 
 	private static boolean isUncraftedFromSingleMovingStorage(Container inventory) {

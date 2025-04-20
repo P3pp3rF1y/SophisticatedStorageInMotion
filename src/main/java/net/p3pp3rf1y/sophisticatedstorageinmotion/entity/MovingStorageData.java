@@ -4,12 +4,18 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 
@@ -47,6 +53,18 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 		MovingStorageData storageData = new MovingStorageData();
 		storageData.movingStorageContents = nbt;
 		return storageData;
+	}
+
+	public static void moveToItemStorage(ItemStack storageItem, UUID storageId) {
+		MovingStorageData storageData = get(storageId);
+		CompoundTag contents = storageData.getContents();
+		contents.put(StorageWrapper.RENDER_INFO_TAG, storageItem.getOrDefault(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.EMPTY).copyTag());
+		CompoundTag fullContents = new CompoundTag();
+		fullContents.put(StorageBlockEntity.STORAGE_WRAPPER_TAG, contents);
+
+		ItemContentsStorage.get().setStorageContents(storageId, fullContents);
+
+		storageData.removeStorageContents();
 	}
 
 	@Override

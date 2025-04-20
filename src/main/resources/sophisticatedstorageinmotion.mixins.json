@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.p3pp3rf1y.sophisticatedstorageinmotion.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinAbstractChestedHorse",
+    "MixinAbstractHorse"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "MixinLivingEntityRenderer"
+  ]
+}

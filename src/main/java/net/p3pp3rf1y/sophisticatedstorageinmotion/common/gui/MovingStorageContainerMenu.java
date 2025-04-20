@@ -9,6 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -27,6 +28,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsP
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,12 +43,20 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 	}
 
 	public MovingStorageContainerMenu(MenuType<?> menuType, int containerId, Player player, int entityId) {
-		super(menuType, containerId, player, getWrapper(player.level(), entityId), NoopStorageWrapper.INSTANCE, -1, false);
+		super(menuType, containerId, player, getWrapper(player.level(), entityId), NoopStorageWrapper.INSTANCE, -1, false, instantiateExtraSlots(player.level(), entityId));
 		if (!(player.level().getEntity(entityId) instanceof IMovingStorageEntity movingStorageEntity)) {
 			throw new IllegalArgumentException("Incorrect entity with id " + entityId + " expected to find IMovingStorageEntity");
 		}
 		storageEntity = new WeakReference<T>((T) movingStorageEntity);
 		movingStorageEntity.getStorageHolder().startOpen(player, storageEntity.get());
+	}
+
+	private static List<Slot> instantiateExtraSlots(Level level, int entityId) {
+		if (!(level.getEntity(entityId) instanceof IMovingStorageEntity movingStorage)) {
+			return Collections.emptyList();
+		}
+
+		return movingStorage.instantiateExtraSlots();
 	}
 
 	public Optional<T> getStorageEntity() {

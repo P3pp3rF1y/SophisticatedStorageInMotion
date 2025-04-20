@@ -98,7 +98,7 @@ public class StorageMinecartItem extends MovingStorageItem {
 	private static StorageMinecart createMinecart(ServerLevel serverlevel, BlockPos blockpos, double ascendingOffset, ItemStack stack, @Nullable Player player) {
 		StorageMinecart minecart = new StorageMinecart(serverlevel, blockpos.getX() + 0.5, blockpos.getY() + 0.0625 + ascendingOffset, blockpos.getZ() + 0.5);
 		EntityStorageHolder<?> storageHolder = minecart.getStorageHolder();
-		storageHolder.setStorageItemFrom(stack, true);
+		storageHolder.setStorageItemFromMovingStorage(stack, true);
 		storageHolder.onPlace();
 		EntityType.createDefaultStackConfig(serverlevel, stack, player).accept(minecart);
 		return minecart;

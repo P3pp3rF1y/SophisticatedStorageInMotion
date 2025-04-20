@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -36,6 +37,7 @@ import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.ItemComponentHelper;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -50,7 +52,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	private StorageBlockEntity renderBlockEntity = null;
 
 	public EntityStorageHolder(T entity) {
-		super(true);
+		super(!(entity instanceof AbstractChestedHorse));
 		this.entity = entity;
 	}
 
@@ -67,23 +69,37 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		return false;
 	}
 
-	public void setStorageItemFrom(ItemStack stack, boolean setupDefaults) {
-		SimpleItemContent storageItemContents = stack.get(ModDataComponents.STORAGE_ITEM.get());
+	public void setStorageItemFromMovingStorage(ItemStack movingStorageStack, boolean setupDefaults) {
+		SimpleItemContent storageItemContents = movingStorageStack.get(ModDataComponents.STORAGE_ITEM.get());
 		if (storageItemContents == null) {
 			ItemStack barrel = new ItemStack(ModBlocks.BARREL_ITEM.get());
 			WoodStorageBlockItem.setWoodType(barrel, WoodType.SPRUCE);
 			setStorageItem(barrel);
 		} else {
 			ItemStack storageItem = storageItemContents.copy();
-			setStorageItem(storageItem);
-			if (MovingStorageWrapper.isLimitedBarrel(storageItem)) {
-				LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
-				if (setupDefaults) {
-					LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
-				}
+			setStorageItemFrom(storageItem, setupDefaults);
+		}
+	}
+
+	@Override
+	protected float getUpgradeRenderYOffset() {
+		if (entity instanceof AbstractChestedHorse) {
+			return 1.2f;
+		}
+
+		return super.getUpgradeRenderYOffset();
+	}
+
+	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
+		setStorageItem(storageItem);
+		if (MovingStorageWrapper.isLimitedBarrel(storageItem)) {
+			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
+			if (setupDefaults) {
+				LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
 			}
 		}
 	}
+
 
 	public CompoundTag saveData(HolderLookup.Provider registries) {
 		CompoundTag ret = new CompoundTag();
@@ -163,6 +179,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 				renderBlockEntity = new ChestBlockEntity(BlockPos.ZERO, ModBlocks.CHEST.get().defaultBlockState());
 			}
 			setRenderBlockEntity(renderBlockEntity);
+			renderBlockEntity.setLevel(entity.level());
 		}
 		return renderBlockEntity;
 	}
@@ -175,13 +192,13 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			ItemStack storageItem = entity.getStorageItem();
 			if (!isShulkerBox() && !isPacked(storageItem)) {
 				dropAllItems();
+
 				if (storageItem.has(ModCoreDataComponents.STORAGE_UUID)) {
 					MovingStorageData.get(storageItem.get(ModCoreDataComponents.STORAGE_UUID)).removeStorageContents();
-					storageItem.remove(ModCoreDataComponents.STORAGE_UUID);
 				}
+				storageItem = ItemComponentHelper.cleanUpStack(storageItem);
 			}
-			ItemStack drop = entity.getDropStack();
-			drop.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem));
+			ItemStack drop = entity.getDropStack(storageItem);
 			if (entity.hasCustomName()) {
 				drop.set(DataComponents.CUSTOM_NAME, entity.getCustomName());
 			}
