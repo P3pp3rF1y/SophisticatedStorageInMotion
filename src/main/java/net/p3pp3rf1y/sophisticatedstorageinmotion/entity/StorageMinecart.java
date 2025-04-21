@@ -94,8 +94,10 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	}
 
 	@Override
-	public ItemStack getDropStack() {
-		return new ItemStack(ModItems.STORAGE_MINECART.get());
+	public ItemStack getDropStack(ItemStack storageItem) {
+		ItemStack drop = new ItemStack(ModItems.STORAGE_MINECART.get());
+		drop.getOrCreateTag().put(EntityStorageHolder.STORAGE_ITEM_TAG, storageItem.save(new CompoundTag()));
+		return drop;
 	}
 
 	@Override

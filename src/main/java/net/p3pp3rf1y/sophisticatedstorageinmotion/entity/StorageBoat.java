@@ -99,7 +99,13 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	}
 
 	@Override
-	public ItemStack getDropStack() {
+	public ItemStack getDropStack(ItemStack storageItem) {
+		ItemStack drop = getDropStack();
+		drop.getOrCreateTag().put(EntityStorageHolder.STORAGE_ITEM_TAG, storageItem.save(new CompoundTag()));
+		return drop;
+	}
+
+	private ItemStack getDropStack() {
 		return StorageBoatItem.setBoatType(new ItemStack(ModItems.STORAGE_BOAT.get()), getVariant());
 	}
 

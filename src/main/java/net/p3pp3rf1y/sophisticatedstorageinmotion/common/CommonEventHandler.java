@@ -106,15 +106,7 @@ public class CommonEventHandler {
 		}
 
 		NBTHelper.getUniqueId(result, StorageWrapper.UUID_TAG).ifPresent(storageId -> {
-			MovingStorageData storageData = MovingStorageData.get(storageId);
-			CompoundTag contents = storageData.getContents();
-			contents.put(StorageWrapper.RENDER_INFO_TAG, NBTHelper.getCompound(result, StorageWrapper.RENDER_INFO_TAG).orElse(new CompoundTag()));
-			CompoundTag fullContents = new CompoundTag();
-			fullContents.put(StorageBlockEntity.STORAGE_WRAPPER_TAG, contents);
-
-			ItemContentsStorage.get().setStorageContents(storageId, fullContents);
-
-			storageData.removeStorageContents();
+			MovingStorageData.moveToItemStorage(result, storageId);
 		});
 	}
 

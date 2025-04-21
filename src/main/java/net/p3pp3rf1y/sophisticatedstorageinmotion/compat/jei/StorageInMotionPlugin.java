@@ -69,6 +69,7 @@ public class StorageInMotionPlugin implements IModPlugin {
 				gui.getUpgradeSlotsRectangle().ifPresent(ret::add);
 				ret.addAll(gui.getUpgradeSettingsControl().getTabRectangles());
 				gui.getSortButtonsRectangle().ifPresent(ret::add);
+				ret.add(gui.getHorseControlRectangle());
 				return ret;
 			}
 		});

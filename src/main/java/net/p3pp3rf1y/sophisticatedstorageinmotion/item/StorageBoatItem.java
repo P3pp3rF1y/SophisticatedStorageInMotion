@@ -174,7 +174,7 @@ public class StorageBoatItem extends MovingStorageItem {
 	private static Boat createBoat(Level level, @Nullable Player player, ItemStack stack, double x, double y, double z) {
 		StorageBoat boat = new StorageBoat(level, x, y, z);
 		EntityStorageHolder<?> storageHolder = boat.getStorageHolder();
-		storageHolder.setStorageItemFrom(stack, true);
+		storageHolder.setStorageItemFromMovingStorage(stack, true);
 		storageHolder.onPlace();
 		boat.setVariant(StorageBoatItem.getBoatType(stack));
 		if (player != null) {

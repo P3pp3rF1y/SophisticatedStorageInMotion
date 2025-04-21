@@ -11,8 +11,8 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsMessage;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.StorageInMotionPacketHandler;
@@ -31,11 +31,11 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 	}
 
 	private static IStorageWrapper getWrapper(Level level, int entityId) {
-		if (!(level.getEntity(entityId) instanceof StorageMinecart storageMinecart)) {
+		if (!(level.getEntity(entityId) instanceof IMovingStorageEntity movingStorageEntity)) {
 			return NoopStorageWrapper.INSTANCE;
 		}
 
-		return storageMinecart.getStorageHolder().getStorageWrapper();
+		return movingStorageEntity.getStorageHolder().getStorageWrapper();
 	}
 
 	@Override
