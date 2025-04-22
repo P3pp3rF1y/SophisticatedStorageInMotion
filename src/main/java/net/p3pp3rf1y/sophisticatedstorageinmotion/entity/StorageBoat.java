@@ -186,6 +186,12 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	}
 
 	@Override
+	public InteractionResult interactWithContainerVehicle(Player player) {
+		getStorageHolder().openMenu(player);
+		return !player.level().isClientSide ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
+	}
+
+	@Override
 	public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
 		return getStorageHolder().createMenu(id, player);
 	}
