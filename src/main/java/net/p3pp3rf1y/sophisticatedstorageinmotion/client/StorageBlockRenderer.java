@@ -14,8 +14,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.Donkey;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.RenderTypeHelper;
 import net.minecraftforge.client.model.data.ModelData;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelBlockEntity;
@@ -24,6 +27,10 @@ import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.client.render.BarrelBakedModelBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class StorageBlockRenderer {
 	public static void renderStorageBlock(float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight, StorageBlockEntity renderBlockEntity) {
@@ -48,6 +55,17 @@ public class StorageBlockRenderer {
 		}
 	}
 
+	private static final Map<Class<? extends AbstractChestedHorse>, Function<StorageBlockEntity, Vec3>> OFFSET_MAP = new LinkedHashMap<>();
+
+	static {
+		OFFSET_MAP.put(Donkey.class, (renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.283, -0.515) : new Vec3(0, -1.34, -0.48));
+		OFFSET_MAP.put(Mule.class, (renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48));
+		OFFSET_MAP.put(Llama.class, (renderBlockEntity) -> new Vec3(0, -1.5, -0.25));
+		OFFSET_MAP.put(AbstractChestedHorse.class, (renderBlockEntity) -> new Vec3(0, -1.5, -0.25));
+	}
+
+	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
+
 	public static void renderChestedHorseStorage(float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight, AbstractChestedHorse chestedHorse, IMovingStorageEntity movingStorage) {
 		EntityStorageHolder<?> storageHolder = movingStorage.getStorageHolder();
 		StorageBlockEntity renderBlockEntity = storageHolder.getRenderBlockEntity();
@@ -56,15 +74,12 @@ public class StorageBlockRenderer {
 		}
 		poseStack.pushPose();
 		poseStack.mulPose(Axis.XP.rotationDegrees(180));
-		if (chestedHorse instanceof Donkey) {
-			if (renderBlockEntity instanceof ChestBlockEntity) {
-				poseStack.translate(0, -1.283, -0.515);
-			} else {
-				poseStack.translate(0, -1.34, -0.48);
-			}
-		} else {
-			poseStack.translate(0, -1.5, -0.25);
+
+		Function<StorageBlockEntity, Vec3> offsetFunction = OFFSET_MAP.getOrDefault(chestedHorse.getClass(), DEFAULT_OFFSET);
+		if (offsetFunction != null) {
+			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y, offsetFunction.apply(renderBlockEntity).z);
 		}
+
 		renderStorageOnSide(chestedHorse, poseStack, 90, 1, renderBlockEntity, packedLight, buffer, partialTicks);
 		renderStorageOnSide(chestedHorse, poseStack, 270, -1, renderBlockEntity, packedLight, buffer, partialTicks);
 		poseStack.popPose();
@@ -79,10 +94,10 @@ public class StorageBlockRenderer {
 		poseStack.mulPose(Axis.YN.rotationDegrees(storageRotation));
 		float xOffset = halftWidth * 0.49f * xOffsetMultiplier;
 		float sideOffset;
-		if (chestedHorse instanceof Donkey) {
-			sideOffset = renderBlockEntity instanceof ChestBlockEntity ? 0.6f : 0.5f;
-		} else {
+		if (chestedHorse instanceof Llama) {
 			sideOffset = renderBlockEntity instanceof ChestBlockEntity ? 1 : 0.85f;
+		} else {
+			sideOffset = renderBlockEntity instanceof ChestBlockEntity ? 0.6f : 0.5f;
 		}
 		float zOffset = -halftWidth * sideOffset;
 		double yOffset = renderBlockEntity instanceof ChestBlockEntity ? chestedHorse.getBbHeight() * 1.03f : chestedHorse.getBbHeight() * 1.01f;
