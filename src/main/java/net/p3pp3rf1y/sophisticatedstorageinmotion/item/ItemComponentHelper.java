@@ -13,7 +13,9 @@ public class ItemComponentHelper {
 	private static final Set<Supplier<? extends DataComponentType<?>>> DROP_COMPONENTS = Set.of(
 			ModDataComponents.WOOD_TYPE,
 			ModCoreDataComponents.MAIN_COLOR,
-			ModCoreDataComponents.ACCENT_COLOR
+			ModCoreDataComponents.ACCENT_COLOR,
+			ModDataComponents.BARREL_MATERIALS,
+			ModDataComponents.FLAT_TOP
 	);
 
 	public static ItemStack cleanUpStack(ItemStack stack) {
