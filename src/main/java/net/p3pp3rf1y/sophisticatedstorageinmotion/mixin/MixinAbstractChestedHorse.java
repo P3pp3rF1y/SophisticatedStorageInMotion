@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.mixin;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -18,6 +19,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
@@ -150,6 +152,16 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	public void tick() {
 		super.tick();
-		entityStorageHolder.tick(this);
+		if (hasStorageItem()) {
+			entityStorageHolder.tick(this);
+		}
+	}
+
+	@Override
+	protected Component getTypeName() {
+		if (hasStorageItem()) {
+			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(), getStorageItem().getHoverName());
+		}
+		return super.getTypeName();
 	}
 }

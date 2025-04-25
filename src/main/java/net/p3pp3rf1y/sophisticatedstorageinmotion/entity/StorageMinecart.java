@@ -140,7 +140,12 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public Component getCustomName() {
-		return entityData.get(DATA_CUSTOM_NAME).orElseGet(() -> Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("storage_minecart"), getStorageItem().getHoverName()));
+		return entityData.get(DATA_CUSTOM_NAME).orElse(Component.empty());
+	}
+
+	@Override
+	protected Component getTypeName() {
+		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("storage_minecart"), getStorageItem().getHoverName());
 	}
 
 	@Override

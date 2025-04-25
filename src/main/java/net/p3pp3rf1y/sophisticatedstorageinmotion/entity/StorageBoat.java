@@ -29,7 +29,6 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.SophisticatedStorage;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
@@ -149,8 +148,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public Component getCustomName() {
-		String boatDescId = getVariant().isRaft() ? "storage_raft" : "storage_boat";
-		return entityData.get(DATA_CUSTOM_NAME).orElseGet(() -> Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getVariant()), getStorageItem().getHoverName()));
+		return entityData.get(DATA_CUSTOM_NAME).orElse(Component.empty());
 	}
 
 	private Component getWoodName(Boat.Type type) {
@@ -159,11 +157,8 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	protected Component getTypeName() {
-		if (getVariant().isRaft()) {
-			return Component.translatable("entity." + SophisticatedStorageInMotion.MOD_ID + ".storage_raft");
-		}
-
-		return super.getTypeName();
+		String boatDescId = getVariant().isRaft() ? "storage_raft" : "storage_boat";
+		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getVariant()), getStorageItem().getHoverName());
 	}
 
 	@Override
