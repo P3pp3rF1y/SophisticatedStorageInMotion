@@ -1,7 +1,7 @@
 // Auto generated package-info by MCP
 
 @ParametersAreNonnullByDefault @MethodsReturnNonnullByDefault
-package net.p3pp3rf1y.sophisticatedstorageinmotion.compat.jei;
+package net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.emi;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 
