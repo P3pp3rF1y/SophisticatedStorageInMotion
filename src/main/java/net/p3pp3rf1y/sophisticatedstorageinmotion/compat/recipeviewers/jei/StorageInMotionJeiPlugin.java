@@ -16,9 +16,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.CraftingContainerRecipeTransferHandlerBase;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.SettingsGhostIngredientHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.StorageGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingContainerRecipeTransferHandlerBase;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiSettingsGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiStorageGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
@@ -35,7 +35,7 @@ import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.co
 
 @SuppressWarnings("unused")
 @JeiPlugin
-public class StorageInMotionPlugin implements IModPlugin {
+public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	@Override
 	public ResourceLocation getPluginUid() {
@@ -68,8 +68,8 @@ public class StorageInMotionPlugin implements IModPlugin {
 			}
 		});
 
-		registration.addGhostIngredientHandler(MovingStorageScreen.class, new StorageGhostIngredientHandler<>());
-		registration.addGhostIngredientHandler(MovingStorageSettingsScreen.class, new SettingsGhostIngredientHandler<>());
+		registration.addGhostIngredientHandler(MovingStorageScreen.class, new JeiStorageGhostIngredientHandler<>());
+		registration.addGhostIngredientHandler(MovingStorageSettingsScreen.class, new JeiSettingsGhostIngredientHandler<>());
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class StorageInMotionPlugin implements IModPlugin {
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		IRecipeTransferHandlerHelper handlerHelper = registration.getTransferHelper();
 		IStackHelper stackHelper = registration.getJeiHelpers().getStackHelper();
-		registration.addRecipeTransferHandler(new CraftingContainerRecipeTransferHandlerBase<MovingStorageContainerMenu<?>, RecipeHolder<CraftingRecipe>>(handlerHelper, stackHelper) {
+		registration.addRecipeTransferHandler(new JeiCraftingContainerRecipeTransferHandlerBase<MovingStorageContainerMenu<?>, RecipeHolder<CraftingRecipe>>(handlerHelper, stackHelper) {
 			@Override
 			public Class<MovingStorageContainerMenu<?>> getContainerClass() {
 				//noinspection unchecked

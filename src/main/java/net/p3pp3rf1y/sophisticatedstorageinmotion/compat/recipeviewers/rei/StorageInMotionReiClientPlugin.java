@@ -10,9 +10,9 @@ import me.shedaniel.rei.forge.REIPluginClient;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ClientTransferHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.SettingsGhostIngredientHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.StorageGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiCraftingContainerTransferHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiSettingsGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiStorageGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
@@ -46,8 +46,8 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerScreens(ScreenRegistry registry) {
-		registry.registerDraggableStackVisitor(new StorageGhostIngredientHandler<>(MovingStorageScreen.class));
-		registry.registerDraggableStackVisitor(new SettingsGhostIngredientHandler<>(MovingStorageSettingsScreen.class));
+		registry.registerDraggableStackVisitor(new ReiStorageGhostIngredientHandler<>(MovingStorageScreen.class));
+		registry.registerDraggableStackVisitor(new ReiSettingsGhostIngredientHandler<>(MovingStorageSettingsScreen.class));
 	}
 
 	@Override
@@ -63,6 +63,6 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerTransferHandlers(TransferHandlerRegistry registry) {
-		registry.register(ClientTransferHandler.crafting(MovingStorageContainerMenu.class));
+		registry.register(ReiCraftingContainerTransferHandler.crafting(MovingStorageContainerMenu.class));
 	}
 }

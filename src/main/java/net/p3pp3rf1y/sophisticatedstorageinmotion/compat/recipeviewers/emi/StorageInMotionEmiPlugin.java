@@ -7,9 +7,9 @@ import dev.emi.emi.api.widget.Bounds;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiClientRecipeHelper;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.GridMenuInfo;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.SettingsGhostDragDropHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.StorageGhostDragDropHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
@@ -26,7 +26,7 @@ import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.co
 
 @SuppressWarnings("unused")
 @EmiEntrypoint
-public class EmiCompat implements EmiPlugin {
+public class StorageInMotionEmiPlugin implements EmiPlugin {
 	@Override
 	public void register(EmiRegistry registry) {
 		registerGuiHandlers(registry);
@@ -60,8 +60,8 @@ public class EmiCompat implements EmiPlugin {
 			screen.getSettingsTabControl().getTabRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
 		});
 
-		registry.addDragDropHandler(MovingStorageScreen.class, new StorageGhostDragDropHandler<>());
-		registry.addDragDropHandler(MovingStorageSettingsScreen.class, new SettingsGhostDragDropHandler<>());
+		registry.addDragDropHandler(MovingStorageScreen.class, new EmiStorageGhostDragDropHandler<>());
+		registry.addDragDropHandler(MovingStorageSettingsScreen.class, new EmiSettingsGhostDragDropHandler<>());
 	}
 
 	public void registerRecipes(EmiRegistry registry) {
@@ -89,6 +89,6 @@ public class EmiCompat implements EmiPlugin {
 	}
 
 	private void registerRecipeHandlers(EmiRegistry registry) {
-		registry.addRecipeHandler(ModEntities.MOVING_STORAGE_CONTAINER_TYPE.get(), GridMenuInfo.crafting());
+		registry.addRecipeHandler(ModEntities.MOVING_STORAGE_CONTAINER_TYPE.get(), EmiGridMenuInfo.crafting());
 	}
 }
