@@ -118,14 +118,14 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		super.appendHoverText(stack, context, tooltip, tooltipFlag);
 		if (tooltipFlag.isAdvanced()) {
 			HolderLookup.Provider registries = context.registries();
-			if (registries != null) {
+			if (registries != null && MovingStorageWrapper.hasContentsUuid(stack)) {
 				getMovingStorageWrapper(stack).getContentsUuid().ifPresent(uuid -> {
 					tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY));
 
 				});
 			}
 		}
-		if (!Screen.hasShiftDown() && getMovingStorageWrapper(stack).getContentsUuid().isPresent()) {
+		if (!Screen.hasShiftDown() && MovingStorageWrapper.hasContentsUuid(stack)) {
 			tooltip.add(Component.translatable(
 					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
 					Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
