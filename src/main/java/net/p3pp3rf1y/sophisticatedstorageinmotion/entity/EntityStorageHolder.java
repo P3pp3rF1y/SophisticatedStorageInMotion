@@ -90,11 +90,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
 		setStorageItem(storageItem);
-		if (MovingStorageWrapper.isLimitedBarrel(storageItem)) {
+		if (setupDefaults && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
 			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
-			if (setupDefaults) {
-				LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
-			}
+			LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
 		}
 	}
 

@@ -114,11 +114,11 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	@Override
 	public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag tooltipFlag) {
 		super.appendHoverText(stack, level, tooltip, tooltipFlag);
-		if (tooltipFlag.isAdvanced()) {
+		if (tooltipFlag.isAdvanced() && MovingStorageWrapper.hasContentsUuid(stack)) {
 			getMovingStorageWrapper(stack).getContentsUuid().ifPresent(uuid ->
 					tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY)));
 		}
-		if (!Screen.hasShiftDown() && getMovingStorageWrapper(stack).getContentsUuid().isPresent()) {
+		if (!Screen.hasShiftDown() && MovingStorageWrapper.hasContentsUuid(stack)) {
 			tooltip.add(Component.translatable(
 					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
 					Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
