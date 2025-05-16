@@ -26,8 +26,8 @@ import net.minecraftforge.common.util.NonNullLazy;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageMinecartItemRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public class StorageMinecartItem extends MovingStorageItem {

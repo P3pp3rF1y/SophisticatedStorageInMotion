@@ -136,7 +136,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		return NBTHelper.getBoolean(stack, LOCKED_TAG).orElse(false);
 	}
 
-	@org.jetbrains.annotations.Nullable
+	@Nullable
 	@Override
 	protected Level getLevel() {
 		return entity.level();

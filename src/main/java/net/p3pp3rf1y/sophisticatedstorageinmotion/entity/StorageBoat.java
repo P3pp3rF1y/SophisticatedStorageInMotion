@@ -34,8 +34,8 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTran
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.Locale;
 import java.util.Optional;
 
