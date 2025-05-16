@@ -31,8 +31,8 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTran
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class StorageMinecart extends MinecartChest implements IMovingStorageEntity {

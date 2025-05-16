@@ -9,7 +9,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 class StaticBlockEntityTintGetter implements BlockAndTintGetter {
 	private final BlockAndTintGetter level;

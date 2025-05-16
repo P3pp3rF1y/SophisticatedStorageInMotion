@@ -21,7 +21,8 @@ import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public class StorageMinecartItem extends MovingStorageItem {
 	public static final DispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {

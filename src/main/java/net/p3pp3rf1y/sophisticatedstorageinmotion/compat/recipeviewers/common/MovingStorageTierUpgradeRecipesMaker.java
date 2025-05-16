@@ -16,7 +16,6 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.crafting.MovingStorageTierUpgradeShapedRecipe;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.crafting.MovingStorageTierUpgradeShapelessRecipe;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +49,6 @@ public class MovingStorageTierUpgradeRecipesMaker {
 		return getCraftingRecipes(constructRecipe, MovingStorageTierUpgradeShapelessRecipe.class, getSubtypeInterpreter, transformRecipe);
 	}
 
-	@NotNull
 	private static <R, T extends CraftingRecipe, U extends PropertyBasedSubtypeInterpreter> List<R> getCraftingRecipes(RecipeConstructor<T> constructRecipe, Class<T> originalRecipeClass, Function<ItemStack, Optional<U>> getSubtypeInterpreter, BiFunction<ResourceLocation, CraftingRecipe, R> transformRecipe) {
 		return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(RecipeType.CRAFTING, originalRecipeClass, recipe -> {
 			List<R> itemGroupRecipes = new ArrayList<>();
