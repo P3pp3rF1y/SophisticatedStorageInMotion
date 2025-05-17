@@ -7,8 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.function.Supplier;
 

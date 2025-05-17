@@ -36,8 +36,8 @@ import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
