@@ -36,6 +36,8 @@ import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.ItemNBTHelper;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessMessage;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.network.StorageInMotionPacketHandler;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -145,6 +147,11 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	@Override
 	protected Vec3 getPosition() {
 		return entity.position();
+	}
+
+	@Override
+	protected void sendOpenness(Entity entity) {
+		StorageInMotionPacketHandler.INSTANCE.sendToAllTracking(new MovingStorageOpennessMessage(entity.getId(), isOpen()), entity);
 	}
 
 	@Override
