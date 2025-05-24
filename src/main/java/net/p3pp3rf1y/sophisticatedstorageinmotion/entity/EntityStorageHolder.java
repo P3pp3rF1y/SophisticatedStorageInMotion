@@ -7,6 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -38,6 +39,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrel
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.ItemComponentHelper;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessPayload;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -147,6 +149,11 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	@Override
 	protected Vec3 getPosition() {
 		return entity.position();
+	}
+
+	@Override
+	protected CustomPacketPayload createOpennessPayload() {
+		return new MovingStorageOpennessPayload(entity.getId(), isOpen());
 	}
 
 	@Override

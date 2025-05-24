@@ -4,6 +4,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsPayload;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessPayload;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.OpenMovingStorageInventoryPayload;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.RequestMovingStorageInventoryContentsPayload;
 
@@ -16,5 +17,6 @@ public class ModPayloads {
 		registrar.playToServer(OpenMovingStorageInventoryPayload.TYPE, OpenMovingStorageInventoryPayload.STREAM_CODEC, OpenMovingStorageInventoryPayload::handlePayload);
 		registrar.playToServer(RequestMovingStorageInventoryContentsPayload.TYPE, RequestMovingStorageInventoryContentsPayload.STREAM_CODEC, RequestMovingStorageInventoryContentsPayload::handlePayload);
 		registrar.playToClient(MovingStorageContentsPayload.TYPE, MovingStorageContentsPayload.STREAM_CODEC, MovingStorageContentsPayload::handlePayload);
+		registrar.playToClient(MovingStorageOpennessPayload.TYPE, MovingStorageOpennessPayload.STREAM_CODEC, MovingStorageOpennessPayload::handlePayload);
 	}
 }
