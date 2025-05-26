@@ -53,11 +53,10 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 			consumer.accept(new Bounds(horseControl.getX(), horseControl.getY(), horseControl.getWidth(), horseControl.getHeight()));
 		});
 		registry.addExclusionArea(MovingStorageSettingsScreen.class, (screen, consumer) -> {
-			//noinspection ConstantValue
-			if (screen == null || screen.getSettingsTabControl() == null) { // Due to how Emi collects the exclusion area this can be null
+			if (screen == null) { // Due to how Emi collects the exclusion area this can be null
 				return;
 			}
-			screen.getSettingsTabControl().getTabRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
+			screen.getExtendedControlsRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
 		});
 
 		registry.addDragDropHandler(MovingStorageScreen.class, new EmiStorageGhostDragDropHandler<>());
