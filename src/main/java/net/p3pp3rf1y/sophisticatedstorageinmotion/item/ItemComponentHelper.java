@@ -19,7 +19,7 @@ public class ItemComponentHelper {
 	);
 
 	public static ItemStack cleanUpStack(ItemStack stack) {
-		ItemStack cleanedUpStack = stack.copy();
+		ItemStack cleanedUpStack = new ItemStack(stack.getItem());
 		for (Supplier<? extends DataComponentType<?>> componentType : DROP_COMPONENTS) {
 			if (stack.has(componentType)) {
 				setCompoment(cleanedUpStack, componentType, stack.get(componentType));
@@ -28,7 +28,7 @@ public class ItemComponentHelper {
 		return cleanedUpStack;
 	}
 
-	private static <T> void setCompoment(ItemStack stack, Supplier<? extends DataComponentType<?>> componentType, @Nullable T value) {
+	public static <T> void setCompoment(ItemStack stack, Supplier<? extends DataComponentType<?>> componentType, @Nullable T value) {
 		stack.set((Supplier<DataComponentType<T>>) componentType, value);
 	}
 }

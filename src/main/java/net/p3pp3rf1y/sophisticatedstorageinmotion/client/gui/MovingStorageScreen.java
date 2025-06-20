@@ -4,10 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
-import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.player.Inventory;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
@@ -18,8 +15,6 @@ public class MovingStorageScreen extends StorageScreenBase<MovingStorageContaine
 	public static final int HORSE_VIEW_PADDING = 7;
 	public static final int HORSE_VIEW_SIZE = 52;
 	public static final int HORSE_WIDGET_WIDTH = HORSE_VIEW_SIZE + HORSE_VIEW_PADDING * 2 + 4 + 18;
-	private static final ResourceLocation SADDLE_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/horse/saddle_slot");
-	private static final ResourceLocation LLAMA_ARMOR_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/horse/llama_armor_slot");
 
 	public static MovingStorageScreen constructScreen(MovingStorageContainerMenu<?> screenContainer, Inventory inv, Component title) {
 		return new MovingStorageScreen(screenContainer, inv, title);
@@ -53,23 +48,13 @@ public class MovingStorageScreen extends StorageScreenBase<MovingStorageContaine
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
-		super.renderBg(guiGraphics, partialTicks, mouseX, mouseY);
-
 		getMenu().getStorageEntity().ifPresent(entity -> {
 			if (entity instanceof AbstractChestedHorse horse) {
 				int y = getHorseControlY();
 				int x = getHorseControlX();
 				int horseWidgetHeight = HORSE_VIEW_SIZE + HORSE_VIEW_PADDING * 2;
-				int slotX = x + HORSE_VIEW_PADDING;
-				int slotY = y + horseWidgetHeight - HORSE_VIEW_PADDING - 18;
 
 				GuiHelper.renderControlBackground(guiGraphics, x, y, HORSE_WIDGET_WIDTH, horseWidgetHeight, 128, 0, 128, 256);
-				if (horse.isSaddleable()) {
-					guiGraphics.blitSprite(SADDLE_SLOT_SPRITE, slotX, slotY, 18, 18);
-				}
-				if (horse.canUseSlot(EquipmentSlot.BODY) && horse instanceof Llama) {
-					guiGraphics.blitSprite(LLAMA_ARMOR_SLOT_SPRITE, slotX, slotY, 18, 18);
-				}
 
 				int entityViewX = x + HORSE_WIDGET_WIDTH - HORSE_VIEW_PADDING - HORSE_VIEW_SIZE;
 				int entityViewY = y + HORSE_VIEW_PADDING;
@@ -77,6 +62,7 @@ public class MovingStorageScreen extends StorageScreenBase<MovingStorageContaine
 				InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, entityViewX, entityViewY, entityViewX + HORSE_VIEW_SIZE, entityViewY + HORSE_VIEW_SIZE, 17, 0.25F, mouseX, mouseY, horse);
 			}
 		});
+		super.renderBg(guiGraphics, partialTicks, mouseX, mouseY);
 	}
 
 	private int getHorseControlY() {

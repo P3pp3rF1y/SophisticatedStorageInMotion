@@ -2,16 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:bamboo_chest_raft"
-    },
-    {
-      "item": "minecraft:redstone_torch"
-    }
+    "minecraft:bamboo_chest_raft",
+    "minecraft:redstone_torch"
   ],
   "result": {
     "components": {
-      "sophisticatedstorageinmotion:boat_type": "bamboo",
+      "sophisticatedstorage:wood_type": "bamboo",
       "sophisticatedstorageinmotion:storage_item": {
         "components": {
           "sophisticatedstorage:wood_type": "oak"

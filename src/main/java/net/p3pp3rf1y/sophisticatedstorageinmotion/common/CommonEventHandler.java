@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
@@ -57,7 +58,7 @@ public class CommonEventHandler {
 			return;
 		}
 
-		if (StorageBlockBase.tryAddSingleUpgrade(player, event.getHand(), itemInHand, movingStorage.getStorageHolder().getStorageWrapper())) {
+		if (StorageBlockBase.tryAddSingleUpgrade(player, itemInHand, movingStorage.getStorageHolder().getStorageWrapper()).consumesAction()) {
 			event.setCanceled(true);
 			event.setCancellationResult(InteractionResult.SUCCESS);
 		}
@@ -74,7 +75,7 @@ public class CommonEventHandler {
 			return;
 		}
 		BlockState state = blockItem.getBlock().defaultBlockState();
-		SoundEvent placeSound = state.getSoundType().getPlaceSound();
+		SoundEvent placeSound = state.getBlock().getSoundType(state, player.level(), BlockPos.ZERO, player).getPlaceSound();
 		if (PaintbrushItem.paint(player, itemInHand, movingStorage.getStorageHolder(), movingStorage.getStorageHolder().getStorageWrapper(),
 				event.getTarget().position(), Direction.UP, placeSound)) {
 			event.setCanceled(true);
@@ -152,7 +153,7 @@ public class CommonEventHandler {
 					CompoundTag migratedContentsNbt = new CompoundTag();
 					migratedContentsNbt.put(StorageWrapper.CONTENTS_TAG, contentsNbt.getCompound(StorageWrapper.CONTENTS_TAG));
 					migratedContentsNbt.put(StorageWrapper.SETTINGS_TAG, contentsNbt.getCompound(StorageWrapper.SETTINGS_TAG));
-					MovingStorageData.get(id).setContents(migratedContentsNbt);
+					MovingStorageData.get().setContents(id, migratedContentsNbt);
 					storageItem.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(contentsNbt.getCompound(StorageWrapper.RENDER_INFO_TAG)));
 					MovingStorageItem.setStorageItem(result, storageItem);
 					itemContentsStorage.removeStorageContents(id);

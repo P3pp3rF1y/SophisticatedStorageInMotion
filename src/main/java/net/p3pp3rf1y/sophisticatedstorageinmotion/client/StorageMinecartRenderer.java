@@ -3,22 +3,37 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.AbstractMinecartRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.MinecartRenderer;
+import net.minecraft.client.renderer.entity.state.MinecartRenderState;
 import net.minecraft.world.level.block.state.BlockState;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ShulkerBoxBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 
-public class StorageMinecartRenderer extends MinecartRenderer<StorageMinecart> {
+import java.util.function.BiConsumer;
+
+public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMinecart, MinecartRenderState> {
+	public static final BiConsumer<StorageMinecart, MinecartRenderState> RENDER_STATE_MODIFIER = (minecart, minecartRenderState) -> {
+		minecartRenderState.setRenderData(ContextKeys.RENDER_BLOCK_ENTITY, minecart.getStorageHolder().getRenderBlockEntity());
+	};
+
 	public StorageMinecartRenderer(EntityRendererProvider.Context context) {
 		super(context, ModelLayers.MINECART);
 	}
 
 	@Override
-	protected void renderMinecartContents(StorageMinecart entity, float partialTicks, BlockState state, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-		StorageBlockEntity renderBlockEntity = entity.getStorageHolder().getRenderBlockEntity();
+	public MinecartRenderState createRenderState() {
+		return new MinecartRenderState();
+	}
+
+	@Override
+	protected void renderMinecartContents(MinecartRenderState minecartRenderState, BlockState state, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+		StorageBlockEntity renderBlockEntity = minecartRenderState.getRenderData(ContextKeys.RENDER_BLOCK_ENTITY);
+		if (renderBlockEntity == null) {
+			return;
+		}
 
 		poseStack.pushPose();
 		double yOffset = 0;
@@ -27,7 +42,7 @@ public class StorageMinecartRenderer extends MinecartRenderer<StorageMinecart> {
 		}
 		poseStack.translate(0, yOffset, 0);
 
-		StorageBlockRenderer.renderStorageBlock(partialTicks, poseStack, buffer, packedLight, renderBlockEntity);
+		StorageBlockRenderer.renderStorageBlock(minecartRenderState.partialTick, poseStack, buffer, packedLight, renderBlockEntity);
 		poseStack.popPose();
 	}
 }

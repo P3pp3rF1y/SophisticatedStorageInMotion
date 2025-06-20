@@ -174,8 +174,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		ItemStack storageItem = getStorageItem(movingStorageStack);
 		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {},
 				() -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)), MovingStorageData::get,
-				() -> movingStorageStack.getOrDefault(ModDataComponents.LOCKED, false),
-				locked -> movingStorageStack.set(ModDataComponents.LOCKED, locked),
+				() -> movingStorageStack.getOrDefault(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, false),
+				locked -> movingStorageStack.set(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, locked),
 				upgrade -> true);
 		return wrapper;
 	}

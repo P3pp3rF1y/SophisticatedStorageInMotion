@@ -1,0 +1,21 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedstorageinmotion:storage_boat"
+    }
+  ],
+  "type": "sophisticatedstorageinmotion:moving_storage_from_storage",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:pale_oak_boat",
+    "#sophisticatedstorage:all_storage"
+  ],
+  "result": {
+    "components": {
+      "sophisticatedstorage:wood_type": "pale_oak"
+    },
+    "count": 1,
+    "id": "sophisticatedstorageinmotion:storage_boat"
+  }
+}

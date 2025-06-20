@@ -8,11 +8,9 @@
   "type": "sophisticatedstorageinmotion:moving_storage_tier_upgrade_shaped_recipe",
   "category": "misc",
   "key": {
-    "M": {
-      "tag": "c:ingots/gold"
-    },
+    "M": "#c:ingots/gold",
     "S": {
-      "type": "sophisticatedstorageinmotion:moving_storage",
+      "neoforge:ingredient_type": "sophisticatedstorageinmotion:moving_storage",
       "moving_storage_item": "sophisticatedstorageinmotion:storage_minecart",
       "storage_item": "sophisticatedstorage:limited_iron_barrel_1"
     }

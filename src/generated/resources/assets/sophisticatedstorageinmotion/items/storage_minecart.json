@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "sophisticatedstorageinmotion:item/storage_minecart",
+    "model": {
+      "type": "sophisticatedstorageinmotion:storage_minecart"
+    }
+  }
+}

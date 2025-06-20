@@ -7,8 +7,8 @@ import dev.emi.emi.api.widget.Bounds;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiClientRecipeHelper;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiRecipeDisplayGenerator;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSubtypeInterpreter;
@@ -67,24 +67,10 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
 		// Add Storage subtype interpreters as well
 		subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
+		EmiRecipeDisplayGenerator generator = new EmiRecipeDisplayGenerator(registry);
 
-		AssembleRecipesMaker.getShapelessCraftingRecipes(
-						stack -> getSubtypeInterpreter(subtypeInterpreters, stack),
-						EmiClientRecipeHelper::wrapSyntheticShapelessRecipe
-				)
-				.forEach(registry::addRecipe);
-
-		MovingStorageTierUpgradeRecipesMaker.getShapedCraftingRecipes(
-						stack -> getSubtypeInterpreter(subtypeInterpreters, stack),
-						EmiClientRecipeHelper::wrapSyntheticShapedRecipe
-				)
-				.forEach(registry::addRecipe);
-
-		MovingStorageTierUpgradeRecipesMaker.getShapelessCraftingRecipes(
-						stack -> getSubtypeInterpreter(subtypeInterpreters, stack),
-						EmiClientRecipeHelper::wrapSyntheticShapelessRecipe
-				)
-				.forEach(registry::addRecipe);
+		AssembleRecipesMaker.addRecipes(generator, stack -> getSubtypeInterpreter(subtypeInterpreters, stack));
+		MovingStorageTierUpgradeRecipesMaker.addRecipes(generator, stack -> getSubtypeInterpreter(subtypeInterpreters, stack));
 	}
 
 	private void registerRecipeHandlers(EmiRegistry registry) {

@@ -10,6 +10,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -81,13 +82,13 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	}
 
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
-		return getStorageHolder().hurt(source, amount, super::hurt);
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource source, float amount) {
+		return getStorageHolder().hurt(serverLevel, source, amount, super::hurtServer);
 	}
 
 	@Override
-	public void destroy(DamageSource source) {
-		this.kill();
+	public void destroy(ServerLevel serverLevel, DamageSource source) {
+		kill(serverLevel);
 		getStorageHolder().onDestroy();
 	}
 
@@ -139,11 +140,6 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	}
 
 	@Override
-	public Component getCustomName() {
-		return entityData.get(DATA_CUSTOM_NAME).orElse(Component.empty());
-	}
-
-	@Override
 	protected Component getTypeName() {
 		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("storage_minecart"), getStorageItem().getHoverName());
 	}
@@ -180,25 +176,25 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public void addChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
-		if (getLootTable() != null) {
-			tag.putString("LootTable", this.getLootTable().location().toString());
-			if (getLootTableSeed() != 0L) {
-				tag.putLong("LootTableSeed", this.getLootTableSeed());
+		getLootTable().ifPresent(lootTable -> {
+			tag.putString("LootTable", lootTable.location().toString());
+			if (getContainerLootTableSeed() != 0L) {
+				tag.putLong("LootTableSeed", getContainerLootTableSeed());
 			}
-		}
+		});
 	}
 
 	@Override
 	public void readChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
 		clearItemStacks();
 		if (tag.contains("LootTable", 8)) {
-			setLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
-			setLootTableSeed(tag.getLong("LootTableSeed"));
+			setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
+			setContainerLootTableSeed(tag.getLong("LootTableSeed"));
 		}
 	}
 
 	@Override
-	public void chestVehicleDestroyed(DamageSource damageSource, Level level, Entity p_entity) {
+	public void chestVehicleDestroyed(DamageSource damageSource, ServerLevel level, Entity p_entity) {
 		//noop
 	}
 

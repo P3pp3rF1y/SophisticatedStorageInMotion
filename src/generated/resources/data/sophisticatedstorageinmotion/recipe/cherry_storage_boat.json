@@ -8,16 +8,12 @@
   "type": "sophisticatedstorageinmotion:moving_storage_from_storage",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:cherry_boat"
-    },
-    {
-      "tag": "sophisticatedstorage:all_storage"
-    }
+    "minecraft:cherry_boat",
+    "#sophisticatedstorage:all_storage"
   ],
   "result": {
     "components": {
-      "sophisticatedstorageinmotion:boat_type": "cherry"
+      "sophisticatedstorage:wood_type": "cherry"
     },
     "count": 1,
     "id": "sophisticatedstorageinmotion:storage_boat"

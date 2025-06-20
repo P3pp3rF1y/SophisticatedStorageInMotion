@@ -15,6 +15,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -33,22 +34,24 @@ public class StorageMinecartItem extends MovingStorageItem {
 			ServerLevel serverlevel = blockSource.level();
 			BlockPos blockpos = blockSource.pos().relative(direction);
 			BlockState blockstate = serverlevel.getBlockState(blockpos);
-			RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock baseRailBlock ? baseRailBlock.getRailDirection(blockstate, serverlevel, blockpos, null) : RailShape.NORTH_SOUTH;
 			double slopeOffset;
 			if (blockstate.is(BlockTags.RAILS)) {
-				if (railshape.isAscending()) {
+				if (getRailShape(blockstate, serverlevel, blockpos).isSlope()) {
 					slopeOffset = 0.6;
 				} else {
 					slopeOffset = 0.1;
 				}
 			} else {
-				if (!blockstate.isAir() || !serverlevel.getBlockState(blockpos.below()).is(BlockTags.RAILS)) {
-					return this.defaultDispenseItemBehavior.dispense(blockSource, stack);
+				if (!blockstate.isAir()) {
+					return defaultDispenseItemBehavior.dispense(blockSource, stack);
 				}
 
-				BlockState stateBelow = serverlevel.getBlockState(blockpos.below());
-				RailShape railShapeBelow = stateBelow.getBlock() instanceof BaseRailBlock baseRailBlock ? baseRailBlock.getRailDirection(stateBelow, serverlevel, blockpos.below(), null) : RailShape.NORTH_SOUTH;
-				if (direction != Direction.DOWN && railShapeBelow.isAscending()) {
+				BlockState blockstate1 = serverlevel.getBlockState(blockpos.below());
+				if (!blockstate1.is(BlockTags.RAILS)) {
+					return defaultDispenseItemBehavior.dispense(blockSource, stack);
+				}
+
+				if (direction != Direction.DOWN && getRailShape(blockstate1, serverlevel, blockpos.below()).isSlope()) {
 					slopeOffset = -0.4;
 				} else {
 					slopeOffset = -0.9;
@@ -57,7 +60,20 @@ public class StorageMinecartItem extends MovingStorageItem {
 
 			serverlevel.addFreshEntity(createMinecart(serverlevel, blockpos, slopeOffset, stack, null));
 			stack.shrink(1);
+
 			return stack;
+		}
+
+		private static RailShape getRailShape(BlockState state, ServerLevel level, BlockPos pos) {
+			Block block = state.getBlock();
+			RailShape railShape;
+			if (block instanceof BaseRailBlock baserailblock) {
+				railShape = baserailblock.getRailDirection(state, level, pos, null);
+			} else {
+				railShape = RailShape.NORTH_SOUTH;
+			}
+
+			return railShape;
 		}
 
 		protected void playSound(BlockSource blockSource) {
@@ -65,8 +81,8 @@ public class StorageMinecartItem extends MovingStorageItem {
 		}
 	};
 
-	public StorageMinecartItem() {
-		super(new Properties().stacksTo(1));
+	public StorageMinecartItem(Properties properties) {
+		super(properties.stacksTo(1));
 	}
 
 	@Override
@@ -81,7 +97,7 @@ public class StorageMinecartItem extends MovingStorageItem {
 			if (level instanceof ServerLevel serverlevel) {
 				RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock baseRailBlock ? baseRailBlock.getRailDirection(blockstate, level, blockpos, null) : RailShape.NORTH_SOUTH;
 				double ascendingOffset = 0.0;
-				if (railshape.isAscending()) {
+				if (railshape.isSlope()) {
 					ascendingOffset = 0.5;
 				}
 
@@ -92,7 +108,7 @@ public class StorageMinecartItem extends MovingStorageItem {
 			}
 
 			stack.shrink(1);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 

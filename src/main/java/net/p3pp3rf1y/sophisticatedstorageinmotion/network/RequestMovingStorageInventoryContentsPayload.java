@@ -30,7 +30,7 @@ public record RequestMovingStorageInventoryContentsPayload(UUID storageUuid) imp
 	}
 
 	public static void handlePayload(RequestMovingStorageInventoryContentsPayload payload, IPayloadContext context) {
-		CompoundTag baseContentsTag = MovingStorageData.get(payload.storageUuid).getContents();
+		CompoundTag baseContentsTag = MovingStorageData.get().getContents(payload.storageUuid);
 		if (!baseContentsTag.contains(StorageWrapper.CONTENTS_TAG)) {
 			return;
 		}

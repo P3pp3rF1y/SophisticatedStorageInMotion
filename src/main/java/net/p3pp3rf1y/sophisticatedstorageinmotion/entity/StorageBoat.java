@@ -4,12 +4,15 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -19,11 +22,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -42,11 +46,12 @@ import java.util.Optional;
 public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	private static final EntityDataAccessor<Optional<Component>> DATA_CUSTOM_NAME = SynchedEntityData.defineId(StorageBoat.class, EntityDataSerializers.OPTIONAL_COMPONENT);
 	static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(StorageBoat.class, EntityDataSerializers.ITEM_STACK);
+	static final EntityDataAccessor<WoodType> DATA_WOOD_TYPE = SynchedEntityData.defineId(StorageBoat.class, ModEntities.WOOD_TYPE_SERIALIZER.get());
 
 	private final EntityStorageHolder<StorageBoat> entityStorageHolder;
 
-	public StorageBoat(EntityType<? extends Boat> entityType, Level level) {
-		super(entityType, level);
+	public StorageBoat(EntityType<StorageBoat> entityType, Level level) {
+		super(entityType, level, () -> Items.ACACIA_BOAT);
 		entityStorageHolder = new EntityStorageHolder<>(this);
 	}
 
@@ -56,10 +61,10 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	public StorageBoat(Level level, double x, double y, double z) {
 		this(level);
-		this.setPos(x, y, z);
-		this.xo = x;
-		this.yo = y;
-		this.zo = z;
+		setPos(x, y, z);
+		xo = x;
+		yo = y;
+		zo = z;
 	}
 
 	@Override
@@ -67,16 +72,17 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 		super.defineSynchedData(builder);
 		builder.define(DATA_STORAGE_ITEM, ItemStack.EMPTY);
 		builder.define(DATA_CUSTOM_NAME, Optional.empty());
+		builder.define(DATA_WOOD_TYPE, WoodType.OAK);
 	}
 
 	@Override
 	public ItemStack getStorageItem() {
-		return this.entityData.get(DATA_STORAGE_ITEM);
+		return entityData.get(DATA_STORAGE_ITEM);
 	}
 
 	@Override
 	public void setStorageItem(ItemStack storageItem) {
-		this.entityData.set(DATA_STORAGE_ITEM, storageItem.copy());
+		entityData.set(DATA_STORAGE_ITEM, storageItem.copy());
 	}
 
 	@Override
@@ -85,13 +91,13 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
-		return getStorageHolder().hurt(source, amount, super::hurt);
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource source, float amount) {
+		return getStorageHolder().hurt(serverLevel, source, amount, super::hurtServer);
 	}
 
 	@Override
-	public void destroy(DamageSource source) {
-		this.kill();
+	public void destroy(ServerLevel serverLevel, DamageSource source) {
+		kill(serverLevel);
 		getStorageHolder().onDestroy();
 	}
 
@@ -103,7 +109,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	}
 
 	private ItemStack getDropStack() {
-		return StorageBoatItem.setBoatType(new ItemStack(ModItems.STORAGE_BOAT.get()), getVariant());
+		return StorageBoatItem.setWoodType(new ItemStack(ModItems.STORAGE_BOAT.get()), getWoodType());
 	}
 
 	@Override
@@ -119,12 +125,19 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	protected void addAdditionalSaveData(CompoundTag tag) {
 		super.addAdditionalSaveData(tag);
 		tag.put("storageHolder", entityStorageHolder.saveData(level().registryAccess()));
+		WoodType.CODEC.encodeStart(NbtOps.INSTANCE, getWoodType()).ifSuccess(woodTypeTag -> tag.put("woodType", woodTypeTag));
 	}
 
 	@Override
 	protected void readAdditionalSaveData(CompoundTag tag) {
 		super.readAdditionalSaveData(tag);
 		entityStorageHolder.readData(level().registryAccess(), tag.getCompound("storageHolder"));
+		if (tag.contains("woodType")) {
+			Tag woodTag = tag.get("woodType");
+			WoodType.CODEC.parse(NbtOps.INSTANCE, woodTag).ifSuccess(woodType -> entityData.set(DATA_WOOD_TYPE, woodType));
+		} else {
+			entityData.set(DATA_WOOD_TYPE, WoodType.OAK);
+		}
 	}
 
 	@Override
@@ -146,19 +159,26 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 		entityData.set(DATA_CUSTOM_NAME, Optional.ofNullable(customName));
 	}
 
-	@Override
-	public Component getCustomName() {
-		return entityData.get(DATA_CUSTOM_NAME).orElse(Component.empty());
-	}
-
-	private Component getWoodName(Boat.Type type) {
+	private Component getWoodName(WoodType type) {
 		return Component.translatable("wood_name." + SophisticatedStorage.MOD_ID + "." + type.name().toLowerCase(Locale.ROOT));
 	}
 
 	@Override
 	protected Component getTypeName() {
-		String boatDescId = getVariant().isRaft() ? "storage_raft" : "storage_boat";
-		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getVariant()), getStorageItem().getHoverName());
+		String boatDescId = isRaft() ? "storage_raft" : "storage_boat";
+		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getWoodType()), getStorageItem().getHoverName());
+	}
+
+	public WoodType getWoodType() {
+		return entityData.get(DATA_WOOD_TYPE);
+	}
+
+	public void setWoodType(WoodType woodType) {
+		entityData.set(DATA_WOOD_TYPE, woodType);
+	}
+
+	public boolean isRaft() {
+		return getWoodType() == WoodType.BAMBOO;
 	}
 
 	@Override
@@ -170,7 +190,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 			}
 		}
 
-		if (this.canAddPassenger(player) && !player.isSecondaryUseActive()) {
+		if (canAddPassenger(player) && !player.isSecondaryUseActive()) {
 			return InteractionResult.PASS;
 		} else {
 			if (player instanceof ServerPlayer serverPlayer) {
@@ -214,25 +234,25 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public void addChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
-		if (getLootTable() != null) {
-			tag.putString("LootTable", this.getLootTable().location().toString());
-			if (getLootTableSeed() != 0L) {
-				tag.putLong("LootTableSeed", this.getLootTableSeed());
+		getLootTable().ifPresent(lootTable -> {
+			tag.putString("LootTable", lootTable.location().toString());
+			if (getContainerLootTableSeed() != 0L) {
+				tag.putLong("LootTableSeed", getContainerLootTableSeed());
 			}
-		}
+		});
 	}
 
 	@Override
 	public void readChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
 		clearItemStacks();
 		if (tag.contains("LootTable", 8)) {
-			setLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
-			setLootTableSeed(tag.getLong("LootTableSeed"));
+			setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
+			setContainerLootTableSeed(tag.getLong("LootTableSeed"));
 		}
 	}
 
 	@Override
-	public void chestVehicleDestroyed(DamageSource damageSource, Level level, Entity p_entity) {
+	public void chestVehicleDestroyed(DamageSource damageSource, ServerLevel level, Entity p_entity) {
 		//noop
 	}
 

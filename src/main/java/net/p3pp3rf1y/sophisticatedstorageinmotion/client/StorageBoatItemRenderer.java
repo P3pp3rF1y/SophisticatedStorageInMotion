@@ -1,24 +1,34 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.jarjar.nio.util.Lazy;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.minecraft.world.level.block.state.properties.WoodType;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 
-public class StorageBoatItemRenderer extends MovingStorageItemRenderer<StorageBoat> {
-	public static final Lazy<StorageBoatItemRenderer> STORAGE_BOAT_ITEM_RENDERER = Lazy.of(() -> new StorageBoatItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
-	public StorageBoatItemRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet) {
-		super(blockEntityRenderDispatcher, entityModelSet);
+import javax.annotation.Nullable;
+
+public class StorageBoatItemRenderer extends MovingStorageItemRenderer<StorageBoat, StorageBoatItemRenderer.BoatRenderData> {
+	@Nullable
+	@Override
+	public BoatRenderData extractArgument(ItemStack itemStack) {
+		ItemStack storageItem = MovingStorageItem.getStorageItem(itemStack);
+		if (storageItem == ItemStack.EMPTY) {
+			return new BoatRenderData(ItemStack.EMPTY, WoodType.ACACIA);
+		}
+
+		return new BoatRenderData(storageItem, StorageBoatItem.getWoodType(itemStack));
 	}
 
 	@Override
-	protected void setMovingStoragePropertiesFromStack(StorageBoat movingStorage, ItemStack stack) {
-		movingStorage.setVariant(StorageBoatItem.getBoatType(stack));
+	protected void setMovingStoragePropertiesFromData(StorageBoat movingStorage, BoatRenderData data) {
+		if (data != null) {
+			movingStorage.setWoodType(data.woodType());
+		}
 	}
 
 	@Override
@@ -26,12 +36,30 @@ public class StorageBoatItemRenderer extends MovingStorageItemRenderer<StorageBo
 		return new StorageBoat(mc.level);
 	}
 
-	public static IClientItemExtensions getItemRenderProperties() {
-		return new IClientItemExtensions() {
-			@Override
-			public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-				return STORAGE_BOAT_ITEM_RENDERER.get();
-			}
-		};
+	public static class BoatRenderData extends MovingStorageItemRenderer.RenderData {
+		private final WoodType woodType;
+		public BoatRenderData(ItemStack storageItem, WoodType woodType) {
+			super(storageItem);
+			this.woodType = woodType;
+		}
+
+		public WoodType woodType() {
+			return woodType;
+		}
+	}
+
+	public static class Unbaked implements SpecialModelRenderer.Unbaked {
+		public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
+
+		@Nullable
+		@Override
+		public SpecialModelRenderer<?> bake(EntityModelSet entityModelSet) {
+			return new StorageBoatItemRenderer();
+		}
+
+		@Override
+		public MapCodec<? extends Unbaked> type() {
+			return MAP_CODEC;
+		}
 	}
 }

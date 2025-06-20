@@ -28,7 +28,7 @@ public record MovingStorageContentsPayload(UUID storageUuid, CompoundTag content
 	}
 
 	public static void handlePayload(MovingStorageContentsPayload payload, IPayloadContext context) {
-		MovingStorageData.get(payload.storageUuid).setContents(payload.storageUuid, payload.contents);
+		MovingStorageData.get().setContentsClient(payload.storageUuid, payload.contents);
 		ClientStorageContentsTooltipBase.refreshContents();
 	}
 }

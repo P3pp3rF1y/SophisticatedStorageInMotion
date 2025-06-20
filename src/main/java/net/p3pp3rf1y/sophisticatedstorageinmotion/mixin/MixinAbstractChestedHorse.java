@@ -5,12 +5,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ArmorSlot;
 import net.minecraft.world.inventory.Slot;
@@ -41,6 +44,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Shadow
 	public abstract boolean hasChest();
 
+	private static final ResourceLocation SADDLE_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot/saddle");
+	private static final ResourceLocation LLAMA_ARMOR_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot/llama_armor");
 	private static final String STORAGE_HOLDER_TAG = "storageHolder";
 	@Unique
 	private final EntityStorageHolder<MixinAbstractChestedHorse> entityStorageHolder = new EntityStorageHolder<>(this);
@@ -60,7 +65,7 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	}
 
 	@Inject(method = "dropEquipment", at = @At("TAIL"))
-	private void dropStorageAndItsContents(CallbackInfo ci) {
+	private void dropStorageAndItsContents(ServerLevel serverLevel, CallbackInfo ci) {
 		entityStorageHolder.onDestroy();
 	}
 
@@ -87,7 +92,7 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 			playChestEquipsSound();
 			stack.consume(1, player);
 			cir.cancel();
-			cir.setReturnValue(InteractionResult.sidedSuccess(level().isClientSide));
+			cir.setReturnValue(InteractionResult.SUCCESS);
 		} else if (isTamed() && hasStorageItem() && stack.is(Items.CHEST)) {
 			cir.cancel();
 			cir.setReturnValue(InteractionResult.FAIL);
@@ -97,15 +102,21 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	public List<Slot> instantiateExtraSlots() {
 		if (canUseSlot(EquipmentSlot.BODY)) {
-			return List.of(new ArmorSlot(getBodyArmorAccess(), this, EquipmentSlot.BODY, 0, 8, 36, null) {
+			return List.of(new ArmorSlot(getBodyArmorAccess(), this, EquipmentSlot.BODY, 0, 8, 36, ((Object)this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
 				public boolean mayPlace(ItemStack stack) {
-					return isBodyArmorItem(stack);
+					return isEquippableInSlot(stack, EquipmentSlot.BODY);
 				}
 			});
 		} else if (isSaddleable()) {
 			return List.of(new Slot(getInventory(), 0, 0, 0) {
+				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return stack.is(Items.SADDLE) && !this.hasItem() && isSaddleable();
+					return stack.is(Items.SADDLE) && !hasItem() && isSaddleable();
+				}
+
+				@Override
+				public ResourceLocation getNoItemIcon() {
+					return SADDLE_SLOT_SPRITE;
 				}
 			});
 		}

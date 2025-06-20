@@ -42,9 +42,9 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 	public void detectSettingsChangeAndReload() {
 		if (player.level().isClientSide) {
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
-				MovingStorageData storage = MovingStorageData.get(uuid);
+				MovingStorageData storage = MovingStorageData.get();
 				if (storage.removeUpdatedStorageSettingsFlag(uuid)) {
-					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents().getCompound(MovingStorageWrapper.SETTINGS_TAG));
+					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).getCompound(MovingStorageWrapper.SETTINGS_TAG));
 				}
 			});
 		}

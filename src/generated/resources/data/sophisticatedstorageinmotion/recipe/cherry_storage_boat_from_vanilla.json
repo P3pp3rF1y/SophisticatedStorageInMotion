@@ -2,16 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:cherry_chest_boat"
-    },
-    {
-      "item": "minecraft:redstone_torch"
-    }
+    "minecraft:cherry_chest_boat",
+    "minecraft:redstone_torch"
   ],
   "result": {
     "components": {
-      "sophisticatedstorageinmotion:boat_type": "cherry",
+      "sophisticatedstorage:wood_type": "cherry",
       "sophisticatedstorageinmotion:storage_item": {
         "components": {
           "sophisticatedstorage:wood_type": "oak"

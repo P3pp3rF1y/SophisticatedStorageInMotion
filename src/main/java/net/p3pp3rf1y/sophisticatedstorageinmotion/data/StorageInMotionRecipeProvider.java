@@ -3,10 +3,10 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.data;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -26,65 +26,69 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 public class StorageInMotionRecipeProvider extends RecipeProvider {
-	public StorageInMotionRecipeProvider(DataGenerator generator, CompletableFuture<HolderLookup.Provider> registries) {
-		super(generator.getPackOutput(), registries);
+	private final HolderLookup.RegistryLookup<Item> items;
+
+	public StorageInMotionRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
+		super(provider, recipeOutput);
+		items = provider.lookupOrThrow(Registries.ITEM);
 	}
 
 	@Override
-	protected void buildRecipes(RecipeOutput recipeOutput) {
-		SpecialRecipeBuilder.special(UncraftMovingStorageRecipe::new).save(recipeOutput, SophisticatedStorageInMotion.getRegistryName("uncraft_moving_storage"));
+	protected void buildRecipes() {
+		SpecialRecipeBuilder.special(UncraftMovingStorageRecipe::new).save(output, SophisticatedStorageInMotion.getRegistryName("uncraft_moving_storage"));
 
-		ShapelessBasedRecipeBuilder.shapeless(ModItems.STORAGE_MINECART.get(), MovingStorageFromStorageRecipe::new)
+		ShapelessBasedRecipeBuilder.shapeless(items, ModItems.STORAGE_MINECART.get(), MovingStorageFromStorageRecipe::new)
 				.requires(Items.MINECART)
 				.requires(ModBlocks.ALL_STORAGE_TAG)
 				.unlockedBy("has_sophisticated_storage", has(ModBlocks.ALL_STORAGE_TAG))
-				.save(recipeOutput);
+				.save(output);
 
-		addStorageBoatFromStorageRecipes(recipeOutput);
+		addStorageBoatFromStorageRecipes(output);
 
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, MovingStorageItem.createWithStorage(new ItemStack(ModItems.STORAGE_MINECART.get()), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK)))
+		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, MovingStorageItem.createWithStorage(new ItemStack(ModItems.STORAGE_MINECART.get()), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK)))
 				.requires(Items.CHEST_MINECART)
 				.requires(Items.REDSTONE_TORCH)
 				.unlockedBy("has_chest_minecart", has(Items.CHEST_MINECART))
-				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName("chest_minecart_to_storage_minecart"));
+				.save(output, SophisticatedStorageInMotion.getRegistryName("chest_minecart_to_storage_minecart"));
 
-		addVanillaChestBoatConversionRecipes(recipeOutput);
+		addVanillaChestBoatConversionRecipes(output);
 
-		addTierUpgradeRecipes(recipeOutput, ModItems.STORAGE_MINECART);
-		addTierUpgradeRecipes(recipeOutput, ModItems.STORAGE_BOAT);
+		addTierUpgradeRecipes(output, ModItems.STORAGE_MINECART);
+		addTierUpgradeRecipes(output, ModItems.STORAGE_BOAT);
 	}
 
 	private void addVanillaChestBoatConversionRecipes(RecipeOutput recipeOutput) {
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.OAK, Items.OAK_CHEST_BOAT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.SPRUCE, Items.SPRUCE_CHEST_BOAT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.BIRCH, Items.BIRCH_CHEST_BOAT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.JUNGLE, Items.JUNGLE_CHEST_BOAT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.ACACIA, Items.ACACIA_CHEST_BOAT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.DARK_OAK, Items.DARK_OAK_CHEST_BOAT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.MANGROVE, Items.MANGROVE_CHEST_BOAT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.BAMBOO, Items.BAMBOO_CHEST_RAFT);
-		addVanillaChestBoatConversionRecipe(recipeOutput, Boat.Type.CHERRY, Items.CHERRY_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.OAK, Items.OAK_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.SPRUCE, Items.SPRUCE_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.BIRCH, Items.BIRCH_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.JUNGLE, Items.JUNGLE_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.ACACIA, Items.ACACIA_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.DARK_OAK, Items.DARK_OAK_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.MANGROVE, Items.MANGROVE_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.BAMBOO, Items.BAMBOO_CHEST_RAFT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.CHERRY, Items.CHERRY_CHEST_BOAT);
+		addVanillaChestBoatConversionRecipe(recipeOutput, WoodType.PALE_OAK, Items.PALE_OAK_CHEST_BOAT);
 	}
 
-	private static void addVanillaChestBoatConversionRecipe(RecipeOutput recipeOutput, Boat.Type boatType, Item vanillaChestBoat) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, MovingStorageItem.createWithStorage(StorageBoatItem.setBoatType(new ItemStack(ModItems.STORAGE_BOAT.get()), boatType), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK)))
+	private void addVanillaChestBoatConversionRecipe(RecipeOutput recipeOutput, WoodType woodType, Item vanillaChestBoat) {
+		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, MovingStorageItem.createWithStorage(StorageBoatItem.setWoodType(new ItemStack(ModItems.STORAGE_BOAT.get()), woodType), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK)))
 				.requires(vanillaChestBoat)
 				.requires(Items.REDSTONE_TORCH)
 				.unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(vanillaChestBoat).getPath(), has(vanillaChestBoat))
-				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(boatType.getName() + "_storage_" + (boatType.isRaft() ? "raft" : "boat") + "_from_vanilla"));
+				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(woodType.name() + "_storage_" + (woodType == WoodType.BAMBOO ? "raft" : "boat") + "_from_vanilla"));
 	}
 
 	private void addStorageBoatFromStorageRecipes(RecipeOutput recipeOutput) {
-		StorageBoatItem.SUPPORTED_BOAT_TYPES.forEach((boatType, baseBoat) -> {
-			ShapelessBasedRecipeBuilder.shapeless(StorageBoatItem.setBoatType(new ItemStack(ModItems.STORAGE_BOAT.get()), boatType), MovingStorageFromStorageRecipe::new)
+		StorageBoatItem.SUPPORTED_WOOD_TYPES.forEach((woodType, baseBoat) -> {
+			ShapelessBasedRecipeBuilder.shapeless(items, StorageBoatItem.setWoodType(new ItemStack(ModItems.STORAGE_BOAT.get()), woodType), MovingStorageFromStorageRecipe::new)
 					.requires(baseBoat.get())
 					.requires(ModBlocks.ALL_STORAGE_TAG)
 					.unlockedBy("has_sophisticated_storage", has(ModBlocks.ALL_STORAGE_TAG))
-					.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(boatType.getName() + "_storage_" + (boatType.isRaft() ? "raft" : "boat")));
+					.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(woodType.name() + "_storage_" + (woodType == WoodType.BAMBOO ? "raft" : "boat")));
 		});
 	}
 
-	private static void addTierUpgradeRecipes(RecipeOutput recipeOutput, Holder<Item> movingStorageItem) {
+	private void addTierUpgradeRecipes(RecipeOutput recipeOutput, Holder<Item> movingStorageItem) {
 		addMovingStorageTierUpgradeRecipe(recipeOutput, movingStorageItem, ModBlocks.CHEST_ITEM.get(), ModBlocks.COPPER_CHEST_ITEM.get(), Tags.Items.INGOTS_COPPER);
 		addMovingStorageTierUpgradeRecipe(recipeOutput, movingStorageItem, ModBlocks.BARREL_ITEM.get(), ModBlocks.COPPER_BARREL_ITEM.get(), Tags.Items.INGOTS_COPPER);
 		addMovingStorageTierUpgradeRecipe(recipeOutput, movingStorageItem, ModBlocks.SHULKER_BOX_ITEM.get(), ModBlocks.COPPER_SHULKER_BOX_ITEM.get(), Tags.Items.INGOTS_COPPER);
@@ -134,29 +138,46 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 		addMovingStorageDiamondToNetheriteTierUpgradeRecipe(recipeOutput, movingStorageItem, ModBlocks.LIMITED_DIAMOND_BARREL_4_ITEM.get(), ModBlocks.LIMITED_NETHERITE_BARREL_4_ITEM.get());
 	}
 
-	private static void addCheaperMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material) {
+	private void addCheaperMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material) {
 		addMovingStorageTierUpgradeRecipe(recipeOutput, movingStorageItem, storageItem, upgradedStorageItem, material, builder -> builder.pattern(" M ").pattern("MSM").pattern(" M "));
 	}
 
-	private static void addMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material) {
+	private void addMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material) {
 		addMovingStorageTierUpgradeRecipe(recipeOutput, movingStorageItem, storageItem, upgradedStorageItem, material, builder -> builder.pattern("MMM").pattern("MSM").pattern("MMM"));
 	}
 
-	private static void addMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material, UnaryOperator<ShapedRecipeBuilder> patternInit) {
+	private void addMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material, UnaryOperator<ShapedRecipeBuilder> patternInit) {
 		String storageItemPath = BuiltInRegistries.ITEM.getKey(storageItem).getPath();
-		patternInit.apply(ShapeBasedRecipeBuilder.shaped(MovingStorageItem.createWithStorage(new ItemStack(movingStorageItem.value()), new ItemStack(upgradedStorageItem)), MovingStorageTierUpgradeShapedRecipe::new))
+		patternInit.apply(ShapeBasedRecipeBuilder.shaped(items, MovingStorageItem.createWithStorage(new ItemStack(movingStorageItem.value()), new ItemStack(upgradedStorageItem)), MovingStorageTierUpgradeShapedRecipe::new))
 				.define('S', MovingStorageIngredient.of(movingStorageItem, storageItem).toVanilla())
 				.define('M', material)
 				.unlockedBy("has_" + storageItemPath, has(storageItem))
 				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(movingStorageItem.getKey().location().getPath() + "_with_" + storageItemPath + "_to_" + BuiltInRegistries.ITEM.getKey(upgradedStorageItem).getPath()));
 	}
 
-	private static void addMovingStorageDiamondToNetheriteTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem) {
+	private void addMovingStorageDiamondToNetheriteTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem) {
 		String storageItemPath = BuiltInRegistries.ITEM.getKey(storageItem).getPath();
-		ShapelessBasedRecipeBuilder.shapeless(MovingStorageItem.createWithStorage(new ItemStack(movingStorageItem.value()), new ItemStack(upgradedStorageItem)), MovingStorageTierUpgradeShapelessRecipe::new)
+		ShapelessBasedRecipeBuilder.shapeless(items, MovingStorageItem.createWithStorage(new ItemStack(movingStorageItem.value()), new ItemStack(upgradedStorageItem)), MovingStorageTierUpgradeShapelessRecipe::new)
 				.requires(MovingStorageIngredient.of(movingStorageItem, storageItem).toVanilla())
 				.requires(Tags.Items.INGOTS_NETHERITE)
 				.unlockedBy("has_" + storageItemPath, has(storageItem))
 				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(movingStorageItem.getKey().location().getPath() + "_with_" + storageItemPath + "_to_" + BuiltInRegistries.ITEM.getKey(upgradedStorageItem).getPath()));
+	}
+
+	public static class Runner extends RecipeProvider.Runner {
+
+		protected Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
+			super(packOutput, registries);
+		}
+
+		@Override
+		protected RecipeProvider createRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
+			return new StorageInMotionRecipeProvider(provider, recipeOutput);
+		}
+
+		@Override
+		public String getName() {
+			return "Sophisticated Storage In Motion Recipes";
+		}
 	}
 }

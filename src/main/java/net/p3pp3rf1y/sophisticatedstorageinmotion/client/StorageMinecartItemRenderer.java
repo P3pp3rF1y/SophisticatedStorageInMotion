@@ -1,37 +1,49 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.jarjar.nio.util.Lazy;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
-public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<StorageMinecart> {
-	public static final Lazy<StorageMinecartItemRenderer> STORAGE_MINECART_ITEM_RENDERER = Lazy.of(() -> new StorageMinecartItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
+import javax.annotation.Nullable;
 
-	public StorageMinecartItemRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet) {
-		super(blockEntityRenderDispatcher, entityModelSet);
+public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<StorageMinecart, MovingStorageItemRenderer.RenderData> {
+	@Nullable
+	@Override
+	public RenderData extractArgument(ItemStack itemStack) {
+		ItemStack storageItem = MovingStorageItem.getStorageItem(itemStack);
+		if (storageItem == ItemStack.EMPTY) {
+			return new RenderData(storageItem);
+		}
+
+		return new RenderData(storageItem);
 	}
 
 	@Override
-	protected void setMovingStoragePropertiesFromStack(StorageMinecart movingStorage, ItemStack stack) {
+	protected void setMovingStoragePropertiesFromData(StorageMinecart movingStorage, RenderData data) {
 		//noop
-	}
-
-	public static IClientItemExtensions getItemRenderProperties() {
-		return new IClientItemExtensions() {
-			@Override
-			public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-				return STORAGE_MINECART_ITEM_RENDERER.get();
-			}
-		};
 	}
 
 	@Override
 	protected StorageMinecart instantiateMovingStorage(Minecraft mc) {
 		return new StorageMinecart(mc.level);
+	}
+
+	public static class Unbaked implements SpecialModelRenderer.Unbaked {
+		public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
+
+		@Nullable
+		@Override
+		public SpecialModelRenderer<?> bake(EntityModelSet entityModelSet) {
+			return new StorageMinecartItemRenderer();
+		}
+
+		@Override
+		public MapCodec<? extends Unbaked> type() {
+			return MAP_CODEC;
+		}
 	}
 }

@@ -8,6 +8,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,7 +45,6 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessP
 import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 
 public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase {
 	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
@@ -131,13 +131,13 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	@Override
-	protected IStorageSavedData getStorageData(UUID storageId) {
-		return MovingStorageData.get(storageId);
+	protected IStorageSavedData getStorageData() {
+		return MovingStorageData.get();
 	}
 
 	@Override
 	public boolean isLocked(ItemStack stack) {
-		return stack.getOrDefault(ModDataComponents.LOCKED, false);
+		return stack.getOrDefault(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, false);
 	}
 
 	@Nullable
@@ -190,16 +190,17 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	public void onDestroy() {
-		if (entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+		if (entity.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			if (Config.COMMON.dropPacked.get()) {
 				pack();
 			}
 			ItemStack storageItem = entity.getStorageItem();
-			if (!isShulkerBox() && !isPacked(storageItem)) {
+			if (!isShulkerBox() && !isPacked()) {
 				dropAllItems();
 
-				if (storageItem.has(ModCoreDataComponents.STORAGE_UUID)) {
-					MovingStorageData.get(storageItem.get(ModCoreDataComponents.STORAGE_UUID)).removeStorageContents();
+				@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+				if (storageId != null) {
+					MovingStorageData.get().removeStorageContents(storageId);
 				}
 				storageItem = ItemComponentHelper.cleanUpStack(storageItem);
 			}
@@ -207,7 +208,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			if (entity.hasCustomName()) {
 				drop.set(DataComponents.CUSTOM_NAME, entity.getCustomName());
 			}
-			entity.spawnAtLocation(drop);
+			entity.spawnAtLocation(serverLevel, drop);
 		}
 	}
 
@@ -218,11 +219,11 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	@Override
 	protected void setLocked(boolean locked) {
-		entity.getStorageItem().set(ModDataComponents.LOCKED, locked);
+		entity.getStorageItem().set(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, locked);
 	}
 
 	public boolean pack() {
-		if (isShulkerBox() || isPacked(entity.getStorageItem())) {
+		if (isShulkerBox() || isPacked()) {
 			return false;
 		}
 
@@ -234,7 +235,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	public void onPlace() {
-		if (isPacked(entity.getStorageItem())) {
+		if (isPacked()) {
 			ItemStack storageItem = entity.getStorageItem();
 			WoodStorageBlockItem.setPacked(storageItem, false);
 			setStorageItem(storageItem);
@@ -264,22 +265,29 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 		ItemBase packingTapeItem = ModItems.PACKING_TAPE.get();
 		Component packingTapeItemName = packingTapeItem.getName(new ItemStack(packingTapeItem)).copy().withStyle(ChatFormatting.GREEN);
-		player.sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
-				entity.getName().copy().withStyle(ChatFormatting.GREEN),
-				Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED),
-				packingTapeItemName)
-		);
+		if (player.getServer() != null) {
+			player.getServer().sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
+					entity.getName().copy().withStyle(ChatFormatting.GREEN),
+					Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED),
+					packingTapeItemName)
+			);
+		}
+
 		return false;
 	}
 
-	public boolean hurt(DamageSource source, float amount, BiFunction<DamageSource, Float, Boolean> superHurt) {
-		if (canBeHurtByWithFeedback(source) && superHurt.apply(source, amount)) {
+	public boolean hurt(ServerLevel serverLevel, DamageSource source, float amount, IHurtHandler superHurt) {
+		if (canBeHurtByWithFeedback(source) && superHurt.apply(serverLevel, source, amount)) {
 			if (source.getEntity() instanceof Player player && player.getAbilities().instabuild && entity.isRemoved()) {
 				dropAllItems();
 			}
 			return true;
 		}
 		return false;
+	}
+
+	public interface IHurtHandler {
+		boolean apply(ServerLevel serverLevel, DamageSource source, float amount);
 	}
 
 	@Override

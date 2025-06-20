@@ -1,5 +1,7 @@
 {
-  "parent": "builtin/entity",
+  "textures": {
+    "particle": "minecraft:missingno"
+  },
   "display": {
     "gui": {
       "rotation": [ 30, 45, 0 ],

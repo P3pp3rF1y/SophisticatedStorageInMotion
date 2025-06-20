@@ -18,7 +18,7 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 	private final ShapedRecipe compose;
 
 	public MovingStorageTierUpgradeShapedRecipe(ShapedRecipe compose) {
-		super(compose.getGroup(), compose.category(), compose.pattern, compose.result);
+		super(compose.group(), compose.category(), compose.pattern, compose.result);
 		this.compose = compose;
 	}
 
@@ -33,10 +33,10 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
 			ItemStack upgradedStorageItem = MovingStorageItem.getStorageItem(upgradedMovingStorage);
-			upgradedStorageItem.applyComponents(originalStorageItem.getComponents());
+			upgradedStorageItem.applyComponents(originalStorageItem.getComponentsPatch());
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, MovingStorageWrapper.getDefaultNumberOfUpgradeSlots(upgradedStorageItem));
-			upgradedMovingStorage.applyComponents(originalMovingStorage.getComponents());
+			upgradedMovingStorage.applyComponents(originalMovingStorage.getComponentsPatch());
 			MovingStorageItem.setStorageItem(upgradedMovingStorage, upgradedStorageItem);
 		});
 		return upgradedMovingStorage;
@@ -59,7 +59,7 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<MovingStorageTierUpgradeShapedRecipe> getSerializer() {
 		return ModItems.MOVING_STORAGE_TIER_UPGRADE_SHAPED_RECIPE_SERIALIZER.get();
 	}
 

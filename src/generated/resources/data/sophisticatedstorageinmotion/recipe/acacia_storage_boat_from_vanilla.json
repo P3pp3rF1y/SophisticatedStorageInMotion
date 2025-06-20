@@ -2,16 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:acacia_chest_boat"
-    },
-    {
-      "item": "minecraft:redstone_torch"
-    }
+    "minecraft:acacia_chest_boat",
+    "minecraft:redstone_torch"
   ],
   "result": {
     "components": {
-      "sophisticatedstorageinmotion:boat_type": "acacia",
+      "sophisticatedstorage:wood_type": "acacia",
       "sophisticatedstorageinmotion:storage_item": {
         "components": {
           "sophisticatedstorage:wood_type": "oak"

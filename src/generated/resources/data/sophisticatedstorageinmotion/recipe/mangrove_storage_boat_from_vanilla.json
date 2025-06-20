@@ -2,16 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:mangrove_chest_boat"
-    },
-    {
-      "item": "minecraft:redstone_torch"
-    }
+    "minecraft:mangrove_chest_boat",
+    "minecraft:redstone_torch"
   ],
   "result": {
     "components": {
-      "sophisticatedstorageinmotion:boat_type": "mangrove",
+      "sophisticatedstorage:wood_type": "mangrove",
       "sophisticatedstorageinmotion:storage_item": {
         "components": {
           "sophisticatedstorage:wood_type": "oak"

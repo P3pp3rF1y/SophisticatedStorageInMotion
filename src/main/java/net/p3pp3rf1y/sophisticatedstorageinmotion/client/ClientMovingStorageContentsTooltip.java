@@ -22,7 +22,7 @@ public class ClientMovingStorageContentsTooltip extends ClientStorageContentsToo
 	}
 
 	@Override
-	public void renderImage(Font font, int leftX, int topY, GuiGraphics guiGraphics) {
+	public void renderImage(Font font, int leftX, int topY, int width, int height, GuiGraphics guiGraphics) {
 		renderTooltip(MovingStorageItem.getMovingStorageWrapper(movingStorage), font, leftX, topY, guiGraphics);
 	}
 

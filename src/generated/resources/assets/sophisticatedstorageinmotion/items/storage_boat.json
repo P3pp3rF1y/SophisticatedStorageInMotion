@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "sophisticatedstorageinmotion:item/storage_boat",
+    "model": {
+      "type": "sophisticatedstorageinmotion:storage_boat"
+    }
+  }
+}

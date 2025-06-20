@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiCraftingContainerTransferHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiRecipeDisplayGenerator;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiSettingsGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiStorageGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
@@ -55,10 +56,10 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
 		// Add Storage subtype interpreters as well
 		subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
+		ReiRecipeDisplayGenerator generator = new ReiRecipeDisplayGenerator(registry);
 
-		AssembleRecipesMaker.getShapelessCraftingRecipes(stack -> getSubtypeInterpreter(subtypeInterpreters, stack)).forEach(registry::add);
-		MovingStorageTierUpgradeRecipesMaker.getShapedCraftingRecipes(stack -> getSubtypeInterpreter(subtypeInterpreters, stack)).forEach(registry::add);
-		MovingStorageTierUpgradeRecipesMaker.getShapelessCraftingRecipes(stack -> getSubtypeInterpreter(subtypeInterpreters, stack)).forEach(registry::add);
+		AssembleRecipesMaker.addRecipes(generator, stack -> getSubtypeInterpreter(subtypeInterpreters, stack));
+		MovingStorageTierUpgradeRecipesMaker.addRecipes(generator, stack -> getSubtypeInterpreter(subtypeInterpreters, stack));
 	}
 
 	@Override

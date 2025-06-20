@@ -129,9 +129,9 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 	public boolean detectSettingsChangeAndReload() {
 		if (player.level().isClientSide) {
 			return storageWrapper.getContentsUuid().map(uuid -> {
-				MovingStorageData storage = MovingStorageData.get(uuid);
+				MovingStorageData storage = MovingStorageData.get();
 				if (storage.removeUpdatedStorageSettingsFlag(uuid)) {
-					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents().getCompound(MovingStorageWrapper.SETTINGS_TAG));
+					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).getCompound(MovingStorageWrapper.SETTINGS_TAG));
 					return true;
 				}
 				return false;
@@ -142,7 +142,7 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 
 	@Override
 	public boolean stillValid(Player player) {
-		return getStorageEntity().map(se -> player.distanceToSqr(se.position()) <= 64.0D).orElse(false); //TODO if packing is allowed check if not packed here
+		return getStorageEntity().map(se -> player.distanceToSqr(se.position()) <= 64.0D).orElse(false);
 	}
 
 	@Override

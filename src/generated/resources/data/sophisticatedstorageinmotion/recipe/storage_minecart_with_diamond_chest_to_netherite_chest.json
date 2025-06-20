@@ -9,13 +9,11 @@
   "category": "misc",
   "ingredients": [
     {
-      "type": "sophisticatedstorageinmotion:moving_storage",
+      "neoforge:ingredient_type": "sophisticatedstorageinmotion:moving_storage",
       "moving_storage_item": "sophisticatedstorageinmotion:storage_minecart",
       "storage_item": "sophisticatedstorage:diamond_chest"
     },
-    {
-      "tag": "c:ingots/netherite"
-    }
+    "#c:ingots/netherite"
   ],
   "result": {
     "components": {

@@ -5,6 +5,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.p3pp3rf1y.sophisticatedcore.crafting.CustomShapelessRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -14,11 +15,11 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.Optional;
 
-public class MovingStorageTierUpgradeShapelessRecipe extends ShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
+public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
 	private final ShapelessRecipe compose;
 
 	public MovingStorageTierUpgradeShapelessRecipe(ShapelessRecipe compose) {
-		super(compose.getGroup(), compose.category(), compose.result, compose.getIngredients());
+		super(compose.group(), compose.category(), compose.result, compose.ingredients);
 		this.compose = compose;
 	}
 
@@ -59,7 +60,7 @@ public class MovingStorageTierUpgradeShapelessRecipe extends ShapelessRecipe imp
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<MovingStorageTierUpgradeShapelessRecipe> getSerializer() {
 		return ModItems.MOVING_STORAGE_TIER_UPGRADE_SHAPELESS_RECIPE_SERIALIZER.get();
 	}
 

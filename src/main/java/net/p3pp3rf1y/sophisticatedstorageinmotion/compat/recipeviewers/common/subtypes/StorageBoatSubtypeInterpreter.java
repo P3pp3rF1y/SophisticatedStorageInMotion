@@ -8,6 +8,6 @@ import java.util.Optional;
 public class StorageBoatSubtypeInterpreter extends MovingStorageSubtypeInterpreter {
 	public StorageBoatSubtypeInterpreter() {
 		super();
-		addOptionalProperty(boatStack -> Optional.of(StorageBoatItem.getBoatType(boatStack)), "boatType", boatType -> boatType.name().toLowerCase(Locale.ROOT));
+		addOptionalProperty(boatStack -> Optional.of(StorageBoatItem.getWoodType(boatStack)), "boatType", boatType -> boatType.name().toLowerCase(Locale.ROOT));
 	}
 }

@@ -7,6 +7,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
+import net.p3pp3rf1y.sophisticatedcore.crafting.CustomShapelessRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockBase;
@@ -16,11 +17,11 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.Optional;
 
-public class MovingStorageFromStorageRecipe extends ShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
+public class MovingStorageFromStorageRecipe extends CustomShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
 	private final ShapelessRecipe compose;
 
 	public MovingStorageFromStorageRecipe(ShapelessRecipe compose) {
-		super(compose.getGroup(), compose.category(), compose.result, compose.getIngredients());
+		super(compose.group(), compose.category(), compose.result, compose.ingredients);
 		this.compose = compose;
 	}
 
@@ -57,7 +58,7 @@ public class MovingStorageFromStorageRecipe extends ShapelessRecipe implements I
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<MovingStorageFromStorageRecipe> getSerializer() {
 		return ModItems.MOVING_STORAGE_FROM_STORAGE_SERIALIZER.get();
 	}
 

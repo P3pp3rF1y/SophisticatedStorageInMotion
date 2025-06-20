@@ -35,10 +35,13 @@ public class UncraftMovingStorageRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean matches(CraftingInput inv, Level level) {
+	public boolean matches(CraftingInput input, Level level) {
+		if (input.isEmpty()) {
+			return false;
+		}
 		boolean hasMovingStorage = false;
-		for (int slot = 0; slot < inv.size(); slot++) {
-			ItemStack slotStack = inv.getItem(slot);
+		for (int slot = 0; slot < input.size(); slot++) {
+			ItemStack slotStack = input.getItem(slot);
 			if (!hasMovingStorage && slotStack.getItem() instanceof MovingStorageItem) {
 				hasMovingStorage = true;
 			} else if (!slotStack.isEmpty()) {
@@ -54,11 +57,6 @@ public class UncraftMovingStorageRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int width, int height) {
-		return width * height >= 1;
-	}
-
-	@Override
 	public NonNullList<ItemStack> getRemainingItems(CraftingInput inv) {
 		NonNullList<ItemStack> remainingItems = NonNullList.withSize(inv.size(), ItemStack.EMPTY);
 		for (int slot = 0; slot < inv.size(); slot++) {
@@ -71,7 +69,7 @@ public class UncraftMovingStorageRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<UncraftMovingStorageRecipe> getSerializer() {
 		return ModItems.UNCRAFT_MOVING_STORAGE_SERIALIZER.get();
 	}
 }

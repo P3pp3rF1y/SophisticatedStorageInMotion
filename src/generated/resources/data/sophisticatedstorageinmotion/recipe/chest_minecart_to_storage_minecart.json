@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
   "ingredients": [
-    {
-      "item": "minecraft:chest_minecart"
-    },
-    {
-      "item": "minecraft:redstone_torch"
-    }
+    "minecraft:chest_minecart",
+    "minecraft:redstone_torch"
   ],
   "result": {
     "components": {
