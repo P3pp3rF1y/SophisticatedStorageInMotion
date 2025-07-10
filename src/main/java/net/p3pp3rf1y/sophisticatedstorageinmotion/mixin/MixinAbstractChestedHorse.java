@@ -7,6 +7,8 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -79,7 +81,7 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
 	private void readStorageHolderSaveData(CompoundTag tag, CallbackInfo ci) {
 		if (tag.contains(STORAGE_HOLDER_TAG)) {
-			entityStorageHolder.readData(level().registryAccess(), tag.getCompound(STORAGE_HOLDER_TAG));
+			entityStorageHolder.readData(level().registryAccess(), tag.getCompoundOrEmpty(STORAGE_HOLDER_TAG));
 		}
 	}
 
@@ -101,22 +103,19 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public List<Slot> instantiateExtraSlots() {
-		if (canUseSlot(EquipmentSlot.BODY)) {
-			return List.of(new ArmorSlot(getBodyArmorAccess(), this, EquipmentSlot.BODY, 0, 8, 36, ((Object)this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
+		if (canUseSlot(EquipmentSlot.BODY)&& (getType().is(EntityTypeTags.CAN_WEAR_HORSE_ARMOR) || ((Object) this) instanceof Llama)) {
+			Container container = createEquipmentSlotContainer(EquipmentSlot.BODY);
+			return List.of(new ArmorSlot(container, this, EquipmentSlot.BODY, 0, 8, 36, ((Object)this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
 				public boolean mayPlace(ItemStack stack) {
 					return isEquippableInSlot(stack, EquipmentSlot.BODY);
 				}
 			});
-		} else if (isSaddleable()) {
-			return List.of(new Slot(getInventory(), 0, 0, 0) {
+		} else if (canUseSlot(EquipmentSlot.SADDLE) && getType().is(EntityTypeTags.CAN_EQUIP_SADDLE)) {
+			Container container = createEquipmentSlotContainer(EquipmentSlot.SADDLE);
+			return List.of(new ArmorSlot(container, this, EquipmentSlot.SADDLE, 0, 0, 0, SADDLE_SLOT_SPRITE) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return stack.is(Items.SADDLE) && !hasItem() && isSaddleable();
-				}
-
-				@Override
-				public ResourceLocation getNoItemIcon() {
-					return SADDLE_SLOT_SPRITE;
+					return stack.is(Items.SADDLE) && !hasItem() && canUseSlot(EquipmentSlot.SADDLE) && getType().is(EntityTypeTags.CAN_EQUIP_SADDLE);
 				}
 			});
 		}

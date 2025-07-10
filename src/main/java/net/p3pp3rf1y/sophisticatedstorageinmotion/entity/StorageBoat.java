@@ -131,7 +131,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	@Override
 	protected void readAdditionalSaveData(CompoundTag tag) {
 		super.readAdditionalSaveData(tag);
-		entityStorageHolder.readData(level().registryAccess(), tag.getCompound("storageHolder"));
+		entityStorageHolder.readData(level().registryAccess(), tag.getCompoundOrEmpty("storageHolder"));
 		if (tag.contains("woodType")) {
 			Tag woodTag = tag.get("woodType");
 			WoodType.CODEC.parse(NbtOps.INSTANCE, woodTag).ifSuccess(woodType -> entityData.set(DATA_WOOD_TYPE, woodType));
@@ -218,7 +218,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public void remove(RemovalReason pReason) {
-		//overriden to prevent default boat logic from using container overrides to drop items when in some cases they are not supposed to be dropped
+		//overridden to prevent default boat logic from using container overrides to drop items when in some cases they are not supposed to be dropped
 		setRemoved(pReason);
 	}
 
@@ -245,10 +245,8 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	@Override
 	public void readChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
 		clearItemStacks();
-		if (tag.contains("LootTable", 8)) {
-			setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
-			setContainerLootTableSeed(tag.getLong("LootTableSeed"));
-		}
+		tag.getString("LootTable").ifPresent(lootTable -> setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(lootTable))));
+		tag.getLong("LootTableSeed").ifPresent(this::setContainerLootTableSeed);
 	}
 
 	@Override

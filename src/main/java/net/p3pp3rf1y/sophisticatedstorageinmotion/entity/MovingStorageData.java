@@ -1,16 +1,15 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
-import net.minecraft.core.HolderLookup;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -25,12 +24,22 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import java.util.*;
 
 public class MovingStorageData extends SavedData implements IStorageSavedData {
-	private static final String SAVED_DATA_NAME = SophisticatedStorageInMotion.MOD_ID;
-	private static final String STORAGE_CONTENTS_TAG = "storageContents";
+	private static final SavedDataType<MovingStorageData> TYPE = new SavedDataType<>(SophisticatedStorageInMotion.MOD_ID, MovingStorageData::new,
+			RecordCodecBuilder.create(
+					builder -> builder.group(
+							Codec.unboundedMap(Codec.STRING.xmap(UUID::fromString, UUID::toString), CompoundTag.CODEC)
+									.fieldOf("storageContents").forGetter(data -> data.movingStorageContents)
+					).apply(builder, MovingStorageData::new)
+			));
+
 	private static final MovingStorageData clientStorageCopy = new MovingStorageData();
 
 	private final Map<UUID, CompoundTag> movingStorageContents = new HashMap<>();
 	private final Set<UUID> updatedStorageSettingsFlags = new HashSet<>();
+
+	private MovingStorageData(Map<UUID, CompoundTag> movingStorageContents) {
+		this.movingStorageContents.putAll(movingStorageContents);
+	}
 
 	private MovingStorageData() {
 	}
@@ -42,46 +51,10 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
 				//noinspection ConstantConditions - by this time overworld is loaded
 				DimensionDataStorage storage = overworld.getDataStorage();
-				return storage.computeIfAbsent(new Factory<>(MovingStorageData::new, MovingStorageData::load), SAVED_DATA_NAME);
+				return storage.computeIfAbsent(TYPE);
 			}
 		}
 		return clientStorageCopy;
-	}
-
-	public static MovingStorageData load(CompoundTag nbt, HolderLookup.Provider registries) {
-		MovingStorageData storageData = new MovingStorageData();
-		storageData.readStorageContents(nbt);
-		return storageData;
-	}
-
-	private void readStorageContents(CompoundTag nbt) {
-		movingStorageContents.clear();
-		ListTag list = nbt.getList(STORAGE_CONTENTS_TAG, Tag.TAG_COMPOUND);
-		for (Tag storageNbt : list) {
-			CompoundTag uuidContentsPair = (CompoundTag) storageNbt;
-			UUID uuid = NbtUtils.loadUUID(Objects.requireNonNull(uuidContentsPair.get("uuid")));
-			CompoundTag contents = uuidContentsPair.getCompound("contents");
-			movingStorageContents.put(uuid, contents);
-		}
-	}
-
-	@Override
-	public CompoundTag save(CompoundTag compound, HolderLookup.Provider registries) {
-		CompoundTag ret = new CompoundTag();
-		writeStorageContents(ret);
-		return ret;
-	}
-
-	private void writeStorageContents(CompoundTag ret) {
-		ListTag list = new ListTag();
-		for (Map.Entry<UUID, CompoundTag> entry : movingStorageContents.entrySet()) {
-			CompoundTag uuidContentsPair = new CompoundTag();
-			uuidContentsPair.putUUID("uuid", entry.getKey());
-			uuidContentsPair.put("contents", entry.getValue());
-			list.add(uuidContentsPair);
-		}
-		ret.put(STORAGE_CONTENTS_TAG, list);
-		setDirty();
 	}
 
 	public CompoundTag getContents(UUID storageId) {
@@ -106,7 +79,7 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 	}
 
 	public void setContentsClient(UUID storageId, CompoundTag contents) {
-		for (String key : contents.getAllKeys()) {
+		for (String key : contents.keySet()) {
 			//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
 			getContents(storageId).put(key, contents.get(key));
 

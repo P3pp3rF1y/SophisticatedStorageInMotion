@@ -131,7 +131,7 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 			return storageWrapper.getContentsUuid().map(uuid -> {
 				MovingStorageData storage = MovingStorageData.get();
 				if (storage.removeUpdatedStorageSettingsFlag(uuid)) {
-					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).getCompound(MovingStorageWrapper.SETTINGS_TAG));
+					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).getCompoundOrEmpty(MovingStorageWrapper.SETTINGS_TAG));
 					return true;
 				}
 				return false;

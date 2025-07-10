@@ -111,9 +111,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	public void readData(HolderLookup.Provider registries, CompoundTag tag) {
-		if (tag.contains("storageItem")) {
-			setStorageItem(ItemStack.parseOptional(registries, tag.getCompound("storageItem")));
-		}
+		tag.getCompound("storageItem").flatMap(storageItemTag -> ItemStack.parse(registries, storageItemTag)).ifPresent(this::setStorageItem);
 	}
 
 	private void setRenderBlockEntity(StorageBlockEntity storageBlockEntity) {

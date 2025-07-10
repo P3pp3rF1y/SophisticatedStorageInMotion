@@ -15,6 +15,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedcore.Config;
@@ -114,19 +115,19 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag tooltipFlag) {
-		super.appendHoverText(stack, context, tooltip, tooltipFlag);
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag) {
+		super.appendHoverText(stack, context, tooltipDisplay, tooltipAdder, tooltipFlag);
 		if (tooltipFlag.isAdvanced()) {
 			HolderLookup.Provider registries = context.registries();
 			if (registries != null && MovingStorageWrapper.hasContentsUuid(stack)) {
 				getMovingStorageWrapper(stack).getContentsUuid().ifPresent(uuid -> {
-					tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY));
+					tooltipAdder.accept(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY));
 
 				});
 			}
 		}
 		if (!Screen.hasShiftDown() && MovingStorageWrapper.hasContentsUuid(stack)) {
-			tooltip.add(Component.translatable(
+			tooltipAdder.accept(Component.translatable(
 					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
 					Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
 			).withStyle(ChatFormatting.GRAY));

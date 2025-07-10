@@ -117,7 +117,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	@Override
 	protected void readAdditionalSaveData(CompoundTag tag) {
 		super.readAdditionalSaveData(tag);
-		entityStorageHolder.readData(level().registryAccess(), tag.getCompound("storageHolder"));
+		entityStorageHolder.readData(level().registryAccess(), tag.getCompoundOrEmpty("storageHolder"));
 	}
 
 	@Override
@@ -187,10 +187,8 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	@Override
 	public void readChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
 		clearItemStacks();
-		if (tag.contains("LootTable", 8)) {
-			setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
-			setContainerLootTableSeed(tag.getLong("LootTableSeed"));
-		}
+		tag.getString("LootTable").ifPresent(lootTable -> setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(lootTable))));
+		tag.getLong("LootTableSeed").ifPresent(this::setContainerLootTableSeed);
 	}
 
 	@Override

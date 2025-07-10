@@ -34,7 +34,7 @@ public record RequestMovingStorageInventoryContentsPayload(UUID storageUuid) imp
 		if (!baseContentsTag.contains(StorageWrapper.CONTENTS_TAG)) {
 			return;
 		}
-		CompoundTag contentsTag = baseContentsTag.getCompound(StorageWrapper.CONTENTS_TAG);
+		CompoundTag contentsTag = baseContentsTag.getCompoundOrEmpty(StorageWrapper.CONTENTS_TAG);
 
 		CompoundTag inventoryContents = new CompoundTag();
 		Tag inventoryNbt = contentsTag.get(InventoryHandler.INVENTORY_TAG);

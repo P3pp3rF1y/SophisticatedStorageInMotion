@@ -44,7 +44,7 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				MovingStorageData storage = MovingStorageData.get();
 				if (storage.removeUpdatedStorageSettingsFlag(uuid)) {
-					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).getCompound(MovingStorageWrapper.SETTINGS_TAG));
+					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).getCompoundOrEmpty(MovingStorageWrapper.SETTINGS_TAG));
 				}
 			});
 		}

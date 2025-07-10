@@ -149,12 +149,12 @@ public class CommonEventHandler {
 					StackStorageWrapper shulkerStorageWrapper = StackStorageWrapper.fromStack(level.registryAccess(), storageItem);
 				shulkerStorageWrapper.getContentsUuid().ifPresent(id -> {
 					ItemContentsStorage itemContentsStorage = ItemContentsStorage.get();
-					CompoundTag contentsNbt = itemContentsStorage.getOrCreateStorageContents(id).getCompound(StorageBlockEntity.STORAGE_WRAPPER_TAG);
+					CompoundTag contentsNbt = itemContentsStorage.getOrCreateStorageContents(id).getCompoundOrEmpty(StorageBlockEntity.STORAGE_WRAPPER_TAG);
 					CompoundTag migratedContentsNbt = new CompoundTag();
-					migratedContentsNbt.put(StorageWrapper.CONTENTS_TAG, contentsNbt.getCompound(StorageWrapper.CONTENTS_TAG));
-					migratedContentsNbt.put(StorageWrapper.SETTINGS_TAG, contentsNbt.getCompound(StorageWrapper.SETTINGS_TAG));
+					migratedContentsNbt.put(StorageWrapper.CONTENTS_TAG, contentsNbt.getCompoundOrEmpty(StorageWrapper.CONTENTS_TAG));
+					migratedContentsNbt.put(StorageWrapper.SETTINGS_TAG, contentsNbt.getCompoundOrEmpty(StorageWrapper.SETTINGS_TAG));
 					MovingStorageData.get().setContents(id, migratedContentsNbt);
-					storageItem.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(contentsNbt.getCompound(StorageWrapper.RENDER_INFO_TAG)));
+					storageItem.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(contentsNbt.getCompoundOrEmpty(StorageWrapper.RENDER_INFO_TAG)));
 					MovingStorageItem.setStorageItem(result, storageItem);
 					itemContentsStorage.removeStorageContents(id);
 				});

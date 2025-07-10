@@ -14,12 +14,7 @@ public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<Stora
 	@Nullable
 	@Override
 	public RenderData extractArgument(ItemStack itemStack) {
-		ItemStack storageItem = MovingStorageItem.getStorageItem(itemStack);
-		if (storageItem == ItemStack.EMPTY) {
-			return new RenderData(storageItem);
-		}
-
-		return new RenderData(storageItem);
+		return new RenderData(MovingStorageItem.getStorageItem(itemStack));
 	}
 
 	@Override
