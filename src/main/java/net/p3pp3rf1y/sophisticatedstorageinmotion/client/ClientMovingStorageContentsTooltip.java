@@ -3,8 +3,8 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.RequestMovingStorageInventoryContentsPayload;
@@ -32,6 +32,6 @@ public class ClientMovingStorageContentsTooltip extends ClientStorageContentsToo
 
 	@Override
 	protected void sendInventorySyncRequest(UUID uuid) {
-		PacketDistributor.sendToServer(new RequestMovingStorageInventoryContentsPayload(uuid));
+		ClientPacketDistributor.sendToServer(new RequestMovingStorageInventoryContentsPayload(uuid));
 	}
 }

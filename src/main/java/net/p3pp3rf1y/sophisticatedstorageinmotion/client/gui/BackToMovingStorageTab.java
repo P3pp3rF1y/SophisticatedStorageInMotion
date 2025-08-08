@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui;
 
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.Tab;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.controls.ImageButton;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.*;
@@ -21,6 +21,6 @@ public class BackToMovingStorageTab extends Tab {
 
 	@Override
 	protected void onTabIconClicked(int button) {
-		PacketDistributor.sendToServer(new OpenMovingStorageInventoryPayload(entityId));
+		ClientPacketDistributor.sendToServer(new OpenMovingStorageInventoryPayload(entityId));
 	}
 }

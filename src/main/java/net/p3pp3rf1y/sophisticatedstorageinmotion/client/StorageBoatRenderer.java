@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.AbstractBoatRenderer;
 import net.minecraft.client.renderer.entity.BoatRenderer;
@@ -20,7 +21,7 @@ import org.joml.Quaternionf;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderState> {
+public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderState> implements IMovingStorageRenderer {
 	private final Map<WoodType, AbstractBoatRenderer> baseBoatRenderers;
 	public static final BiConsumer<StorageBoat, BoatRenderState> RENDER_STATE_MODIFIER = (storageBoat, renderState) -> {
 		renderState.setRenderData(ContextKeys.BASE_BOAT_WOOD_TYPE, storageBoat.getWoodType());
@@ -99,5 +100,10 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		poseStack.popPose();
 
 		baseBoatRenderers.get(woodType).render(renderState, poseStack, buffer, packedLight);
+	}
+
+	@Override
+	public ModelPart rootModelPart() {
+		return ((BoatRenderer) baseBoatRenderers.get(WoodType.OAK)).model.root();
 	}
 }

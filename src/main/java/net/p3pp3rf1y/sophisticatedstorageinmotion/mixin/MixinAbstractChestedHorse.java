@@ -1,10 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.mixin;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
@@ -22,12 +18,16 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IStorageItemAttachmentHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -42,17 +42,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Mixin(AbstractChestedHorse.class)
-public abstract class MixinAbstractChestedHorse extends AbstractHorse implements IMovingStorageEntity {
+public abstract class MixinAbstractChestedHorse extends AbstractHorse implements IMovingStorageEntity, IStorageItemAttachmentHolder {
 	@Shadow
 	public abstract boolean hasChest();
 
+
 	private static final ResourceLocation SADDLE_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot/saddle");
 	private static final ResourceLocation LLAMA_ARMOR_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot/llama_armor");
-	private static final String STORAGE_HOLDER_TAG = "storageHolder";
+	private static final String STORAGE_HOLDER = "storageHolder";
 	@Unique
 	private final EntityStorageHolder<MixinAbstractChestedHorse> entityStorageHolder = new EntityStorageHolder<>(this);
-	@Unique
-	private static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(MixinAbstractChestedHorse.class, EntityDataSerializers.ITEM_STACK);
+	private boolean storageItemSynced = false;
 
 	protected MixinAbstractChestedHorse(EntityType<? extends AbstractChestedHorse> pEntityType, Level pLevel) {
 		super(pEntityType, pLevel);
@@ -61,28 +61,21 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Shadow
 	protected abstract void playChestEquipsSound();
 
-	@Inject(method = "defineSynchedData", at = @At("TAIL"))
-	private void defineSynchedStorageItem(SynchedEntityData.Builder builder, CallbackInfo ci) {
-		builder.define(DATA_STORAGE_ITEM, ItemStack.EMPTY);
-	}
-
 	@Inject(method = "dropEquipment", at = @At("TAIL"))
 	private void dropStorageAndItsContents(ServerLevel serverLevel, CallbackInfo ci) {
 		entityStorageHolder.onDestroy();
 	}
 
 	@Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
-	private void addStorageHolderSaveData(CompoundTag tag, CallbackInfo ci) {
+	private void addStorageHolderSaveData(ValueOutput out, CallbackInfo ci) {
 		if (hasStorageItem()) {
-			tag.put(STORAGE_HOLDER_TAG, entityStorageHolder.saveData(level().registryAccess()));
+			out.putChild(STORAGE_HOLDER, entityStorageHolder);
 		}
 	}
 
 	@Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-	private void readStorageHolderSaveData(CompoundTag tag, CallbackInfo ci) {
-		if (tag.contains(STORAGE_HOLDER_TAG)) {
-			entityStorageHolder.readData(level().registryAccess(), tag.getCompoundOrEmpty(STORAGE_HOLDER_TAG));
-		}
+	private void readStorageHolderSaveData(ValueInput in, CallbackInfo ci) {
+		in.child(STORAGE_HOLDER).ifPresent(entityStorageHolder::deserialize);
 	}
 
 	@Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
@@ -103,9 +96,9 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public List<Slot> instantiateExtraSlots() {
-		if (canUseSlot(EquipmentSlot.BODY)&& (getType().is(EntityTypeTags.CAN_WEAR_HORSE_ARMOR) || ((Object) this) instanceof Llama)) {
+		if (canUseSlot(EquipmentSlot.BODY) && (getType().is(EntityTypeTags.CAN_WEAR_HORSE_ARMOR) || ((Object) this) instanceof Llama)) {
 			Container container = createEquipmentSlotContainer(EquipmentSlot.BODY);
-			return List.of(new ArmorSlot(container, this, EquipmentSlot.BODY, 0, 8, 36, ((Object)this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
+			return List.of(new ArmorSlot(container, this, EquipmentSlot.BODY, 0, 8, 36, ((Object) this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
 				public boolean mayPlace(ItemStack stack) {
 					return isEquippableInSlot(stack, EquipmentSlot.BODY);
 				}
@@ -129,12 +122,12 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public ItemStack getStorageItem() {
-		return entityData.get(DATA_STORAGE_ITEM);
+		return getData(ModEntities.STORAGE_ITEM_ATTACHMENT);
 	}
 
 	@Override
 	public void setStorageItem(ItemStack storageItem) {
-		entityData.set(DATA_STORAGE_ITEM, storageItem.copy());
+		setData(ModEntities.STORAGE_ITEM_ATTACHMENT, storageItem);
 	}
 
 	@Override
@@ -152,16 +145,12 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	}
 
 	@Override
-	public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
-		super.onSyncedDataUpdated(key);
-		if (key == DATA_STORAGE_ITEM && level().isClientSide()) {
-			entityStorageHolder.onStorageItemSynced();
-		}
-	}
-
-	@Override
 	public void tick() {
 		super.tick();
+		if (storageItemSynced) {
+			storageItemSynced = false;
+			entityStorageHolder.onStorageItemSynced();
+		}
 		if (hasStorageItem()) {
 			entityStorageHolder.tick(this);
 		}
@@ -173,5 +162,10 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(), getStorageItem().getHoverName());
 		}
 		return super.getTypeName();
+	}
+
+	@Override
+	public void markStorageItemSynced() {
+		storageItemSynced = true;
 	}
 }

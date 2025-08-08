@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControlBase;
@@ -24,7 +24,7 @@ public class MovingStorageSettingsScreen extends StorageSettingsScreen {
 
 	@Override
 	protected void sendStorageInventoryScreenOpenMessage() {
-		PacketDistributor.sendToServer(new OpenMovingStorageInventoryPayload(entityId));
+		ClientPacketDistributor.sendToServer(new OpenMovingStorageInventoryPayload(entityId));
 	}
 
 	public static MovingStorageSettingsScreen constructScreen(SettingsContainerMenu<?> screenContainer, Inventory inventory, Component title) {

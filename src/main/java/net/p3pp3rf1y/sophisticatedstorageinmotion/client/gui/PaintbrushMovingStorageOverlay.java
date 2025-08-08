@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -12,6 +11,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
+import net.neoforged.neoforge.client.gui.GuiLayer;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelMaterial;
 import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
@@ -62,7 +62,7 @@ public class PaintbrushMovingStorageOverlay {
 		}
 	}
 
-	public static final LayeredDraw.Layer HUD_PAINTBRUSH_INFO = (guiGraphics, deltaTracker) -> {
+	public static final GuiLayer HUD_PAINTBRUSH_INFO = (guiGraphics, deltaTracker) -> {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.screen != null) {
 			if (!mc.screen.isPauseScreen()) {

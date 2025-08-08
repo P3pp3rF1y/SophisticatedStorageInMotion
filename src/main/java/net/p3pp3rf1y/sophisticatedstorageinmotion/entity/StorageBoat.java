@@ -1,11 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -28,6 +24,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -122,22 +120,17 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	}
 
 	@Override
-	protected void addAdditionalSaveData(CompoundTag tag) {
-		super.addAdditionalSaveData(tag);
-		tag.put("storageHolder", entityStorageHolder.saveData(level().registryAccess()));
-		WoodType.CODEC.encodeStart(NbtOps.INSTANCE, getWoodType()).ifSuccess(woodTypeTag -> tag.put("woodType", woodTypeTag));
+	protected void addAdditionalSaveData(ValueOutput out) {
+		super.addAdditionalSaveData(out);
+		out.putChild("storageHolder", entityStorageHolder);
+		out.store("woodType", WoodType.CODEC, getWoodType());
 	}
 
 	@Override
-	protected void readAdditionalSaveData(CompoundTag tag) {
-		super.readAdditionalSaveData(tag);
-		entityStorageHolder.readData(level().registryAccess(), tag.getCompoundOrEmpty("storageHolder"));
-		if (tag.contains("woodType")) {
-			Tag woodTag = tag.get("woodType");
-			WoodType.CODEC.parse(NbtOps.INSTANCE, woodTag).ifSuccess(woodType -> entityData.set(DATA_WOOD_TYPE, woodType));
-		} else {
-			entityData.set(DATA_WOOD_TYPE, WoodType.OAK);
-		}
+	protected void readAdditionalSaveData(ValueInput in) {
+		super.readAdditionalSaveData(in);
+		in.child("storageHolder").ifPresent(entityStorageHolder::deserialize);
+		entityData.set(DATA_WOOD_TYPE, in.read("woodType", WoodType.CODEC).orElse(WoodType.OAK));
 	}
 
 	@Override
@@ -233,20 +226,20 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	}
 
 	@Override
-	public void addChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
+	public void addChestVehicleSaveData(ValueOutput out) {
 		getLootTable().ifPresent(lootTable -> {
-			tag.putString("LootTable", lootTable.location().toString());
+			out.putString("LootTable", lootTable.location().toString());
 			if (getContainerLootTableSeed() != 0L) {
-				tag.putLong("LootTableSeed", getContainerLootTableSeed());
+				out.putLong("LootTableSeed", getContainerLootTableSeed());
 			}
 		});
 	}
 
 	@Override
-	public void readChestVehicleSaveData(CompoundTag tag, HolderLookup.Provider levelRegistry) {
+	public void readChestVehicleSaveData(ValueInput in) {
 		clearItemStacks();
-		tag.getString("LootTable").ifPresent(lootTable -> setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(lootTable))));
-		tag.getLong("LootTableSeed").ifPresent(this::setContainerLootTableSeed);
+		in.getString("LootTable").ifPresent(lootTable -> setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(lootTable))));
+		in.getLong("LootTableSeed").ifPresent(this::setContainerLootTableSeed);
 	}
 
 	@Override

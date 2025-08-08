@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.AbstractMinecartRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -14,7 +15,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 
 import java.util.function.BiConsumer;
 
-public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMinecart, MinecartRenderState> {
+public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMinecart, MinecartRenderState> implements IMovingStorageRenderer {
 	public static final BiConsumer<StorageMinecart, MinecartRenderState> RENDER_STATE_MODIFIER = (minecart, minecartRenderState) -> {
 		minecartRenderState.setRenderData(ContextKeys.RENDER_BLOCK_ENTITY, minecart.getStorageHolder().getRenderBlockEntity());
 	};
@@ -44,5 +45,10 @@ public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMin
 
 		StorageBlockRenderer.renderStorageBlock(minecartRenderState.partialTick, poseStack, buffer, packedLight, renderBlockEntity);
 		poseStack.popPose();
+	}
+
+	@Override
+	public ModelPart rootModelPart() {
+		return model.root();
 	}
 }

@@ -149,7 +149,7 @@ public class CommonEventHandler {
 					StackStorageWrapper shulkerStorageWrapper = StackStorageWrapper.fromStack(level.registryAccess(), storageItem);
 				shulkerStorageWrapper.getContentsUuid().ifPresent(id -> {
 					ItemContentsStorage itemContentsStorage = ItemContentsStorage.get();
-					CompoundTag contentsNbt = itemContentsStorage.getOrCreateStorageContents(id).getCompoundOrEmpty(StorageBlockEntity.STORAGE_WRAPPER_TAG);
+					CompoundTag contentsNbt = itemContentsStorage.getOrCreateStorageContents(id).getCompoundOrEmpty(StorageBlockEntity.STORAGE_WRAPPER);
 					CompoundTag migratedContentsNbt = new CompoundTag();
 					migratedContentsNbt.put(StorageWrapper.CONTENTS_TAG, contentsNbt.getCompoundOrEmpty(StorageWrapper.CONTENTS_TAG));
 					migratedContentsNbt.put(StorageWrapper.SETTINGS_TAG, contentsNbt.getCompoundOrEmpty(StorageWrapper.SETTINGS_TAG));

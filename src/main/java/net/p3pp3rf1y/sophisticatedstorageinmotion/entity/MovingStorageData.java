@@ -66,7 +66,7 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 		CompoundTag contents = storageData.getContents(storageId);
 		contents.put(StorageWrapper.RENDER_INFO_TAG, storageItem.getOrDefault(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.EMPTY).copyTag());
 		CompoundTag fullContents = new CompoundTag();
-		fullContents.put(StorageBlockEntity.STORAGE_WRAPPER_TAG, contents);
+		fullContents.put(StorageBlockEntity.STORAGE_WRAPPER, contents);
 
 		ItemContentsStorage.get().setStorageContents(storageId, fullContents);
 

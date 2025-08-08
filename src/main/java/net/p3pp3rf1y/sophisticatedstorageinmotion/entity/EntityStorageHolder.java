@@ -3,9 +3,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
@@ -20,8 +18,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.util.ValueIOSerializable;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -46,7 +47,7 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase {
+public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase implements ValueIOSerializable {
 	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
 	private final T entity;
 
@@ -98,20 +99,6 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
 			LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
 		}
-	}
-
-
-	public CompoundTag saveData(HolderLookup.Provider registries) {
-		CompoundTag ret = new CompoundTag();
-		ItemStack storageItem = entity.getStorageItem();
-		if (!storageItem.isEmpty()) {
-			ret.put("storageItem", storageItem.save(registries, new CompoundTag()));
-		}
-		return ret;
-	}
-
-	public void readData(HolderLookup.Provider registries, CompoundTag tag) {
-		tag.getCompound("storageItem").flatMap(storageItemTag -> ItemStack.parse(registries, storageItemTag)).ifPresent(this::setStorageItem);
 	}
 
 	private void setRenderBlockEntity(StorageBlockEntity storageBlockEntity) {
@@ -282,6 +269,16 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void serialize(ValueOutput out) {
+		out.storeNullable("storageItem", ItemStack.CODEC, entity.getStorageItem());
+	}
+
+	@Override
+	public void deserialize(ValueInput in) {
+		in.read("storageItem", ItemStack.CODEC).ifPresent(this::setStorageItem);
 	}
 
 	public interface IHurtHandler {
