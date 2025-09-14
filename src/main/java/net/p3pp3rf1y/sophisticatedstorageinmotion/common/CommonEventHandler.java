@@ -23,6 +23,7 @@ import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderToolHandler;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
+import net.p3pp3rf1y.sophisticatedstorage.item.PackingTapeItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.PaintbrushItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
@@ -82,7 +83,7 @@ public class CommonEventHandler {
 	private static void onPacked(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
 		ItemStack itemInHand = player.getItemInHand(event.getHand());
-		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || itemInHand.getItem() != ModItems.PACKING_TAPE.get() || Config.COMMON.dropPacked.get()) {
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof PackingTapeItem) || Config.COMMON.dropPacked.get()) {
 			return;
 		}
 
