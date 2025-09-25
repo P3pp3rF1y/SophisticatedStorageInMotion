@@ -10,6 +10,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.data.DataGenerators;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntitiesClient;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
@@ -28,6 +29,7 @@ public class SophisticatedStorageInMotion {
 		ModItems.registerHandlers(modBus);
 		ModEntities.registerHandlers(modBus);
 		CommonEventHandler.registerHandlers();
+		ModCompat.initCompats();
 		if (FMLEnvironment.dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers(modBus);
 			ModEntitiesClient.registerHandlers(modBus);
@@ -47,5 +49,6 @@ public class SophisticatedStorageInMotion {
 	private static void setup(FMLCommonSetupEvent event) {
 		StorageInMotionPacketHandler.INSTANCE.init();
 		event.enqueueWork(ModItems::registerDispenseBehavior);
+		ModCompat.compatsSetup();
 	}
 }
