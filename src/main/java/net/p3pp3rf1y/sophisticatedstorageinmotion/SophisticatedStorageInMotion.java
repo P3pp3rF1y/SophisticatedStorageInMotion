@@ -24,6 +24,7 @@ public class SophisticatedStorageInMotion {
 		ModEntities.registerHandlers(modBus);
 		ModDataComponents.register(modBus);
 		CommonEventHandler.registerHandlers();
+		ModCompat.register();
 		if (dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers(modBus);
 			ModEntitiesClient.registerHandlers(modBus); //TODO move this to client event handler
