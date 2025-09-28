@@ -3,10 +3,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.init;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsPayload;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessPayload;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.network.OpenMovingStorageInventoryPayload;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.network.RequestMovingStorageInventoryContentsPayload;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.network.*;
 
 public class ModPayloads {
 	private ModPayloads() {
@@ -18,5 +15,6 @@ public class ModPayloads {
 		registrar.playToServer(RequestMovingStorageInventoryContentsPayload.TYPE, RequestMovingStorageInventoryContentsPayload.STREAM_CODEC, RequestMovingStorageInventoryContentsPayload::handlePayload);
 		registrar.playToClient(MovingStorageContentsPayload.TYPE, MovingStorageContentsPayload.STREAM_CODEC, MovingStorageContentsPayload::handlePayload);
 		registrar.playToClient(MovingStorageOpennessPayload.TYPE, MovingStorageOpennessPayload.STREAM_CODEC, MovingStorageOpennessPayload::handlePayload);
+		registrar.playToClient(MovingStorageSyncItemHighlightsPayload.TYPE, MovingStorageSyncItemHighlightsPayload.STREAM_CODEC, MovingStorageSyncItemHighlightsPayload::handlePayload);
 	}
 }
