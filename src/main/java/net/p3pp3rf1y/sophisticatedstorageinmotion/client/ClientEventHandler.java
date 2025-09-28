@@ -13,6 +13,7 @@ import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.p3pp3rf1y.sophisticatedcore.client.render.ItemInStorageHighlightRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.PaintbrushMovingStorageOverlay;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
@@ -43,6 +44,8 @@ public class ClientEventHandler {
 
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(ClientMovingStorageContentsTooltip::onWorldLoad);
+
+		ItemInStorageHighlightRenderer.registerHighlightHandler(MovingStorageHighlightHandler.INSTANCE);
 	}
 
 	private static void registerMovingStorageRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
