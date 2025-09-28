@@ -16,5 +16,6 @@ public class StorageInMotionPacketHandler extends PacketHandler {
 		registerMessage(MovingStorageContentsMessage.class, MovingStorageContentsMessage::encode, MovingStorageContentsMessage::decode, MovingStorageContentsMessage::onMessage);
 		registerMessage(RequestMovingStorageInventoryContentsMessage.class, RequestMovingStorageInventoryContentsMessage::encode, RequestMovingStorageInventoryContentsMessage::decode, RequestMovingStorageInventoryContentsMessage::onMessage);
 		registerMessage(MovingStorageOpennessMessage.class, MovingStorageOpennessMessage::encode, MovingStorageOpennessMessage::decode, MovingStorageOpennessMessage::onMessage);
+		registerMessage(MovingStorageSyncItemHighlightsMessage.class, MovingStorageSyncItemHighlightsMessage::encode, MovingStorageSyncItemHighlightsMessage::decode, MovingStorageSyncItemHighlightsMessage::onMessage);
 	}
 }
