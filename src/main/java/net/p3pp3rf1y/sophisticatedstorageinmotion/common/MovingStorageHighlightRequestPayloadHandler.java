@@ -42,9 +42,7 @@ public class MovingStorageHighlightRequestPayloadHandler implements IHighlightRe
 			}
 		});
 
-		if (!entitiesWithStack.isEmpty() || !entitiesWithItem.isEmpty()) {
-			StorageInMotionPacketHandler.INSTANCE.sendToClient(player, new MovingStorageSyncItemHighlightsMessage(entitiesWithStack, entitiesWithItem));
-		}
+		StorageInMotionPacketHandler.INSTANCE.sendToClient(player, new MovingStorageSyncItemHighlightsMessage(entitiesWithStack, entitiesWithItem));
 
 		return new IHighlightRequestPayloadHandler.HighlightResult(entitiesWithStack.size(), entitiesWithItem.size());
 	}
