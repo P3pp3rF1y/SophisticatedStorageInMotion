@@ -2,12 +2,11 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.client.render.BlockHighlightRenderHelper;
@@ -15,7 +14,7 @@ import net.p3pp3rf1y.sophisticatedcore.client.render.IClientHighlightHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ItemInStorageHighlightRenderer;
 import net.p3pp3rf1y.sophisticatedcore.util.Easing;
 import net.p3pp3rf1y.sophisticatedcore.util.VoxelOutliner;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.common.MovingStorageHighlightRequestPayloadHandler;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.common.MovingStorageItemActionPayloadHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
 import java.util.Collections;
@@ -37,11 +36,11 @@ public class MovingStorageHighlightHandler implements IClientHighlightHandler<Li
 
 	@Override
 	public ResourceLocation getPayloadHandlerId() {
-		return MovingStorageHighlightRequestPayloadHandler.ID;
+		return MovingStorageItemActionPayloadHandler.ID;
 	}
 
 	@Override
-	public List<Integer> buildClientRequestData(LocalPlayer player, ItemStack stack) {
+	public List<Integer> buildClientRequestData(Player player) {
 		return player.level().getEntities(player,
 				player.getBoundingBox().inflate(ItemInStorageHighlightRenderer.HIGHLIGHT_RANGE),
 				e -> e instanceof IMovingStorageEntity && e.distanceTo(player) <= ItemInStorageHighlightRenderer.HIGHLIGHT_RANGE
