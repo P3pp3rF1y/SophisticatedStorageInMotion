@@ -7,6 +7,7 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
+import net.p3pp3rf1y.sophisticatedcore.client.ItemInteractionHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ItemInStorageHighlightRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.PaintbrushMovingStorageOverlay;
@@ -24,6 +25,7 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientMovingStorageContentsTooltip::onWorldLoad);
 
 		ItemInStorageHighlightRenderer.registerHighlightHandler(MovingStorageHighlightHandler.INSTANCE);
+		ItemInteractionHandler.registerPayloadBuilder(MovingStorageItemActionPayloadBuilder.INSTANCE);
 	}
 
 	private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
