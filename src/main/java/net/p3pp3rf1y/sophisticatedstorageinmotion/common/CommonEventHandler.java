@@ -14,7 +14,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.p3pp3rf1y.sophisticatedcore.common.HighlightRequestPayloadHandlerRegistry;
+import net.p3pp3rf1y.sophisticatedcore.common.ItemActionHandlerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedstorage.Config;
@@ -52,7 +52,7 @@ public class CommonEventHandler {
 	}
 
 	private static void registerHighlightRequestPayloadHandler() {
-		HighlightRequestPayloadHandlerRegistry.register(MovingStorageHighlightRequestPayloadHandler.INSTANCE);
+		ItemActionHandlerRegistry.register(MovingStorageItemActionPayloadHandler.INSTANCE);
 	}
 
 	private static void onStorageUpgradeInteract(PlayerInteractEvent.EntityInteract event) {

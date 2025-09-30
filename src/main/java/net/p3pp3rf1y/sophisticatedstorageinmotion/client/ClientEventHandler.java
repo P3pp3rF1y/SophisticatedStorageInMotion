@@ -5,6 +5,7 @@ import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.p3pp3rf1y.sophisticatedcore.client.ItemInteractionHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ItemInStorageHighlightRenderer;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.PaintbrushMovingStorageOverlay;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
@@ -21,6 +22,7 @@ public class ClientEventHandler {
 		eventBus.addListener(ClientMovingStorageContentsTooltip::onWorldLoad);
 
 		ItemInStorageHighlightRenderer.registerHighlightHandler(MovingStorageHighlightHandler.INSTANCE);
+		ItemInteractionHandler.registerPayloadBuilder(MovingStorageItemActionPayloadBuilder.INSTANCE);
 	}
 
 	private static void registerOverlay(RegisterGuiOverlaysEvent event) {
