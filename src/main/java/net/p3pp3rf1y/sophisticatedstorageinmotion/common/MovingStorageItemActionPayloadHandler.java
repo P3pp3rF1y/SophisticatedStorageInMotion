@@ -6,34 +6,39 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.p3pp3rf1y.sophisticatedcore.common.IHighlightRequestPayloadHandler;
+import net.p3pp3rf1y.sophisticatedcore.common.IItemActionPayloadHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ISlotTracker;
+import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageSyncItemHighlightsPayload;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class MovingStorageHighlightRequestPayloadHandler implements IHighlightRequestPayloadHandler<List<Integer>> {
-	private MovingStorageHighlightRequestPayloadHandler() {}
+public class MovingStorageItemActionPayloadHandler implements IItemActionPayloadHandler<List<Integer>> {
+	private MovingStorageItemActionPayloadHandler() {}
 
-	public static MovingStorageHighlightRequestPayloadHandler INSTANCE = new MovingStorageHighlightRequestPayloadHandler();
+	public static MovingStorageItemActionPayloadHandler INSTANCE = new MovingStorageItemActionPayloadHandler();
+	public static final ResourceLocation ID = SophisticatedStorageInMotion.getRL("moving_storage_item_action");
 
-	public static final ResourceLocation ID = SophisticatedStorageInMotion.getRL("moving_storage_highlight_request");
 	@Override
 	public ResourceLocation id() {
 		return ID;
 	}
 
 	@Override
-	public StreamCodec<ByteBuf, List<Integer>> requestCodec() {
+	public StreamCodec<ByteBuf, List<Integer>> codec() {
 		return ByteBufCodecs.INT.apply(ByteBufCodecs.list());
 	}
 
 	@Override
-	public HighlightResult compute(ServerPlayer player, ItemStackKey stackKey, List<Integer> clientData) {
+	public HighlightResult computeHighlight(ServerPlayer player, ItemStackKey stackKey, List<Integer> clientData) {
 		List<Integer> entitiesWithStack = new java.util.ArrayList<>();
 		List<Integer> entitiesWithItem = new java.util.ArrayList<>();
 		clientData.forEach(entityId -> {
@@ -50,6 +55,14 @@ public class MovingStorageHighlightRequestPayloadHandler implements IHighlightRe
 
 		PacketDistributor.sendToPlayer(player, new MovingStorageSyncItemHighlightsPayload(entitiesWithStack, entitiesWithItem));
 
-		return new IHighlightRequestPayloadHandler.HighlightResult(entitiesWithStack.size(), entitiesWithItem.size());
+		return new IItemActionPayloadHandler.HighlightResult(entitiesWithStack.size(), entitiesWithItem.size());
+	}
+
+	@Override
+	public Map<Vec3, InventoryHandler> getTargetInventories(Player player, List<Integer> clientData) {
+		return clientData.stream()
+				.map(entityId -> player.level().getEntity(entityId))
+				.filter(IMovingStorageEntity.class::isInstance)
+				.collect(Collectors.toMap(e -> e.getBoundingBox().getCenter(),e -> ((IMovingStorageEntity)e).getStorageHolder().getStorageWrapper().getInventoryHandler()));
 	}
 }
