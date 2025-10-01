@@ -9,6 +9,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.MovingStorageItemAction
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 public class MovingStorageItemActionPayloadBuilder implements IItemActionPayloadBuilder<List<Integer>> {
 	public static final MovingStorageItemActionPayloadBuilder INSTANCE = new MovingStorageItemActionPayloadBuilder();
@@ -19,10 +20,11 @@ public class MovingStorageItemActionPayloadBuilder implements IItemActionPayload
 	}
 
 	@Override
-	public List<Integer> buildClientRequestData(Player player) {
-		return player.level().getEntities(player,
+	public Optional<List<Integer>> buildClientRequestData(Player player) {
+		List<Integer> entityIds = player.level().getEntities(player,
 				player.getBoundingBox().inflate(ItemInteractionHandler.INTERACTION_RANGE),
 				e -> e instanceof IMovingStorageEntity && e.distanceTo(player) <= ItemInteractionHandler.INTERACTION_RANGE
 		).stream().map(Entity::getId).toList();
+		return entityIds.isEmpty() ? Optional.empty() : Optional.of(entityIds);
 	}
 }
