@@ -19,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class MovingStorageHighlightHandler implements IClientHighlightHandler<List<Integer>> {
 	private MovingStorageHighlightHandler() {
@@ -40,11 +41,12 @@ public class MovingStorageHighlightHandler implements IClientHighlightHandler<Li
 	}
 
 	@Override
-	public List<Integer> buildClientRequestData(Player player) {
-		return player.level().getEntities(player,
+	public Optional<List<Integer>> buildClientRequestData(Player player) {
+		List<Integer> entityIds = player.level().getEntities(player,
 				player.getBoundingBox().inflate(ItemInStorageHighlightRenderer.HIGHLIGHT_RANGE),
 				e -> e instanceof IMovingStorageEntity && e.distanceTo(player) <= ItemInStorageHighlightRenderer.HIGHLIGHT_RANGE
 		).stream().map(Entity::getId).toList();
+		return entityIds.isEmpty() ? Optional.empty() : Optional.of(entityIds);
 	}
 
 	@Override
