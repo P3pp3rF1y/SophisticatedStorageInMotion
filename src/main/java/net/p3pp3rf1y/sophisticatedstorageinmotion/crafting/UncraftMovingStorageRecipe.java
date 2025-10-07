@@ -45,7 +45,7 @@ public class UncraftMovingStorageRecipe extends CustomRecipe {
 				return false;
 			}
 		}
-		return true;
+		return hasMovingStorage;
 	}
 
 	@Override
