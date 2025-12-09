@@ -4,12 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.AbstractBoatRenderer;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.BoatRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelBlockEntity;
@@ -54,7 +55,7 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 	public void extractRenderState(StorageBoat storageBoat, BoatRenderState boatRenderState, float partialTick) {
 		super.extractRenderState(storageBoat, boatRenderState, partialTick);
 		boatRenderState.yRot = storageBoat.getYRot(partialTick);
-		boatRenderState.hurtTime = (float)storageBoat.getHurtTime() - partialTick;
+		boatRenderState.hurtTime = (float) storageBoat.getHurtTime() - partialTick;
 		boatRenderState.hurtDir = storageBoat.getHurtDir();
 		boatRenderState.damageTime = Math.max(storageBoat.getDamage() - partialTick, 0.0F);
 		boatRenderState.bubbleAngle = storageBoat.getBubbleAngle(partialTick);
@@ -64,8 +65,8 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 	}
 
 	@Override
-	public void render(BoatRenderState renderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
-		super.render(renderState, poseStack, buffer, packedLight);
+	public void submit(BoatRenderState renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState) {
+		super.submit(renderState, poseStack, submitNodeCollector, cameraRenderState);
 
 		StorageBlockEntity renderBlockEntity = renderState.getRenderData(ContextKeys.RENDER_BLOCK_ENTITY);
 		WoodType woodType = renderState.getRenderData(ContextKeys.BASE_BOAT_WOOD_TYPE);
@@ -74,7 +75,7 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		}
 
 		poseStack.pushPose();
-		poseStack.translate(0, woodType == WoodType.BAMBOO ? 8/16F : 3/16F, 0);
+		poseStack.translate(0, woodType == WoodType.BAMBOO ? 8 / 16F : 3 / 16F, 0);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - renderState.yRot));
 		float interpolatedHurtTime = renderState.hurtTime;
 		float interpolatedDamage = renderState.damageTime;
@@ -83,7 +84,7 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		}
 
 		if (interpolatedHurtTime > 0.0F) {
-			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * (float)renderState.hurtDir));
+			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * (float) renderState.hurtDir));
 		}
 
 		float bubbleAngle = renderState.bubbleAngle;
@@ -94,12 +95,12 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
 		poseStack.mulPose(Axis.XP.rotationDegrees(180));
-		poseStack.scale(6/7F, 6/7F, 6/7F);
-		poseStack.translate(-0.5F, 0, (renderBlockEntity instanceof BarrelBlockEntity || renderBlockEntity instanceof ShulkerBoxBlockEntity ? 0 : 1/16F) + 0.02F);
-		StorageBlockRenderer.renderStorageBlock(renderState.partialTick, poseStack, buffer, packedLight, renderBlockEntity);
+		poseStack.scale(6 / 7F, 6 / 7F, 6 / 7F);
+		poseStack.translate(-0.5F, 0, (renderBlockEntity instanceof BarrelBlockEntity || renderBlockEntity instanceof ShulkerBoxBlockEntity ? 0 : 1 / 16F) + 0.02F);
+		StorageBlockRenderer.submitStorageBlock(renderState.partialTick, poseStack, submitNodeCollector, renderState.lightCoords, renderBlockEntity);
 		poseStack.popPose();
 
-		baseBoatRenderers.get(woodType).render(renderState, poseStack, buffer, packedLight);
+		baseBoatRenderers.get(woodType).submit(renderState, poseStack, submitNodeCollector, cameraRenderState);
 	}
 
 	@Override

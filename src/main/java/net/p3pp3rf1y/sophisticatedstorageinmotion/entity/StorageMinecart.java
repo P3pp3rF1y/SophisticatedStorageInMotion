@@ -24,9 +24,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
-import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
@@ -166,7 +168,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public int getContainerSize() {
-		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().getSlots();
+		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().size();
 	}
 
 	@Override
@@ -200,15 +202,16 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	public void clearChestVehicleContent() {
 		unpackChestVehicleLootTable(null);
 		InventoryHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryHandler();
-		for (int slot = 0; slot < inventoryHandler.getSlots(); slot++) {
+		for (int slot = 0; slot < inventoryHandler.size(); slot++) {
 			inventoryHandler.setStackInSlot(slot, ItemStack.EMPTY);
 		}
 	}
 
 	@Override
 	public ItemStack removeChestVehicleItemNoUpdate(int slot) {
-		ITrackedContentsItemHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryForInputOutput();
-		return inventoryHandler.extractItem(slot, inventoryHandler.getStackInSlot(slot).getCount(), false);
+		ITrackedContentsItemResourceHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryForInputOutput();
+		ItemResource resource = inventoryHandler.getResource(slot);
+		return resource.toStack(InventoryHelper.extract(inventoryHandler, slot, resource, inventoryHandler.getAmountAsInt(slot)));
 	}
 
 	@Override
@@ -218,7 +221,9 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public ItemStack removeChestVehicleItem(int slot, int amount) {
-		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().extractItem(slot, amount, false);
+		ITrackedContentsItemResourceHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryForInputOutput();
+		ItemResource resource = inventoryHandler.getResource(slot);
+		return resource.toStack(InventoryHelper.extract(inventoryHandler, slot, resource, amount));
 	}
 
 	@Override
@@ -228,7 +233,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public boolean canPlaceItem(int slot, ItemStack stack) {
-		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().isItemValid(slot, stack);
+		return getStorageHolder().getStorageWrapper().getInventoryForInputOutput().isValid(slot, ItemResource.of(stack));
 	}
 
 	@Override

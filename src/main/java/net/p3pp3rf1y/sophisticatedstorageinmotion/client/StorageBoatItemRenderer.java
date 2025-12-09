@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.WoodType;
@@ -53,7 +52,7 @@ public class StorageBoatItemRenderer extends MovingStorageItemRenderer<StorageBo
 
 		@Nullable
 		@Override
-		public SpecialModelRenderer<?> bake(EntityModelSet entityModelSet) {
+		public SpecialModelRenderer<?> bake(BakingContext bakingContext) {
 			return new StorageBoatItemRenderer();
 		}
 

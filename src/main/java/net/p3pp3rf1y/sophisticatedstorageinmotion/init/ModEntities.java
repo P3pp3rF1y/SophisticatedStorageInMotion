@@ -24,7 +24,6 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageItemSyncHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class ModEntities {
@@ -58,8 +57,8 @@ public class ModEntities {
 	public static final Supplier<EntityDataSerializer<WoodType>> WOOD_TYPE_SERIALIZER = ENTITY_DATA_SERIALIZERS.register("wood_type", () -> EntityDataSerializer.forValueType(StreamCodecs.WOOD_TYPE_STREAM_CODEC));
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerEntity(Capabilities.ItemHandler.ENTITY_AUTOMATION, STORAGE_MINECART.get(), (entity, direction) -> entity.getStorageHolder().getStorageWrapper().getInventoryForInputOutput());
-		event.registerEntity(Capabilities.ItemHandler.ENTITY_AUTOMATION, STORAGE_BOAT.get(), (entity, direction) -> entity.getStorageHolder().getStorageWrapper().getInventoryForInputOutput());
+		event.registerEntity(Capabilities.Item.ENTITY_AUTOMATION, STORAGE_MINECART.get(), (entity, direction) -> entity.getStorageHolder().getStorageWrapper().getInventoryForInputOutput());
+		event.registerEntity(Capabilities.Item.ENTITY_AUTOMATION, STORAGE_BOAT.get(), (entity, direction) -> entity.getStorageHolder().getStorageWrapper().getInventoryForInputOutput());
 	}
 
 	public static void registerHandlers(IEventBus modBus) {

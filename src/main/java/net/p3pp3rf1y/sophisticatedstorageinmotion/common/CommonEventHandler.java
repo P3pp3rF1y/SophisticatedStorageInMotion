@@ -3,13 +3,15 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
@@ -18,6 +20,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.p3pp3rf1y.sophisticatedcore.common.ItemActionHandlerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedstorage.Config;
 import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
@@ -119,7 +123,7 @@ public class CommonEventHandler {
 			return;
 		}
 
-		MovingStorageData.moveToItemStorage(result, storageId);
+		MovingStorageData.moveToItemStorage(event.getEntity().level().registryAccess(), result, storageId);
 	}
 
 	private static boolean isUncraftedFromSingleMovingStorage(Container inventory) {
@@ -150,19 +154,21 @@ public class CommonEventHandler {
 
 		ItemStack storageItem = MovingStorageItem.getStorageItem(result);
 		if (storageItem.getItem() instanceof ShulkerBoxItem) {
-					StackStorageWrapper shulkerStorageWrapper = StackStorageWrapper.fromStack(level.registryAccess(), storageItem);
-				shulkerStorageWrapper.getContentsUuid().ifPresent(id -> {
-					ItemContentsStorage itemContentsStorage = ItemContentsStorage.get();
-					CompoundTag contentsNbt = itemContentsStorage.getOrCreateStorageContents(id).getCompoundOrEmpty(StorageBlockEntity.STORAGE_WRAPPER);
-					CompoundTag migratedContentsNbt = new CompoundTag();
-					migratedContentsNbt.put(StorageWrapper.CONTENTS_TAG, contentsNbt.getCompoundOrEmpty(StorageWrapper.CONTENTS_TAG));
-					migratedContentsNbt.put(StorageWrapper.SETTINGS_TAG, contentsNbt.getCompoundOrEmpty(StorageWrapper.SETTINGS_TAG));
-					MovingStorageData.get().setContents(id, migratedContentsNbt);
-					storageItem.set(ModCoreDataComponents.RENDER_INFO_TAG, CustomData.of(contentsNbt.getCompoundOrEmpty(StorageWrapper.RENDER_INFO_TAG)));
-					MovingStorageItem.setStorageItem(result, storageItem);
-					itemContentsStorage.removeStorageContents(id);
+			StackStorageWrapper shulkerStorageWrapper = StackStorageWrapper.fromStack(level.registryAccess(), storageItem);
+			shulkerStorageWrapper.getContentsUuid().ifPresent(id -> {
+				ItemContentsStorage itemContentsStorage = ItemContentsStorage.get();
+				ContainerContents contents = itemContentsStorage.getOrCreateContents(id);
+				CompoundTag renderDataNbt = itemContentsStorage.getOrCreateAddtionalBeData(id).getCompoundOrEmpty(StorageBlockEntity.STORAGE_WRAPPER).getCompoundOrEmpty(StorageWrapper.RENDER_DATA);
+				RegistryOps<Tag> registryOps = level.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+				RenderData.CODEC.decode(registryOps, renderDataNbt).ifSuccess(pair -> {
+					storageItem.set(ModCoreDataComponents.RENDER_DATA, pair.getFirst());
 				});
+				MovingStorageData.get().setContents(id, contents);
 				MovingStorageItem.setStorageItem(result, storageItem);
+				itemContentsStorage.removeContents(id);
+				itemContentsStorage.removeAddtionalBeData(id);
+			});
+			MovingStorageItem.setStorageItem(result, storageItem);
 		}
 	}
 

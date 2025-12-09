@@ -151,7 +151,7 @@ public class StorageBoatItem extends MovingStorageItem {
 				if (!level.noCollision(boat, boat.getBoundingBox())) {
 					return InteractionResult.FAIL;
 				} else {
-					if (!level.isClientSide) {
+					if (!level.isClientSide()) {
 						level.addFreshEntity(boat);
 						level.gameEvent(player, GameEvent.ENTITY_PLACE, hitresult.getLocation());
 						itemstack.consume(1, player);

@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.AbstractMinecartRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.MinecartRenderState;
@@ -30,7 +30,7 @@ public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMin
 	}
 
 	@Override
-	protected void renderMinecartContents(MinecartRenderState minecartRenderState, BlockState state, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+	protected void submitMinecartContents(MinecartRenderState minecartRenderState, BlockState blockState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
 		StorageBlockEntity renderBlockEntity = minecartRenderState.getRenderData(ContextKeys.RENDER_BLOCK_ENTITY);
 		if (renderBlockEntity == null) {
 			return;
@@ -43,7 +43,7 @@ public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMin
 		}
 		poseStack.translate(0, yOffset, 0);
 
-		StorageBlockRenderer.renderStorageBlock(minecartRenderState.partialTick, poseStack, buffer, packedLight, renderBlockEntity);
+		StorageBlockRenderer.submitStorageBlock(minecartRenderState.partialTick, poseStack, submitNodeCollector, packedLight, renderBlockEntity);
 		poseStack.popPose();
 	}
 

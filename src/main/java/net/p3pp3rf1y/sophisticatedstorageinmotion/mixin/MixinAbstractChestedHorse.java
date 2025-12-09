@@ -139,7 +139,7 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	public ItemStack getDropStack(ItemStack storageItem) {
 		@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
 		if (storageId != null) {
-			MovingStorageData.moveToItemStorage(storageItem, storageId);
+			MovingStorageData.moveToItemStorage(level().registryAccess(), storageItem, storageId);
 		}
 		return storageItem;
 	}

@@ -1,22 +1,31 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.RenderTypeHelper;
@@ -24,15 +33,14 @@ import net.p3pp3rf1y.sophisticatedstorage.block.BarrelBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ChestBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.client.render.BarrelBlockStateModelBase;
+import net.p3pp3rf1y.sophisticatedstorage.client.render.RenderHelper;
 
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class StorageBlockRenderer {
-	public static void renderStorageBlock(float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight, StorageBlockEntity renderBlockEntity) {
+	public static void submitStorageBlock(float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, StorageBlockEntity renderBlockEntity) {
 		BlockState state = renderBlockEntity.getBlockState();
 		Minecraft minecraft = Minecraft.getInstance();
 		if (renderBlockEntity instanceof BarrelBlockEntity barrel) {
@@ -43,13 +51,64 @@ public class StorageBlockRenderer {
 			}
 			BlockAndTintGetter wrappedLevel = new StaticBlockEntityTintGetter(minecraft.level, renderBlockEntity, packedLight); //TODO try to optimize not to create a new instance all the time, perhaps level keyed cache for these and then only setting blockentity in the render call
 			List<BlockModelPart> parts = blockStateModel.collectParts(wrappedLevel, BlockPos.ZERO, state, RandomSource.create(42L));
-			blockRenderer.getModelRenderer().tesselateWithoutAO(wrappedLevel, parts, state, BlockPos.ZERO, poseStack, renderType -> buffer.getBuffer(RenderTypeHelper.getEntityRenderType(renderType)), false, OverlayTexture.NO_OVERLAY);
+			List<BlockModelPart> translucentParts = new ArrayList<>();
+			Iterator<BlockModelPart> it = parts.iterator();
+			while (it.hasNext()) {
+				BlockModelPart part = it.next();
+				if (part.getRenderType(barrel.getBlockState()) == ChunkSectionLayer.TRANSLUCENT) {
+					translucentParts.add(part);
+					it.remove();
+				}
+			}
+			submitNodeCollector.submitCustomGeometry(poseStack, RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS), (pose, vertexConsumer) -> {
+				for (BlockModelPart part : parts) {
+					renderBlockModelPart(packedLight, pose, vertexConsumer, part, state, wrappedLevel);
+				}
+			});
+			if (!translucentParts.isEmpty()) {
+				submitNodeCollector.submitCustomGeometry(poseStack, RenderTypeHelper.getEntityRenderType(ChunkSectionLayer.TRANSLUCENT), (pose, vertexConsumer) -> {
+					for (BlockModelPart translucentPart : translucentParts) {
+						renderBlockModelPart(packedLight, pose, vertexConsumer, translucentPart, state, wrappedLevel);
+					}
+				});
+			}
 		}
 
-		BlockEntityRenderer<StorageBlockEntity> renderer = minecraft.getBlockEntityRenderDispatcher().getRenderer(renderBlockEntity);
-		if (renderer != null) {
-			renderer.render(renderBlockEntity, partialTicks, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, Vec3.ZERO);
+		BlockEntityRenderer<StorageBlockEntity, ? extends BlockEntityRenderState> renderer = minecraft.getBlockEntityRenderDispatcher().getRenderer(renderBlockEntity);
+		if (renderer == null) {
+			return;
 		}
+		submitBlockEntityRender(renderer, renderBlockEntity, partialTicks, poseStack, submitNodeCollector, packedLight);
+	}
+
+	private static void renderBlockModelPart(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part, BlockState state, BlockAndTintGetter wrappedLevel) {
+		for (Direction direction : Direction.values()) {
+			renderBlockModelPartQuads(packedLight, pose, vertexConsumer, part, direction, state, wrappedLevel);
+		}
+		renderBlockModelPartQuads(packedLight, pose, vertexConsumer, part, null, state, wrappedLevel);
+	}
+
+	private static void renderBlockModelPartQuads(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part, @Nullable Direction direction, BlockState state, BlockAndTintGetter wrappedLevel) {
+		for (BakedQuad quad : part.getQuads(direction)) {
+			float red = 1.0F;
+			float green = 1.0F;
+			float blue = 1.0F;
+			if (quad.isTinted()) {
+				int tint = Minecraft.getInstance().getBlockColors().getColor(state, wrappedLevel, BlockPos.ZERO, quad.tintIndex());
+				red = ARGB.redFloat(tint);
+				green = ARGB.greenFloat(tint);
+				blue = ARGB.blueFloat(tint);
+			}
+			vertexConsumer.putBulkData(pose, quad, red, green, blue, 1, packedLight, OverlayTexture.NO_OVERLAY, false);
+		}
+	}
+
+	private static <T extends BlockEntity, S extends BlockEntityRenderState> void submitBlockEntityRender(
+			BlockEntityRenderer<T, S> renderer, T blockEntity, float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
+		S renderState = renderer.createRenderState();
+		renderer.extractRenderState(blockEntity, renderState, partialTicks, Vec3.ZERO, null);
+		renderState.lightCoords = packedLight;
+		renderer.submit(renderState, poseStack, submitNodeCollector, RenderHelper.ZERO_POS_CAMERA_RENDER_STATE);
 	}
 
 	private static final Map<Class<? extends AbstractChestedHorse>, Function<StorageBlockEntity, Vec3>> OFFSET_MAP = new LinkedHashMap<>();
@@ -73,7 +132,7 @@ public class StorageBlockRenderer {
 
 	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
 
-	public static void renderChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
+	public static void submitChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
 		if (renderBlockEntity == null) {
 			return;
 		}
@@ -85,12 +144,12 @@ public class StorageBlockRenderer {
 			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y, offsetFunction.apply(renderBlockEntity).z);
 		}
 
-		renderStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 90, 1, renderBlockEntity, packedLight, buffer, entityRenderState.partialTick);
-		renderStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 270, -1, renderBlockEntity, packedLight, buffer, entityRenderState.partialTick);
+		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 90, 1, renderBlockEntity, packedLight, submitNodeCollector, entityRenderState.partialTick);
+		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 270, -1, renderBlockEntity, packedLight, submitNodeCollector, entityRenderState.partialTick);
 		poseStack.popPose();
 	}
 
-	private static void renderStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, MultiBufferSource buffer, float partialTick) {
+	private static void submitStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, SubmitNodeCollector submitNodeCollector, float partialTick) {
 		float halfWidth = entityRenderState.boundingBoxWidth / 2;
 		poseStack.pushPose();
 
@@ -113,7 +172,7 @@ public class StorageBlockRenderer {
 		}
 		poseStack.translate(-0.5, -0.5, -0.5);
 
-		StorageBlockRenderer.renderStorageBlock(partialTick, poseStack, buffer, packedLight, renderBlockEntity);
+		StorageBlockRenderer.submitStorageBlock(partialTick, poseStack, submitNodeCollector, packedLight, renderBlockEntity);
 		poseStack.popPose();
 	}
 }

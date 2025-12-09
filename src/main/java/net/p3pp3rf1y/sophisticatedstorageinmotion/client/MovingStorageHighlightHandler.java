@@ -2,7 +2,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -56,12 +56,12 @@ public class MovingStorageHighlightHandler implements IClientHighlightHandler<Li
 	}
 
 	@Override
-	public void render(PoseStack poseStack, float partialTick, Vec3 cameraPos) {
-		highlightedStackEntityIds.forEach(eId -> renderHighlightedEntity(poseStack, partialTick, cameraPos, eId, Minecraft.getInstance(), Minecraft.getInstance().renderBuffers().bufferSource(), ItemInStorageHighlightRenderer.MATCHING_STACK_HIGHLIGHT_COLOR));
-		highlightedItemEntityIds.forEach(eId -> renderHighlightedEntity(poseStack, partialTick, cameraPos, eId, Minecraft.getInstance(), Minecraft.getInstance().renderBuffers().bufferSource(), ItemInStorageHighlightRenderer.MATCHING_ITEM_HIGHLIGHT_COLOR));
+	public void submit(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos) {
+		highlightedStackEntityIds.forEach(eId -> submitHighlightedEntity(submitNodeCollector, poseStack, partialTick, cameraPos, eId, Minecraft.getInstance(), ItemInStorageHighlightRenderer.MATCHING_STACK_HIGHLIGHT_COLOR));
+		highlightedItemEntityIds.forEach(eId -> submitHighlightedEntity(submitNodeCollector, poseStack, partialTick, cameraPos, eId, Minecraft.getInstance(), ItemInStorageHighlightRenderer.MATCHING_ITEM_HIGHLIGHT_COLOR));
 	}
 
-	private static void renderHighlightedEntity(PoseStack poseStack, float partialTick, Vec3 cameraPos, int entityId, Minecraft mc, MultiBufferSource.BufferSource buffer, int color) {
+	private static void submitHighlightedEntity(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos, int entityId, Minecraft mc, int color) {
 		Entity entity = mc.level.getEntity(entityId);
 		if (entity == null) {
 			return;
@@ -78,7 +78,7 @@ public class MovingStorageHighlightHandler implements IClientHighlightHandler<Li
 		float scale = 1 + Easing.EASE_IN_OUT_CUBIC.ease((float) ItemInStorageHighlightRenderer.tri01(mc.level.getGameTime(), 15, partialTick)) * 0.05f;
 		poseStack.scale(scale, scale, scale);
 		poseStack.translate(0, -halfH, 0);
-		BlockHighlightRenderHelper.renderThickEdges(poseStack, buffer, color, VoxelOutliner.edgesFromAABB(boundingBox), entity.getX(), entity.getY(), entity.getZ());
+		BlockHighlightRenderHelper.submitThickEdges(submitNodeCollector, poseStack, color, VoxelOutliner.edgesFromAABB(boundingBox), entity.getX(), entity.getY(), entity.getZ());
 		poseStack.popPose();
 	}
 }

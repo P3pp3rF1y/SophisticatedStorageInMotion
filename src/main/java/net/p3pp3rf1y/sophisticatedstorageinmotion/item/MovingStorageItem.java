@@ -1,9 +1,10 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.item;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SlotAccess;
@@ -18,6 +19,9 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import net.p3pp3rf1y.sophisticatedcore.Config;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
@@ -78,7 +82,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		return storageItemContents != null && BarrelBlockItem.isFlatTop(storageItemContents);
 	}
 
-	public static ItemStack getStorageItem(ItemStack stack) {
+	public static ItemStack getStorageItem(DataComponentHolder stack) {
 		return stack.getOrDefault(ModDataComponents.STORAGE_ITEM, SimpleItemContent.EMPTY).copy();
 	}
 
@@ -88,7 +92,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	public void addCreativeTabItems(Consumer<ItemStack> itemConsumer) {
 		if (Config.COMMON.enabledItems.isItemEnabled(this)) {
 			List<ItemStack> movingStorages = getBaseMovingStorageItems();
-			movingStorages.forEach(movingStorage ->  {
+			movingStorages.forEach(movingStorage -> {
 				itemConsumer.accept(createWithStorage(movingStorage.copy(), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.BARREL_ITEM.get()), WoodType.SPRUCE)));
 				ItemStack limitedIStack = new ItemStack(ModBlocks.LIMITED_GOLD_BARREL_1_ITEM.get());
 				if (limitedIStack.getItem() instanceof ITintableBlockItem tintableBlockItem) {
@@ -126,7 +130,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 				});
 			}
 		}
-		if (!Screen.hasShiftDown() && MovingStorageWrapper.hasContentsUuid(stack)) {
+		if (!Minecraft.getInstance().hasShiftDown() && MovingStorageWrapper.hasContentsUuid(stack)) {
 			tooltipAdder.accept(Component.translatable(
 					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
 					Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
@@ -142,7 +146,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 			return Optional.ofNullable(MovingStorageItemClient.getTooltipImage(stack));
 		}
 		return Optional.empty();
@@ -158,8 +162,10 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		if (getStorageItemType(storageStack).map(item -> item instanceof ShulkerBoxItem).orElse(false)) {
 			MovingStorageWrapper wrapper = getMovingStorageWrapper(storageStack);
 
-			if (wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() == stack.getCount()) {
-				return StashResult.NO_SPACE;
+			try (Transaction tx = Transaction.openRoot()) {
+				if (wrapper.getInventoryForUpgradeProcessing().insert(ItemResource.of(stack), stack.getCount(), tx) == 0) {
+					return StashResult.NO_SPACE;
+				}
 			}
 			if (wrapper.getInventoryHandler().getSlotTracker().getItems().contains(stack.getItem()) || wrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(stack)) {
 				return StashResult.MATCH_AND_SPACE;
@@ -173,7 +179,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
 		ItemStack storageItem = getStorageItem(movingStorageStack);
-		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {},
+		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {
+				},
 				() -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)), MovingStorageData::get,
 				() -> movingStorageStack.getOrDefault(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, false),
 				locked -> movingStorageStack.set(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, locked),
@@ -181,12 +188,12 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		return wrapper;
 	}
 
-	public ItemStack stash(ItemStack movingStorageStack, ItemStack stack, boolean simulate) {
+	public int stash(ItemStack movingStorageStack, ItemResource resource, int amount, TransactionContext tx) {
 		MovingStorageWrapper wrapper = getMovingStorageWrapper(movingStorageStack);
 		if (wrapper.getContentsUuid().isEmpty()) {
 			wrapper.setContentsUuid(UUID.randomUUID());
 		}
-		return wrapper.getInventoryForUpgradeProcessing().insertItem(stack, simulate);
+		return wrapper.getInventoryForUpgradeProcessing().insert(resource, amount, tx);
 	}
 
 	@Override
@@ -196,12 +203,13 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 		}
 
 		ItemStack stackToStash = slot.getItem();
-		ItemStack stashResult = stash(stack, stackToStash, true);
-		if (stashResult.getCount() != stackToStash.getCount()) {
-			int countToTake = stackToStash.getCount() - stashResult.getCount();
-			ItemStack takeResult = slot.safeTake(countToTake, countToTake, player);
-			stash(stack, takeResult, false);
-			return true;
+		try (Transaction tx = Transaction.openRoot()) {
+			int stashed = stash(stack, ItemResource.of(stackToStash), stackToStash.getCount(), tx);
+			if (stashed > 0) {
+				tx.commit();
+				slot.safeTake(stashed, stashed, player);
+				return true;
+			}
 		}
 
 		return super.overrideStackedOnOther(stack, slot, action, player);
@@ -217,11 +225,14 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 			return super.overrideOtherStackedOnMe(stack, otherStack, slot, action, player, carriedAccess);
 		}
 
-		ItemStack result = stash(stack, otherStack, false);
-		if (result.getCount() != otherStack.getCount()) {
-			carriedAccess.set(result);
-			slot.set(stack);
-			return true;
+		try (Transaction tx = Transaction.openRoot()) {
+			int stashed = stash(stack, ItemResource.of(otherStack), otherStack.getCount(), tx);
+			if (stashed > 0) {
+				tx.commit();
+				carriedAccess.set(otherStack.copyWithCount(otherStack.getCount() - stashed));
+				slot.set(stack);
+				return true;
+			}
 		}
 
 		return super.overrideOtherStackedOnMe(stack, otherStack, slot, action, player, carriedAccess);
@@ -238,23 +249,23 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	}
 
 	static {
-		DecorationTableBlockEntity.registerItemDecorator(stack -> stack.getItem() instanceof MovingStorageItem, new DecorationTableBlockEntity.IItemDecorator() {
+		DecorationTableBlockEntity.registerItemDecorator(item -> item instanceof MovingStorageItem, new DecorationTableBlockEntity.IItemDecorator() {
 			@Override
-			public boolean supportsMaterials(ItemStack input) {
+			public boolean supportsMaterials(ItemResource input) {
 				ItemStack storageItem = getStorageItem(input);
-				return STORAGE_DECORATOR.supportsMaterials(storageItem);
+				return STORAGE_DECORATOR.supportsMaterials(ItemResource.of(storageItem));
 			}
 
 			@Override
-			public boolean supportsTints(ItemStack input) {
+			public boolean supportsTints(ItemResource input) {
 				ItemStack storageItem = getStorageItem(input);
-				return STORAGE_DECORATOR.supportsTints(storageItem);
+				return STORAGE_DECORATOR.supportsTints(ItemResource.of(storageItem));
 			}
 
 			@Override
-			public boolean supportsTopInnerTrim(ItemStack input) {
+			public boolean supportsTopInnerTrim(ItemResource input) {
 				ItemStack storageItem = getStorageItem(input);
-				return STORAGE_DECORATOR.supportsTopInnerTrim(storageItem);
+				return STORAGE_DECORATOR.supportsTopInnerTrim(ItemResource.of(storageItem));
 			}
 
 			@Override

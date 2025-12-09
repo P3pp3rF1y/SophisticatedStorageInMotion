@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -10,16 +9,19 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
-import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsPayload;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageSettingsPayload;
+
+import javax.annotation.Nullable;
 
 public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IStorageWrapper> {
 	private final int entityId;
-	private CompoundTag lastSettingsNbt = null;
+	@Nullable
+	private ContainerContents.SettingsData lastSettingsData = null;
 
 	protected MovingStorageSettingsContainerMenu(int windowId, Player player, int entityId) {
 		this(ModEntities.MOVING_STORAGE_SETTINGS_CONTAINER_TYPE.get(), windowId, player, entityId);
@@ -40,11 +42,11 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 
 	@Override
 	public void detectSettingsChangeAndReload() {
-		if (player.level().isClientSide) {
+		if (player.level().isClientSide()) {
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				MovingStorageData storage = MovingStorageData.get();
 				if (storage.removeUpdatedStorageSettingsFlag(uuid)) {
-					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).getCompoundOrEmpty(MovingStorageWrapper.SETTINGS_TAG));
+					storageWrapper.getSettingsHandler().reloadFrom(storage.getContents(uuid).settings());
 				}
 			});
 		}
@@ -59,21 +61,17 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 	}
 
 	private void sendStorageSettingsToClient() {
-		if (player.level().isClientSide) {
+		if (player.level().isClientSide()) {
 			return;
 		}
 
-		if (lastSettingsNbt == null || !lastSettingsNbt.equals(storageWrapper.getSettingsHandler().getNbt())) {
-			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
+		if (lastSettingsData == null || !lastSettingsData.equals(storageWrapper.getSettingsHandler().getSettingsData())) {
+			lastSettingsData = storageWrapper.getSettingsHandler().getSettingsData().copy();
 
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
-				CompoundTag settingsContents = new CompoundTag();
-				CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
-				if (!settingsNbt.isEmpty()) {
-					settingsContents.put(MovingStorageWrapper.SETTINGS_TAG, settingsNbt);
-					if (player instanceof ServerPlayer serverPlayer) {
-						PacketDistributor.sendToPlayer(serverPlayer, new MovingStorageContentsPayload(uuid, settingsContents));
-					}
+				ContainerContents.SettingsData settingsData = storageWrapper.getSettingsHandler().getSettingsData();
+				if (player instanceof ServerPlayer serverPlayer) {
+					PacketDistributor.sendToPlayer(serverPlayer, new MovingStorageSettingsPayload(uuid, settingsData));
 				}
 			});
 		}

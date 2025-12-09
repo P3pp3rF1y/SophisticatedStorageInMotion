@@ -24,7 +24,7 @@ public abstract class MixinAbstractHorse extends Animal {
 
 	@Inject(method="openCustomInventoryScreen", at=@At("HEAD"), cancellable=true)
 	private void openStorageScreen(Player player, CallbackInfo ci) {
-		if (!level().isClientSide && (!isVehicle() || hasPassenger(player)) && isTamed() && this instanceof IMovingStorageEntity movingStorage && !movingStorage.getStorageItem().isEmpty()) {
+		if (!level().isClientSide() && (!isVehicle() || hasPassenger(player)) && isTamed() && this instanceof IMovingStorageEntity movingStorage && !movingStorage.getStorageItem().isEmpty()) {
 			movingStorage.getStorageHolder().openContainerMenu(player);
 			ci.cancel();
 		}

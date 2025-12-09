@@ -2,16 +2,11 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.network;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
-import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
@@ -30,25 +25,8 @@ public record RequestMovingStorageInventoryContentsPayload(UUID storageUuid) imp
 	}
 
 	public static void handlePayload(RequestMovingStorageInventoryContentsPayload payload, IPayloadContext context) {
-		CompoundTag baseContentsTag = MovingStorageData.get().getContents(payload.storageUuid);
-		if (!baseContentsTag.contains(StorageWrapper.CONTENTS_TAG)) {
-			return;
-		}
-		CompoundTag contentsTag = baseContentsTag.getCompoundOrEmpty(StorageWrapper.CONTENTS_TAG);
-
-		CompoundTag inventoryContents = new CompoundTag();
-		Tag inventoryNbt = contentsTag.get(InventoryHandler.INVENTORY_TAG);
-		if (inventoryNbt != null) {
-			inventoryContents.put(InventoryHandler.INVENTORY_TAG, inventoryNbt);
-		}
-		Tag upgradeNbt = contentsTag.get(UpgradeHandler.UPGRADE_INVENTORY_TAG);
-		if (upgradeNbt != null) {
-			inventoryContents.put(UpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
-		}
-		CompoundTag newBaseContentsTag = new CompoundTag();
-		newBaseContentsTag.put(StorageWrapper.CONTENTS_TAG, inventoryContents);
 		if (context.player() instanceof ServerPlayer serverPlayer) {
-			PacketDistributor.sendToPlayer(serverPlayer, new MovingStorageContentsPayload(payload.storageUuid, newBaseContentsTag));
+			PacketDistributor.sendToPlayer(serverPlayer, new MovingStorageContentsPayload(payload.storageUuid, MovingStorageData.get().getContents(payload.storageUuid)));
 		}
 	}
 }

@@ -47,8 +47,10 @@ public class MovingStorageItemActionPayloadHandler implements IItemActionPayload
 				ISlotTracker slotTracker = movingStorageEntity.getStorageHolder().getStorageWrapper().getInventoryHandler().getSlotTracker();
 				if (slotTracker.getPartialStacks().contains(stackKey) || slotTracker.getFullStacks().contains(stackKey)) {
 					entitiesWithStack.add(entityId);
-				} else if (slotTracker.getItems().contains(stackKey.getStack().getItem())) {
-					entitiesWithItem.add(entityId);
+				} else {
+					if (slotTracker.getItems().contains(stackKey.stack().getItem())) {
+						entitiesWithItem.add(entityId);
+					}
 				}
 			}
 		});

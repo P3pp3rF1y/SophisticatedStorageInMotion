@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -96,7 +97,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
 		setStorageItem(storageItem);
 		if (setupDefaults && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
-			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
+			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().size());
 			LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
 		}
 	}
@@ -250,8 +251,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 		ItemBase packingTapeItem = ModItems.PACKING_TAPE.get();
 		Component packingTapeItemName = packingTapeItem.getName(new ItemStack(packingTapeItem)).copy().withStyle(ChatFormatting.GREEN);
-		if (player.getServer() != null) {
-			player.getServer().sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
+		if (player instanceof ServerPlayer serverPlayer) {
+			serverPlayer.level().getServer().sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
 					entity.getName().copy().withStyle(ChatFormatting.GREEN),
 					Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED),
 					packingTapeItemName)
