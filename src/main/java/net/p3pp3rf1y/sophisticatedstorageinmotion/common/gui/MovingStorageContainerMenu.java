@@ -23,8 +23,8 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageSettingsPayload;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
@@ -33,8 +33,7 @@ import java.util.Optional;
 public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity> extends StorageContainerMenuBase<IStorageWrapper> implements ISyncedContainer {
 	protected final WeakReference<T> storageEntity;
 
-	@Nullable
-	private ContainerContents.SettingsData lastSettingsData = null;
+	private ContainerContents.@Nullable SettingsData lastSettingsData = null;
 
 	public MovingStorageContainerMenu(int containerId, Player player, int entityId) {
 		this(ModEntities.MOVING_STORAGE_CONTAINER_TYPE.get(), containerId, player, entityId);

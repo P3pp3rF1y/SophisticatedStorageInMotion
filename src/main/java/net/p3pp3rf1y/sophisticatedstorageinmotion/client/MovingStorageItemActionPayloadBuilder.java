@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.p3pp3rf1y.sophisticatedcore.client.ItemInteractionHandler;
@@ -15,7 +15,7 @@ public class MovingStorageItemActionPayloadBuilder implements IItemActionPayload
 	public static final MovingStorageItemActionPayloadBuilder INSTANCE = new MovingStorageItemActionPayloadBuilder();
 
 	@Override
-	public ResourceLocation getPayloadHandlerId() {
+	public Identifier getPayloadHandlerId() {
 		return MovingStorageItemActionPayloadHandler.ID;
 	}
 

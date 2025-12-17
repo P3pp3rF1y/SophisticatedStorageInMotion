@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -18,8 +18,8 @@ import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorage.item.PaintbrushItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +48,7 @@ public class PaintbrushMovingStorageOverlay {
 	}
 
 	private static <T extends Entity & IMovingStorageEntity> Optional<PaintbrushItem.ItemRequirements> getItemRequirements(ItemStack paintbrush, Player player, T movingStorage) {
-		Map<BarrelMaterial, ResourceLocation> materialsToApply = new HashMap<>(PaintbrushItem.getBarrelMaterials(paintbrush));
+		Map<BarrelMaterial, Identifier> materialsToApply = new HashMap<>(PaintbrushItem.getBarrelMaterials(paintbrush));
 		if (!materialsToApply.isEmpty()) {
 			if (!movingStorage.getStorageHolder().canHoldMaterials()) {
 				return Optional.empty();

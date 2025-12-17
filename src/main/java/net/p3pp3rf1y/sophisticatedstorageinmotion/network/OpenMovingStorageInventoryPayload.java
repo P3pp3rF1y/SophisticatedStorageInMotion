@@ -11,7 +11,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
 public record OpenMovingStorageInventoryPayload(int entityId) implements CustomPacketPayload {
-	public static final Type<OpenMovingStorageInventoryPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getRL("open_storage_inventory"));
+	public static final Type<OpenMovingStorageInventoryPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getIdentifier("open_storage_inventory"));
 	public static final StreamCodec<ByteBuf, OpenMovingStorageInventoryPayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT,
 			OpenMovingStorageInventoryPayload::entityId,

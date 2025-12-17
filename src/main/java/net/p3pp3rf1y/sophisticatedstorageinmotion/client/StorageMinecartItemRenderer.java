@@ -6,8 +6,7 @@ import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<StorageMinecart, MovingStorageItemRenderer.RenderData> {
 	@Nullable

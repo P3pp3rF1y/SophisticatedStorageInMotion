@@ -3,7 +3,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -25,10 +25,10 @@ public class MovingStorageItemActionPayloadHandler implements IItemActionPayload
 	private MovingStorageItemActionPayloadHandler() {}
 
 	public static MovingStorageItemActionPayloadHandler INSTANCE = new MovingStorageItemActionPayloadHandler();
-	public static final ResourceLocation ID = SophisticatedStorageInMotion.getRL("moving_storage_item_action");
+	public static final Identifier ID = SophisticatedStorageInMotion.getIdentifier("moving_storage_item_action");
 
 	@Override
-	public ResourceLocation id() {
+	public Identifier id() {
 		return ID;
 	}
 

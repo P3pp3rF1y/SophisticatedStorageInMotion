@@ -6,8 +6,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -18,7 +18,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -34,8 +34,8 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTran
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class StorageMinecart extends MinecartChest implements IMovingStorageEntity {
@@ -179,7 +179,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	@Override
 	public void addChestVehicleSaveData(ValueOutput out) {
 		getLootTable().ifPresent(lootTable -> {
-			out.putString("LootTable", lootTable.location().toString());
+			out.putString("LootTable", lootTable.identifier().toString());
 			if (getContainerLootTableSeed() != 0L) {
 				out.putLong("LootTableSeed", getContainerLootTableSeed());
 			}
@@ -189,7 +189,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	@Override
 	public void readChestVehicleSaveData(ValueInput in) {
 		clearItemStacks();
-		in.getString("LootTable").ifPresent(lootTable -> setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(lootTable))));
+		in.getString("LootTable").ifPresent(lootTable -> setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, Identifier.parse(lootTable))));
 		in.getLong("LootTableSeed").ifPresent(this::setContainerLootTableSeed);
 	}
 
@@ -237,7 +237,8 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	}
 
 	@Override
+	@Nullable
 	public SlotAccess getChestVehicleSlot(int index) {
-		return SlotAccess.NULL;
+		return null;
 	}
 }

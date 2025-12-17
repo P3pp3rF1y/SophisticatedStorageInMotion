@@ -8,8 +8,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class StorageBoatItemRenderer extends MovingStorageItemRenderer<StorageBoat, StorageBoatItemRenderer.BoatRenderData> {
 	@Nullable

@@ -5,7 +5,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.ContextKeys;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.StorageBlockRenderer;
 import org.spongepowered.asm.mixin.Mixin;

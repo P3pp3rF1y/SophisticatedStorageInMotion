@@ -12,7 +12,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.renderer.Rect2i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -42,8 +42,8 @@ import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.co
 public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	@Override
-	public ResourceLocation getPluginUid() {
-		return ResourceLocation.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "default");
+	public Identifier getPluginUid() {
+		return Identifier.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "default");
 	}
 
 	@Override

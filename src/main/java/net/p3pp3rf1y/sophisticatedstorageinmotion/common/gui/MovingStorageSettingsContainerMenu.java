@@ -15,13 +15,12 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageSettingsPayload;
-
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IStorageWrapper> {
 	private final int entityId;
-	@Nullable
-	private ContainerContents.SettingsData lastSettingsData = null;
+
+	private ContainerContents.@Nullable SettingsData lastSettingsData = null;
 
 	protected MovingStorageSettingsContainerMenu(int windowId, Player player, int entityId) {
 		this(ModEntities.MOVING_STORAGE_SETTINGS_CONTAINER_TYPE.get(), windowId, player, entityId);

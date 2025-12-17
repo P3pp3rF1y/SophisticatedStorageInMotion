@@ -13,7 +13,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import java.util.UUID;
 
 public record RequestMovingStorageInventoryContentsPayload(UUID storageUuid) implements CustomPacketPayload {
-	public static final Type<RequestMovingStorageInventoryContentsPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getRL("request_moving_storage_inventory_contents"));
+	public static final Type<RequestMovingStorageInventoryContentsPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getIdentifier("request_moving_storage_inventory_contents"));
 	public static final StreamCodec<ByteBuf, RequestMovingStorageInventoryContentsPayload> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC,
 			RequestMovingStorageInventoryContentsPayload::storageUuid,

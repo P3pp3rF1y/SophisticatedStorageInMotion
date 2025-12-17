@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public record MovingStorageContentsPayload(UUID storageUuid,
 										   ContainerContents contents) implements CustomPacketPayload {
-	public static final Type<MovingStorageContentsPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getRL("storage_contents"));
+	public static final Type<MovingStorageContentsPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getIdentifier("storage_contents"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, MovingStorageContentsPayload> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC,
 			MovingStorageContentsPayload::storageUuid,

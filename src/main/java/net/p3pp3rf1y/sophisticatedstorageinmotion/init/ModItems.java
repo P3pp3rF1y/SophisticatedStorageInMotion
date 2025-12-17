@@ -28,7 +28,7 @@ public class ModItems {
 	}
 
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SophisticatedStorageInMotion.MOD_ID);
-	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.location(), SophisticatedStorageInMotion.MOD_ID);
+	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.identifier(), SophisticatedStorageInMotion.MOD_ID);
 
 	public static final DeferredHolder<Item, StorageMinecartItem> STORAGE_MINECART = ITEMS.registerItem("storage_minecart", StorageMinecartItem::new);
 

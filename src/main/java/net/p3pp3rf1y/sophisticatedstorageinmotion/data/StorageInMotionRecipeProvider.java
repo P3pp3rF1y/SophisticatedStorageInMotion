@@ -152,7 +152,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 				.define('S', MovingStorageIngredient.of(movingStorageItem, storageItem).toVanilla())
 				.define('M', material)
 				.unlockedBy("has_" + storageItemPath, has(storageItem))
-				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(movingStorageItem.getKey().location().getPath() + "_with_" + storageItemPath + "_to_" + BuiltInRegistries.ITEM.getKey(upgradedStorageItem).getPath()));
+				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(movingStorageItem.getKey().identifier().getPath() + "_with_" + storageItemPath + "_to_" + BuiltInRegistries.ITEM.getKey(upgradedStorageItem).getPath()));
 	}
 
 	private void addMovingStorageDiamondToNetheriteTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem) {
@@ -161,7 +161,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 				.requires(MovingStorageIngredient.of(movingStorageItem, storageItem).toVanilla())
 				.requires(Tags.Items.INGOTS_NETHERITE)
 				.unlockedBy("has_" + storageItemPath, has(storageItem))
-				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(movingStorageItem.getKey().location().getPath() + "_with_" + storageItemPath + "_to_" + BuiltInRegistries.ITEM.getKey(upgradedStorageItem).getPath()));
+				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(movingStorageItem.getKey().identifier().getPath() + "_with_" + storageItemPath + "_to_" + BuiltInRegistries.ITEM.getKey(upgradedStorageItem).getPath()));
 	}
 
 	public static class Runner extends RecipeProvider.Runner {

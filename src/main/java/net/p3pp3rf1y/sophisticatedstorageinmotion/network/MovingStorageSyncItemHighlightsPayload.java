@@ -12,7 +12,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.client.MovingStorageHighlightH
 import java.util.List;
 
 public record MovingStorageSyncItemHighlightsPayload(List<Integer> stackEntityIds, List<Integer> itemEntityIds) implements CustomPacketPayload {
-	public static final Type<MovingStorageSyncItemHighlightsPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getRL("moving_storage_sync_item_highlights"));
+	public static final Type<MovingStorageSyncItemHighlightsPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getIdentifier("moving_storage_sync_item_highlights"));
 	public static final StreamCodec<ByteBuf, MovingStorageSyncItemHighlightsPayload> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.INT.apply(ByteBufCodecs.list()),
 			MovingStorageSyncItemHighlightsPayload::stackEntityIds,

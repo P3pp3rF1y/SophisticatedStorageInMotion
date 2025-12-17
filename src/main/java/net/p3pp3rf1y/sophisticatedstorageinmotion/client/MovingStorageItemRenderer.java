@@ -12,10 +12,10 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedstorage.client.render.RenderHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.Set;
+import java.util.function.Consumer;
 
 public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorageEntity, D extends MovingStorageItemRenderer.RenderData> implements SpecialModelRenderer<D> {
 	@Nullable
@@ -42,12 +42,12 @@ public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorag
 	}
 
 	@Override
-	public void getExtents(Set<Vector3f> set) {
+	public void getExtents(Consumer<Vector3fc> consumer) {
 		PoseStack posestack = new PoseStack();
 		T entity = getMovingStorage(Minecraft.getInstance());
 		EntityRenderer<? super T, ?> entityRenderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
 		if (entityRenderer instanceof IMovingStorageRenderer movingStorageRenderer) {
-			movingStorageRenderer.rootModelPart().getExtentsForGui(posestack, set);
+			movingStorageRenderer.rootModelPart().getExtentsForGui(posestack, consumer);
 		}
 	}
 
@@ -65,6 +65,7 @@ public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorag
 
 	public static class RenderData {
 		private final ItemStack storageItem;
+
 		public RenderData(ItemStack storageItem) {
 			this.storageItem = storageItem;
 		}
