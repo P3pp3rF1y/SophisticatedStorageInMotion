@@ -11,7 +11,7 @@ public class StorageInMotionPacketHandler extends PacketHandler {
 	}
 
 	@Override
-	public void init() {
+	public void registerMessages() {
 		registerMessage(OpenMovingStorageInventoryMessage.class, OpenMovingStorageInventoryMessage::encode, OpenMovingStorageInventoryMessage::decode, OpenMovingStorageInventoryMessage::onMessage);
 		registerMessage(MovingStorageContentsMessage.class, MovingStorageContentsMessage::encode, MovingStorageContentsMessage::decode, MovingStorageContentsMessage::onMessage);
 		registerMessage(RequestMovingStorageInventoryContentsMessage.class, RequestMovingStorageInventoryContentsMessage::encode, RequestMovingStorageInventoryContentsMessage::decode, RequestMovingStorageInventoryContentsMessage::onMessage);

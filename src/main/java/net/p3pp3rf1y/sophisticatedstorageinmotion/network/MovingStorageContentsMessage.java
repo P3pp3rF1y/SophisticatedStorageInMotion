@@ -6,13 +6,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
+import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public record MovingStorageContentsMessage(UUID storageUuid, @Nullable CompoundTag contents) {
+public record MovingStorageContentsMessage(UUID storageUuid, @Nullable CompoundTag contents) implements ISplittableMessage {
 
 	public static void encode(MovingStorageContentsMessage msg, FriendlyByteBuf buffer) {
 		buffer.writeUUID(msg.storageUuid);
@@ -20,7 +21,7 @@ public record MovingStorageContentsMessage(UUID storageUuid, @Nullable CompoundT
 	}
 
 	public static MovingStorageContentsMessage decode(FriendlyByteBuf buffer) {
-		return new MovingStorageContentsMessage(buffer.readUUID(), buffer.readNbt());
+		return new MovingStorageContentsMessage(buffer.readUUID(), buffer.readAnySizeNbt());
 	}
 
 	static void onMessage(MovingStorageContentsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
