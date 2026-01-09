@@ -19,6 +19,9 @@ idea {
 if (findProject(':SophisticatedCore') != null) {
     evaluationDependsOn(':SophisticatedCore')
 }
+if (findProject(':SophisticatedStorage') != null) {
+    evaluationDependsOn(':SophisticatedStorage')
+}
 
 repositories {
     mavenCentral()
