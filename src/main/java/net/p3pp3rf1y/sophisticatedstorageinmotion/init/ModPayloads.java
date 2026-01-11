@@ -16,6 +16,5 @@ public class ModPayloads {
 		registrar.playToClient(MovingStorageContentsPayload.TYPE, MovingStorageContentsPayload.STREAM_CODEC, MovingStorageContentsPayload::handlePayload);
 		registrar.playToClient(MovingStorageSettingsPayload.TYPE, MovingStorageSettingsPayload.STREAM_CODEC, MovingStorageSettingsPayload::handlePayload);
 		registrar.playToClient(MovingStorageOpennessPayload.TYPE, MovingStorageOpennessPayload.STREAM_CODEC, MovingStorageOpennessPayload::handlePayload);
-		registrar.playToClient(MovingStorageSyncItemHighlightsPayload.TYPE, MovingStorageSyncItemHighlightsPayload.STREAM_CODEC, MovingStorageSyncItemHighlightsPayload::handlePayload);
 	}
 }

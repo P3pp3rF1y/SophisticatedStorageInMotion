@@ -18,7 +18,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.p3pp3rf1y.sophisticatedcore.common.ItemActionHandlerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderData;
@@ -51,12 +50,6 @@ public class CommonEventHandler {
 		eventBus.addListener(CommonEventHandler::onPacked);
 		eventBus.addListener(CommonEventHandler::onPaintbrushInteract);
 		eventBus.addListener(CommonEventHandler::onStorageUpgradeInteract);
-
-		registerHighlightRequestPayloadHandler();
-	}
-
-	private static void registerHighlightRequestPayloadHandler() {
-		ItemActionHandlerRegistry.register(MovingStorageItemActionPayloadHandler.INSTANCE);
 	}
 
 	private static void onStorageUpgradeInteract(PlayerInteractEvent.EntityInteract event) {
