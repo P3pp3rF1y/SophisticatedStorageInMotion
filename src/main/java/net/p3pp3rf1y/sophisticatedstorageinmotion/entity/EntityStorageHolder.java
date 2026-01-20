@@ -71,7 +71,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		return false;
 	}
 
-	public void setStorageItemFromMovingStorage(ItemStack movingStorageStack, boolean setupDefaults) {
+	public void setStorageItemAndCustomNameFromMovingStorageStack(ItemStack movingStorageStack, boolean setupDefaults) {
 		SimpleItemContent storageItemContents = movingStorageStack.get(ModDataComponents.STORAGE_ITEM.get());
 		if (storageItemContents == null) {
 			ItemStack barrel = new ItemStack(ModBlocks.BARREL_ITEM.get());
@@ -80,6 +80,10 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		} else {
 			ItemStack storageItem = storageItemContents.copy();
 			setStorageItemFrom(storageItem, setupDefaults);
+		}
+		Component customName = movingStorageStack.get(DataComponents.CUSTOM_NAME);
+		if (customName != null) {
+			getEntity().setCustomName(customName);
 		}
 	}
 
