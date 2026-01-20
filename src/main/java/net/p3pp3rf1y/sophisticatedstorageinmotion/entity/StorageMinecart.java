@@ -36,10 +36,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Optional;
-
 public class StorageMinecart extends MinecartChest implements IMovingStorageEntity {
-	private static final EntityDataAccessor<Optional<Component>> DATA_CUSTOM_NAME = SynchedEntityData.defineId(StorageMinecart.class, EntityDataSerializers.OPTIONAL_COMPONENT);
 	static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(StorageMinecart.class, EntityDataSerializers.ITEM_STACK);
 
 	private final EntityStorageHolder<StorageMinecart> entityStorageHolder;
@@ -65,7 +62,6 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_STORAGE_ITEM, ItemStack.EMPTY);
-		builder.define(DATA_CUSTOM_NAME, Optional.empty());
 	}
 
 	@Override
@@ -134,11 +130,6 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 		if (key == DATA_STORAGE_ITEM && level().isClientSide()) {
 			entityStorageHolder.onStorageItemSynced();
 		}
-	}
-
-	@Override
-	public void setCustomName(@Nullable Component customName) {
-		entityData.set(DATA_CUSTOM_NAME, Optional.ofNullable(customName));
 	}
 
 	@Override
