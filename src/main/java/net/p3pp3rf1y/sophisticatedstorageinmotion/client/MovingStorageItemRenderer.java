@@ -24,7 +24,7 @@ public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorag
 
 		T movingStorage = getMovingStorage(mc);
 		setMovingStoragePropertiesFromData(movingStorage, data);
-		movingStorage.getStorageHolder().setStorageItemFrom(data.storageItem(), false);
+		movingStorage.getStorageHolder().setStorageItem(data.storageItem());
 
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0, 0.5);
