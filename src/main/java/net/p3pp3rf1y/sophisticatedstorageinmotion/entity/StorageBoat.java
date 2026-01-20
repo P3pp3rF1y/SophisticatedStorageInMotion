@@ -37,12 +37,9 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 
-import javax.annotation.Nullable;
 import java.util.Locale;
-import java.util.Optional;
 
 public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
-	private static final EntityDataAccessor<Optional<Component>> DATA_CUSTOM_NAME = SynchedEntityData.defineId(StorageBoat.class, EntityDataSerializers.OPTIONAL_COMPONENT);
 	static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(StorageBoat.class, EntityDataSerializers.ITEM_STACK);
 	static final EntityDataAccessor<WoodType> DATA_WOOD_TYPE = SynchedEntityData.defineId(StorageBoat.class, ModEntities.WOOD_TYPE_SERIALIZER.get());
 
@@ -69,7 +66,6 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_STORAGE_ITEM, ItemStack.EMPTY);
-		builder.define(DATA_CUSTOM_NAME, Optional.empty());
 		builder.define(DATA_WOOD_TYPE, WoodType.OAK);
 	}
 
@@ -145,11 +141,6 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 		if (key == DATA_STORAGE_ITEM && level().isClientSide()) {
 			entityStorageHolder.onStorageItemSynced();
 		}
-	}
-
-	@Override
-	public void setCustomName(@Nullable Component customName) {
-		entityData.set(DATA_CUSTOM_NAME, Optional.ofNullable(customName));
 	}
 
 	private Component getWoodName(WoodType type) {
