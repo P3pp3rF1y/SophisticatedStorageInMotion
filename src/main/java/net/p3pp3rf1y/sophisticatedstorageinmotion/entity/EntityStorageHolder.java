@@ -70,7 +70,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		return false;
 	}
 
-	public void setStorageItemFromMovingStorage(ItemStack movingStorageStack, boolean setupDefaults) {
+	public void setStorageItemAndCustomNameFromMovingStorageStack(ItemStack movingStorageStack, boolean setupDefaults) {
 		ItemStack storageItem = NBTHelper.getCompound(movingStorageStack, STORAGE_ITEM_TAG).map(ItemStack::of).orElse(ItemStack.EMPTY);
 		if (storageItem.isEmpty()) {
 			ItemStack barrel = new ItemStack(ModBlocks.BARREL_ITEM.get());
@@ -78,6 +78,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			setStorageItem(barrel);
 		} else {
 			setStorageItemFrom(storageItem, setupDefaults);
+		}
+		if (movingStorageStack.hasCustomHoverName()) {
+			getEntity().setCustomName(movingStorageStack.getHoverName());
 		}
 	}
 

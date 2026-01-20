@@ -37,10 +37,8 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 
 import javax.annotation.Nullable;
 import java.util.Locale;
-import java.util.Optional;
 
 public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
-	private static final EntityDataAccessor<Optional<Component>> DATA_CUSTOM_NAME = SynchedEntityData.defineId(StorageBoat.class, EntityDataSerializers.OPTIONAL_COMPONENT);
 	static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(StorageBoat.class, EntityDataSerializers.ITEM_STACK);
 
 	private final EntityStorageHolder<StorageBoat> entityStorageHolder;
@@ -68,7 +66,6 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		entityData.define(DATA_STORAGE_ITEM, ItemStack.EMPTY);
-		entityData.define(DATA_CUSTOM_NAME, Optional.empty());
 	}
 
 	@Override
@@ -141,16 +138,6 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 		if (key == DATA_STORAGE_ITEM && level().isClientSide()) {
 			entityStorageHolder.onStorageItemSynced();
 		}
-	}
-
-	@Override
-	public void setCustomName(@Nullable Component customName) {
-		entityData.set(DATA_CUSTOM_NAME, Optional.ofNullable(customName));
-	}
-
-	@Override
-	public Component getCustomName() {
-		return entityData.get(DATA_CUSTOM_NAME).orElse(Component.empty());
 	}
 
 	private Component getWoodName(Boat.Type type) {
