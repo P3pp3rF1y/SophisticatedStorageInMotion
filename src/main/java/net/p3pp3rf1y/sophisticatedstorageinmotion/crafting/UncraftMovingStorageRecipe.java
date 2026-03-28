@@ -1,7 +1,9 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.crafting;
 
-import net.minecraft.core.HolderLookup;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -14,9 +16,13 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import java.util.Optional;
 
 public class UncraftMovingStorageRecipe extends CustomRecipe {
+	public static final UncraftMovingStorageRecipe INSTANCE = new UncraftMovingStorageRecipe(CraftingBookCategory.MISC);
+	public static final MapCodec<UncraftMovingStorageRecipe> MAP_CODEC = MapCodec.unit(INSTANCE);
+	public static final StreamCodec<RegistryFriendlyByteBuf, UncraftMovingStorageRecipe> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+	public static final RecipeSerializer<UncraftMovingStorageRecipe> SERIALIZER = new RecipeSerializer<>(MAP_CODEC, STREAM_CODEC);
 
 	public UncraftMovingStorageRecipe(CraftingBookCategory category) {
-		super(category);
+		super();
 	}
 
 	@Override
@@ -52,7 +58,7 @@ public class UncraftMovingStorageRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+	public ItemStack assemble(CraftingInput input) {
 		return getMovingStorage(input).map(MovingStorageItem::getStorageItem).orElse(ItemStack.EMPTY);
 	}
 

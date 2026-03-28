@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.p3pp3rf1y.sophisticatedstorage.client.gui.LimitedBarrelScreen;
@@ -14,13 +14,13 @@ public class MovingLimitedBarrelScreen extends MovingStorageScreen {
 	}
 
 	@Override
-	protected void drawSlotBg(GuiGraphics guiGraphics, int x, int y, int visibleSlotsCount) {
+	protected void drawSlotBg(GuiGraphicsExtractor guiGraphics, int x, int y, int visibleSlotsCount) {
 		LimitedBarrelScreen.drawSlotBg(this, guiGraphics, x, y, getMenu().getNumberOfStorageInventorySlots());
 	}
 
 	@Override
-	protected void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-		super.renderLabels(guiGraphics, mouseX, mouseY);
+	protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
+		super.extractLabels(guiGraphics, mouseX, mouseY);
 		LimitedBarrelScreen.renderBars(font, imageWidth, getMenu(), guiGraphics, getMenu()::getSlotFillPercentage);
 	}
 

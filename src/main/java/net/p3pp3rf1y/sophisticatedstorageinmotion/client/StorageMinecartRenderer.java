@@ -4,10 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
 import net.minecraft.client.renderer.entity.AbstractMinecartRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.MinecartRenderState;
-import net.minecraft.world.level.block.state.BlockState;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ShulkerBoxBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
@@ -30,7 +30,7 @@ public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMin
 	}
 
 	@Override
-	protected void submitMinecartContents(MinecartRenderState minecartRenderState, BlockState blockState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
+	protected void submitMinecartContents(MinecartRenderState minecartRenderState, BlockModelRenderState blockModel, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
 		StorageBlockEntity renderBlockEntity = minecartRenderState.getRenderData(ContextKeys.RENDER_BLOCK_ENTITY);
 		if (renderBlockEntity == null) {
 			return;

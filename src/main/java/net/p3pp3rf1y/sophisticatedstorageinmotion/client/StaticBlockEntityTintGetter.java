@@ -2,7 +2,8 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,8 +24,8 @@ class StaticBlockEntityTintGetter implements BlockAndTintGetter {
 	}
 
 	@Override
-	public float getShade(Direction direction, boolean b) {
-		return level.getShade(direction, b);
+	public CardinalLighting cardinalLighting() {
+		return level.cardinalLighting();
 	}
 
 	@Override

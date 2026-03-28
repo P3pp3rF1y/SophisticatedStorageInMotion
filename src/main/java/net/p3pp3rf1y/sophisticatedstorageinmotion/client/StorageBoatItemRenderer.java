@@ -46,17 +46,17 @@ public class StorageBoatItemRenderer extends MovingStorageItemRenderer<StorageBo
 		}
 	}
 
-	public static class Unbaked implements SpecialModelRenderer.Unbaked {
+	public static class Unbaked implements SpecialModelRenderer.Unbaked<BoatRenderData> {
 		public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
 
 		@Nullable
 		@Override
-		public SpecialModelRenderer<?> bake(BakingContext bakingContext) {
+		public SpecialModelRenderer<BoatRenderData> bake(BakingContext bakingContext) {
 			return new StorageBoatItemRenderer();
 		}
 
 		@Override
-		public MapCodec<? extends Unbaked> type() {
+		public MapCodec<? extends SpecialModelRenderer.Unbaked<BoatRenderData>> type() {
 			return MAP_CODEC;
 		}
 	}

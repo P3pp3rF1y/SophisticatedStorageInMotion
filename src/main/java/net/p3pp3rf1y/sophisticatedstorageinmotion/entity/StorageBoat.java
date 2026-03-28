@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.transfer.item.ItemResource;
@@ -169,9 +170,9 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	}
 
 	@Override
-	public InteractionResult interact(Player player, InteractionHand hand) {
+	public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
 		if (!player.isSecondaryUseActive()) {
-			InteractionResult result = super.interact(player, hand);
+			InteractionResult result = super.interact(player, hand, location);
 			if (result != InteractionResult.PASS) {
 				return result;
 			}

@@ -1,9 +1,10 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.crafting;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
@@ -15,9 +16,11 @@ import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
+import java.util.List;
 import java.util.Optional;
 
 public class MovingStorageFromStorageRecipe extends CustomShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
+	public static final RecipeSerializer<MovingStorageFromStorageRecipe> SERIALIZER = RecipeWrapperSerializer.create(MovingStorageFromStorageRecipe::new, ShapelessRecipe.SERIALIZER);
 	private final ShapelessRecipe compose;
 
 	public MovingStorageFromStorageRecipe(ShapelessRecipe compose) {
@@ -46,8 +49,8 @@ public class MovingStorageFromStorageRecipe extends CustomShapelessRecipe implem
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-		ItemStack movingStorageItem = super.assemble(input, registries);
+	public ItemStack assemble(CraftingInput input) {
+		ItemStack movingStorageItem = super.assemble(input);
 		getStorage(input).ifPresent(storage -> MovingStorageItem.setStorageItem(movingStorageItem, storage));
 		return movingStorageItem;
 	}
@@ -62,9 +65,29 @@ public class MovingStorageFromStorageRecipe extends CustomShapelessRecipe implem
 		return ModItems.MOVING_STORAGE_FROM_STORAGE_SERIALIZER.get();
 	}
 
-	public static class Serializer extends RecipeWrapperSerializer<ShapelessRecipe, MovingStorageFromStorageRecipe> {
-		public Serializer() {
-			super(MovingStorageFromStorageRecipe::new, RecipeSerializer.SHAPELESS_RECIPE);
-		}
+	@Override
+	public boolean showNotification() {
+		return compose.showNotification();
 	}
+
+	@Override
+	public String group() {
+		return compose.group();
+	}
+
+	@Override
+	public CraftingBookCategory category() {
+		return compose.category();
+	}
+
+	@Override
+	public PlacementInfo placementInfo() {
+		return compose.placementInfo();
+	}
+
+	@Override
+	public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
+		return compose.display();
+	}
+
 }

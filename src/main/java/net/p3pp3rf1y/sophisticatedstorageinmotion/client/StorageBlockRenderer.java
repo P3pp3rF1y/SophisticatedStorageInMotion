@@ -1,34 +1,30 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.renderer.block.BlockStateModelSet;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.equine.Donkey;
 import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.animal.equine.Mule;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.RenderTypeHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ChestBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
@@ -36,42 +32,26 @@ import net.p3pp3rf1y.sophisticatedstorage.client.render.BarrelBlockStateModelBas
 import net.p3pp3rf1y.sophisticatedstorage.client.render.RenderHelper;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class StorageBlockRenderer {
 	public static void submitStorageBlock(float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, StorageBlockEntity renderBlockEntity) {
-		BlockState state = renderBlockEntity.getBlockState();
 		Minecraft minecraft = Minecraft.getInstance();
-		if (renderBlockEntity instanceof BarrelBlockEntity barrel) {
-			BlockRenderDispatcher blockRenderer = minecraft.getBlockRenderer();
-			BlockStateModel blockStateModel = blockRenderer.getBlockModel(barrel.getBlockState());
+		BlockState state = renderBlockEntity.getBlockState();
+		if (renderBlockEntity instanceof BarrelBlockEntity barrel && minecraft.level != null) {
+			BlockStateModelSet blockModelSet = minecraft.getModelManager().getBlockStateModelSet();
+			BlockStateModel blockStateModel = blockModelSet.get(state);
 			if (blockStateModel instanceof BarrelBlockStateModelBase barrelModel) {
 				barrelModel.setModelPropertiesFromBlockEntity(barrel);
 			}
-			BlockAndTintGetter wrappedLevel = new StaticBlockEntityTintGetter(minecraft.level, renderBlockEntity, packedLight); //TODO try to optimize not to create a new instance all the time, perhaps level keyed cache for these and then only setting blockentity in the render call
-			List<BlockModelPart> parts = blockStateModel.collectParts(wrappedLevel, BlockPos.ZERO, state, RandomSource.create(42L));
-			List<BlockModelPart> translucentParts = new ArrayList<>();
-			Iterator<BlockModelPart> it = parts.iterator();
-			while (it.hasNext()) {
-				BlockModelPart part = it.next();
-				if (part.getRenderType(barrel.getBlockState()) == ChunkSectionLayer.TRANSLUCENT) {
-					translucentParts.add(part);
-					it.remove();
-				}
-			}
-			submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.entityCutout(TextureAtlas.LOCATION_BLOCKS), (pose, vertexConsumer) -> {
-				for (BlockModelPart part : parts) {
-					renderBlockModelPart(packedLight, pose, vertexConsumer, part, state, wrappedLevel);
-				}
-			});
-			if (!translucentParts.isEmpty()) {
-				submitNodeCollector.submitCustomGeometry(poseStack, RenderTypeHelper.getEntityRenderType(ChunkSectionLayer.TRANSLUCENT), (pose, vertexConsumer) -> {
-					for (BlockModelPart translucentPart : translucentParts) {
-						renderBlockModelPart(packedLight, pose, vertexConsumer, translucentPart, state, wrappedLevel);
-					}
-				});
-			}
+			StaticBlockEntityTintGetter wrappedLevel = new StaticBlockEntityTintGetter(minecraft.level, renderBlockEntity, packedLight);
+			List<BlockStateModelPart> parts = new ArrayList<>();
+			blockStateModel.collectParts(wrappedLevel, BlockPos.ZERO, state, RandomSource.create(42L), parts);
+			submitModelParts(poseStack, submitNodeCollector, state, wrappedLevel, parts, packedLight);
 		}
 
 		BlockEntityRenderer<StorageBlockEntity, ? extends BlockEntityRenderState> renderer = minecraft.getBlockEntityRenderDispatcher().getRenderer(renderBlockEntity);
@@ -81,34 +61,59 @@ public class StorageBlockRenderer {
 		submitBlockEntityRender(renderer, renderBlockEntity, partialTicks, poseStack, submitNodeCollector, packedLight);
 	}
 
-	private static void renderBlockModelPart(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part, BlockState state, BlockAndTintGetter wrappedLevel) {
-		for (Direction direction : Direction.values()) {
-			renderBlockModelPartQuads(packedLight, pose, vertexConsumer, part, direction, state, wrappedLevel);
-		}
-		renderBlockModelPartQuads(packedLight, pose, vertexConsumer, part, null, state, wrappedLevel);
-	}
-
-	private static void renderBlockModelPartQuads(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part, @Nullable Direction direction, BlockState state, BlockAndTintGetter wrappedLevel) {
-		for (BakedQuad quad : part.getQuads(direction)) {
-			float red = 1.0F;
-			float green = 1.0F;
-			float blue = 1.0F;
-			if (quad.isTinted()) {
-				int tint = Minecraft.getInstance().getBlockColors().getColor(state, wrappedLevel, BlockPos.ZERO, quad.tintIndex());
-				red = ARGB.redFloat(tint);
-				green = ARGB.greenFloat(tint);
-				blue = ARGB.blueFloat(tint);
-			}
-			vertexConsumer.putBulkData(pose, quad, red, green, blue, 1, packedLight, OverlayTexture.NO_OVERLAY);
-		}
-	}
-
 	private static <T extends BlockEntity, S extends BlockEntityRenderState> void submitBlockEntityRender(
 			BlockEntityRenderer<T, S> renderer, T blockEntity, float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
 		S renderState = renderer.createRenderState();
 		renderer.extractRenderState(blockEntity, renderState, partialTicks, Vec3.ZERO, null);
 		renderState.lightCoords = packedLight;
 		renderer.submit(renderState, poseStack, submitNodeCollector, RenderHelper.ZERO_POS_CAMERA_RENDER_STATE);
+	}
+
+	private static void submitModelParts(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, BlockState state, StaticBlockEntityTintGetter wrappedLevel, List<BlockStateModelPart> parts, int packedLight) {
+		List<BakedQuad> cutoutQuads = new ArrayList<>();
+		List<BakedQuad> translucentQuads = new ArrayList<>();
+		for (BlockStateModelPart part : parts) {
+			collectPartQuads(part, cutoutQuads, translucentQuads);
+		}
+
+		if (!cutoutQuads.isEmpty()) {
+			submitQuads(poseStack, submitNodeCollector, state, wrappedLevel, packedLight, cutoutQuads, Sheets.cutoutBlockSheet());
+		}
+		if (!translucentQuads.isEmpty()) {
+			submitQuads(poseStack, submitNodeCollector, state, wrappedLevel, packedLight, translucentQuads, Sheets.translucentBlockSheet());
+		}
+	}
+
+	private static void collectPartQuads(BlockStateModelPart part, List<BakedQuad> cutoutQuads, List<BakedQuad> translucentQuads) {
+		for (Direction direction : Direction.values()) {
+			for (BakedQuad quad : part.getQuads(direction)) {
+				(quad.materialInfo().layer().translucent() ? translucentQuads : cutoutQuads).add(quad);
+			}
+		}
+		for (BakedQuad quad : part.getQuads(null)) {
+			(quad.materialInfo().layer().translucent() ? translucentQuads : cutoutQuads).add(quad);
+		}
+	}
+
+	private static void submitQuads(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, BlockState state, StaticBlockEntityTintGetter wrappedLevel, int packedLight, List<BakedQuad> quads, net.minecraft.client.renderer.rendertype.RenderType renderType) {
+		submitNodeCollector.submitCustomGeometry(poseStack, renderType, (pose, vertexConsumer) -> {
+			QuadInstance quadInstance = new QuadInstance();
+			quadInstance.setLightCoords(packedLight);
+			quadInstance.setOverlayCoords(OverlayTexture.NO_OVERLAY);
+			for (BakedQuad quad : quads) {
+				int tintIndex = quad.materialInfo().tintIndex();
+				quadInstance.setColor(getTintColor(state, wrappedLevel, tintIndex));
+				vertexConsumer.putBakedQuad(pose, quad, quadInstance);
+			}
+		});
+	}
+
+	private static int getTintColor(BlockState state, StaticBlockEntityTintGetter wrappedLevel, int tintIndex) {
+		if (tintIndex == -1) {
+			return -1;
+		}
+		BlockTintSource tintSource = Minecraft.getInstance().getBlockColors().getTintSource(state, tintIndex);
+		return tintSource == null ? -1 : tintSource.colorInWorld(state, wrappedLevel, BlockPos.ZERO);
 	}
 
 	private static final Map<Class<? extends AbstractChestedHorse>, Function<StorageBlockEntity, Vec3>> OFFSET_MAP = new LinkedHashMap<>();

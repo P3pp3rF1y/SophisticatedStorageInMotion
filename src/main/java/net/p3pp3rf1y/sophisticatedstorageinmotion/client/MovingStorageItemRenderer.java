@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedstorage.client.render.RenderHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
@@ -22,7 +21,7 @@ public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorag
 	private T movingStorage = null;
 
 	@Override
-	public void submit(@Nullable D data, ItemDisplayContext itemDisplayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int color) {
+	public void submit(@Nullable D data, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int color) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.level == null || data == null) {
 			return;

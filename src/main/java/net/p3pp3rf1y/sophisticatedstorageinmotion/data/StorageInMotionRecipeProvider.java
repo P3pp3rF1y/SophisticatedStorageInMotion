@@ -9,6 +9,7 @@ import net.minecraft.data.recipes.*;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.neoforge.common.Tags;
@@ -35,7 +36,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 
 	@Override
 	protected void buildRecipes() {
-		SpecialRecipeBuilder.special(UncraftMovingStorageRecipe::new).save(output, SophisticatedStorageInMotion.getRegistryName("uncraft_moving_storage"));
+		SpecialRecipeBuilder.special(() -> UncraftMovingStorageRecipe.INSTANCE).save(output, SophisticatedStorageInMotion.getRegistryName("uncraft_moving_storage"));
 
 		ShapelessBasedRecipeBuilder.shapeless(items, ModItems.STORAGE_MINECART.get(), MovingStorageFromStorageRecipe::new)
 				.requires(Items.MINECART)
@@ -45,7 +46,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 
 		addStorageBoatFromStorageRecipes(output);
 
-		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, MovingStorageItem.createWithStorage(new ItemStack(ModItems.STORAGE_MINECART.get()), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK)))
+		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, ItemStackTemplate.fromNonEmptyStack(MovingStorageItem.createWithStorage(new ItemStack(ModItems.STORAGE_MINECART.get()), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK))))
 				.requires(Items.CHEST_MINECART)
 				.requires(Items.REDSTONE_TORCH)
 				.unlockedBy("has_chest_minecart", has(Items.CHEST_MINECART))
@@ -71,7 +72,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 	}
 
 	private void addVanillaChestBoatConversionRecipe(RecipeOutput recipeOutput, WoodType woodType, Item vanillaChestBoat) {
-		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, MovingStorageItem.createWithStorage(StorageBoatItem.setWoodType(new ItemStack(ModItems.STORAGE_BOAT.get()), woodType), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK)))
+		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, ItemStackTemplate.fromNonEmptyStack(MovingStorageItem.createWithStorage(StorageBoatItem.setWoodType(new ItemStack(ModItems.STORAGE_BOAT.get()), woodType), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK))))
 				.requires(vanillaChestBoat)
 				.requires(Items.REDSTONE_TORCH)
 				.unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(vanillaChestBoat).getPath(), has(vanillaChestBoat))
@@ -146,7 +147,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 		addMovingStorageTierUpgradeRecipe(recipeOutput, movingStorageItem, storageItem, upgradedStorageItem, material, builder -> builder.pattern("MMM").pattern("MSM").pattern("MMM"));
 	}
 
-	private void addMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material, UnaryOperator<ShapedRecipeBuilder> patternInit) {
+	private void addMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material, UnaryOperator<ShapeBasedRecipeBuilder> patternInit) {
 		String storageItemPath = BuiltInRegistries.ITEM.getKey(storageItem).getPath();
 		patternInit.apply(ShapeBasedRecipeBuilder.shaped(items, MovingStorageItem.createWithStorage(new ItemStack(movingStorageItem.value()), new ItemStack(upgradedStorageItem)), MovingStorageTierUpgradeShapedRecipe::new))
 				.define('S', MovingStorageIngredient.of(movingStorageItem, storageItem).toVanilla())

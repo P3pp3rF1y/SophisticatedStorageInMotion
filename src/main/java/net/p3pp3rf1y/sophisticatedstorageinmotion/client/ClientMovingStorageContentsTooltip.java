@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -21,9 +21,8 @@ public class ClientMovingStorageContentsTooltip extends ClientStorageContentsToo
 		lastRequestTime = 0;
 	}
 
-	@Override
-	public void renderImage(Font font, int leftX, int topY, int width, int height, GuiGraphics guiGraphics) {
-		renderTooltip(MovingStorageItem.getMovingStorageWrapper(movingStorage), font, leftX, topY, guiGraphics);
+	public void renderImage(Font font, int leftX, int topY, int width, int height, GuiGraphicsExtractor guiGraphics) {
+		extractTooltip(MovingStorageItem.getMovingStorageWrapper(movingStorage), font, leftX, topY, guiGraphics);
 	}
 
 	public ClientMovingStorageContentsTooltip(MovingStorageItem.MovingStorageContentsTooltip tooltip) {

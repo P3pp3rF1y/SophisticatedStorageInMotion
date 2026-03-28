@@ -6,6 +6,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
@@ -27,21 +28,11 @@ public class MovingStorageIngredient implements ICustomIngredient {
 	);
 	private final Holder<Item> movingStorageItem;
 	private final Holder<Item> storageItem;
-	private final List<ItemStack> movingStorages;
+	private List<ItemStack> movingStorages = null;
 
 	private MovingStorageIngredient(Holder<Item> movingStorageItem, Holder<Item> storageItem) {
 		this.movingStorageItem = movingStorageItem;
 		this.storageItem = storageItem;
-		List<ItemStack> storageItemCreativeTabItems = new ArrayList<>();
-		if (storageItem.value() instanceof BlockItemBase itemBase) {
-			itemBase.addCreativeTabItems(storageItemCreativeTabItems::add);
-		}
-		movingStorages = new ArrayList<>();
-		storageItemCreativeTabItems.forEach(storageItemStack -> {
-			ItemStack movingStorageStack = new ItemStack(movingStorageItem);
-			MovingStorageItem.setStorageItem(movingStorageStack, storageItemStack);
-			movingStorages.add(movingStorageStack);
-		});
 	}
 
 	public static MovingStorageIngredient of(Holder<Item> movingStorageItem, Item storageItem) {
@@ -70,6 +61,25 @@ public class MovingStorageIngredient implements ICustomIngredient {
 
 	@Override
 	public SlotDisplay display() {
-		return new SlotDisplay.Composite(movingStorages.stream().map(SlotDisplay.ItemStackSlotDisplay::new).map(SlotDisplay.class::cast).toList());
+		return new SlotDisplay.Composite(getMovingStorages().stream().map(ItemStackTemplate::fromNonEmptyStack).map(SlotDisplay.ItemStackSlotDisplay::new).map(SlotDisplay.class::cast).toList());
+	}
+
+	private List<ItemStack> getMovingStorages() {
+		if (movingStorages != null) {
+			return movingStorages;
+		}
+
+		List<ItemStack> storageItemCreativeTabItems = new ArrayList<>();
+		if (storageItem.value() instanceof BlockItemBase itemBase) {
+			itemBase.addCreativeTabItems(storageItemCreativeTabItems::add);
+		}
+
+		movingStorages = new ArrayList<>();
+		storageItemCreativeTabItems.forEach(storageItemStack -> {
+			ItemStack movingStorageStack = new ItemStack(movingStorageItem);
+			MovingStorageItem.setStorageItem(movingStorageStack, storageItemStack);
+			movingStorages.add(movingStorageStack);
+		});
+		return movingStorages;
 	}
 }

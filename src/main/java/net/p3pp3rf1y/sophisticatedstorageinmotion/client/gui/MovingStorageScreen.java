@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
@@ -47,7 +47,7 @@ public class MovingStorageScreen extends StorageScreenBase<MovingStorageContaine
 	}
 
 	@Override
-	protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
+	protected void extractBg(GuiGraphicsExtractor guiGraphics, float partialTicks, int mouseX, int mouseY) {
 		getMenu().getStorageEntity().ifPresent(entity -> {
 			if (entity instanceof AbstractChestedHorse horse) {
 				int y = getHorseControlY();
@@ -59,10 +59,10 @@ public class MovingStorageScreen extends StorageScreenBase<MovingStorageContaine
 				int entityViewX = x + HORSE_WIDGET_WIDTH - HORSE_VIEW_PADDING - HORSE_VIEW_SIZE;
 				int entityViewY = y + HORSE_VIEW_PADDING;
 				guiGraphics.fill(entityViewX, entityViewY, entityViewX + HORSE_VIEW_SIZE, entityViewY + HORSE_VIEW_SIZE, 0xFF_000000);
-				InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, entityViewX, entityViewY, entityViewX + HORSE_VIEW_SIZE, entityViewY + HORSE_VIEW_SIZE, 17, 0.25F, mouseX, mouseY, horse);
+				InventoryScreen.extractEntityInInventoryFollowsMouse(guiGraphics, entityViewX, entityViewY, entityViewX + HORSE_VIEW_SIZE, entityViewY + HORSE_VIEW_SIZE, 17, 0.25F, mouseX, mouseY, horse);
 			}
 		});
-		super.renderBg(guiGraphics, partialTicks, mouseX, mouseY);
+		super.extractBg(guiGraphics, partialTicks, mouseX, mouseY);
 	}
 
 	private int getHorseControlY() {

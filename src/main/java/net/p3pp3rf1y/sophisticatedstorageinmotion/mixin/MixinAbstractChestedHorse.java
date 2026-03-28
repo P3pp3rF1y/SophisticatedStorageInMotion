@@ -96,19 +96,19 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public List<Slot> instantiateExtraSlots() {
-		if (canUseSlot(EquipmentSlot.BODY) && (getType().is(EntityTypeTags.CAN_WEAR_HORSE_ARMOR) || ((Object) this) instanceof Llama)) {
+		if (canUseSlot(EquipmentSlot.BODY) && (((AbstractChestedHorse) (Object) this).is(EntityTypeTags.CAN_WEAR_HORSE_ARMOR) || ((Object) this) instanceof Llama)) {
 			Container container = createEquipmentSlotContainer(EquipmentSlot.BODY);
 			return List.of(new ArmorSlot(container, this, EquipmentSlot.BODY, 0, 8, 36, ((Object) this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
 				public boolean mayPlace(ItemStack stack) {
 					return isEquippableInSlot(stack, EquipmentSlot.BODY);
 				}
 			});
-		} else if (canUseSlot(EquipmentSlot.SADDLE) && getType().is(EntityTypeTags.CAN_EQUIP_SADDLE)) {
+		} else if (canUseSlot(EquipmentSlot.SADDLE) && ((AbstractChestedHorse) (Object) this).is(EntityTypeTags.CAN_EQUIP_SADDLE)) {
 			Container container = createEquipmentSlotContainer(EquipmentSlot.SADDLE);
 			return List.of(new ArmorSlot(container, this, EquipmentSlot.SADDLE, 0, 0, 0, SADDLE_SLOT_SPRITE) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return stack.is(Items.SADDLE) && !hasItem() && canUseSlot(EquipmentSlot.SADDLE) && getType().is(EntityTypeTags.CAN_EQUIP_SADDLE);
+					return stack.is(Items.SADDLE) && !hasItem() && canUseSlot(EquipmentSlot.SADDLE) && ((AbstractChestedHorse) (Object) this).is(EntityTypeTags.CAN_EQUIP_SADDLE);
 				}
 			});
 		}

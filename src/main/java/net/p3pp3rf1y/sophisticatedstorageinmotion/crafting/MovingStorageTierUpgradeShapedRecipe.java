@@ -1,10 +1,13 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.crafting;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -12,13 +15,14 @@ import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
+import java.util.List;
 import java.util.Optional;
 
-public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implements IWrapperRecipe<ShapedRecipe> {
+public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWrapperRecipe<ShapedRecipe> {
+	public static final RecipeSerializer<MovingStorageTierUpgradeShapedRecipe> SERIALIZER = RecipeWrapperSerializer.create(MovingStorageTierUpgradeShapedRecipe::new, ShapedRecipe.SERIALIZER);
 	private final ShapedRecipe compose;
 
 	public MovingStorageTierUpgradeShapedRecipe(ShapedRecipe compose) {
-		super(compose.group(), compose.category(), compose.pattern, compose.result);
 		this.compose = compose;
 	}
 
@@ -28,8 +32,13 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
-		ItemStack upgradedMovingStorage = super.assemble(input, registries);
+	public boolean matches(CraftingInput input, Level level) {
+		return compose.matches(input, level) && getOriginalMovingStorage(input).isPresent();
+	}
+
+	@Override
+	public ItemStack assemble(CraftingInput input) {
+		ItemStack upgradedMovingStorage = compose.assemble(input);
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
 			ItemStack upgradedStorageItem = MovingStorageItem.getStorageItem(upgradedMovingStorage);
@@ -63,9 +72,29 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 		return ModItems.MOVING_STORAGE_TIER_UPGRADE_SHAPED_RECIPE_SERIALIZER.get();
 	}
 
-	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, MovingStorageTierUpgradeShapedRecipe> {
-		public Serializer() {
-			super(MovingStorageTierUpgradeShapedRecipe::new, RecipeSerializer.SHAPED_RECIPE);
-		}
+	@Override
+	public boolean showNotification() {
+		return compose.showNotification();
 	}
+
+	@Override
+	public String group() {
+		return compose.group();
+	}
+
+	@Override
+	public CraftingBookCategory category() {
+		return compose.category();
+	}
+
+	@Override
+	public PlacementInfo placementInfo() {
+		return compose.placementInfo();
+	}
+
+	@Override
+	public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
+		return compose.display();
+	}
+
 }

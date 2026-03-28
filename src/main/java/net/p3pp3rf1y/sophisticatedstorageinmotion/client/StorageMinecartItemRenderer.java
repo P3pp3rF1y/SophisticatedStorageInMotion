@@ -25,17 +25,17 @@ public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<Stora
 		return new StorageMinecart(mc.level);
 	}
 
-	public static class Unbaked implements SpecialModelRenderer.Unbaked {
+	public static class Unbaked implements SpecialModelRenderer.Unbaked<RenderData> {
 		public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
 
 		@Nullable
 		@Override
-		public SpecialModelRenderer<?> bake(BakingContext bakingContext) {
+		public SpecialModelRenderer<RenderData> bake(BakingContext bakingContext) {
 			return new StorageMinecartItemRenderer();
 		}
 
 		@Override
-		public MapCodec<? extends Unbaked> type() {
+		public MapCodec<? extends SpecialModelRenderer.Unbaked<RenderData>> type() {
 			return MAP_CODEC;
 		}
 	}

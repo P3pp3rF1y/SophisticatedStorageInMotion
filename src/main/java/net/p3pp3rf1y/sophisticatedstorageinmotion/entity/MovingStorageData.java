@@ -4,13 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.fml.util.thread.SidedThreadGroups;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
@@ -28,11 +29,11 @@ import java.util.*;
 
 //TODO after 1.22 remove support for legacy UUID deserialization via strings
 public class MovingStorageData extends SavedData implements IStorageSavedData {
-	private static final SavedDataType<MovingStorageData> TYPE = new SavedDataType<>(SophisticatedStorageInMotion.MOD_ID, MovingStorageData::new,
+	private static final SavedDataType<MovingStorageData> TYPE = new SavedDataType<>(Identifier.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "moving_storage_data"), MovingStorageData::new,
 			RecordCodecBuilder.create(
 					builder -> builder.group(
 							Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, ContainerContents.CODEC)
-									.fieldOf("storageContents").forGetter(data -> data.movingStorageContents)
+									.fieldOf("storageContents").forGetter((MovingStorageData data) -> data.movingStorageContents)
 					).apply(builder, MovingStorageData::new)
 			));
 
@@ -54,7 +55,7 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
 				//noinspection ConstantConditions - by this time overworld is loaded
-				DimensionDataStorage storage = overworld.getDataStorage();
+				SavedDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(TYPE);
 			}
 		}
