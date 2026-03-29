@@ -10,9 +10,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.horse.Donkey;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -22,8 +26,13 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
+import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeRenderData;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
+import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
@@ -45,6 +54,10 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
+
+import com.mojang.math.Axis;
+import org.joml.Vector3f;
 
 public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase {
 	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
@@ -94,6 +107,27 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		}
 
 		return super.getUpgradeRenderYOffset();
+	}
+
+	@Override
+	protected UnaryOperator<Vector3f> getUpgradeRenderPosition() {
+		if (entity instanceof AbstractChestedHorse chestedHorse) {
+			int side = (entity.tickCount / 20) % 2 == 0 ? 1 : -1;
+			return vector -> getChestedHorseUpgradeRenderPoint(chestedHorse, side, vector);
+		}
+
+		return super.getUpgradeRenderPosition();
+	}
+
+	private Vector3f getChestedHorseUpgradeRenderPoint(AbstractChestedHorse chestedHorse, int side, Vector3f vector) {
+		Vector3f point = new Vector3f(vector);
+		point.rotate(Axis.YN.rotationDegrees(side > 0 ? 90.0F : -90.0F));
+		point.add((float) (chestedHorse.getBbWidth() * (chestedHorse instanceof Llama ? 0.75F : 0.62F)) * side,
+				(float) (chestedHorse.getBbHeight() * (chestedHorse instanceof Llama ? 0.62F : 0.55F)),
+				chestedHorse instanceof Llama ? -0.08F : -0.05F);
+		point.rotate(Axis.YN.rotationDegrees(chestedHorse.yBodyRot - 180.0F));
+		point.add(chestedHorse.position().toVector3f());
+		return point;
 	}
 
 	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
