@@ -1,6 +1,10 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.crafting;
 
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -9,7 +13,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
-import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
@@ -17,13 +20,30 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWrapperRecipe<ShapedRecipe> {
-	public static final RecipeSerializer<MovingStorageTierUpgradeShapedRecipe> SERIALIZER = RecipeWrapperSerializer.create(MovingStorageTierUpgradeShapedRecipe::new, ShapedRecipe.SERIALIZER);
+	public static final RecipeSerializer<MovingStorageTierUpgradeShapedRecipe> SERIALIZER = new RecipeSerializer<>(
+			RecordCodecBuilder.mapCodec(instance -> instance.group(
+					ShapedRecipe.SERIALIZER.codec().forGetter(MovingStorageTierUpgradeShapedRecipe::getCompose),
+					ItemStackTemplate.CODEC.fieldOf("upgraded_storage_result").forGetter(MovingStorageTierUpgradeShapedRecipe::getUpgradedStorageResult)
+			).apply(instance, MovingStorageTierUpgradeShapedRecipe::new)),
+			StreamCodec.composite(
+					ShapedRecipe.SERIALIZER.streamCodec(), MovingStorageTierUpgradeShapedRecipe::getCompose,
+					ItemStackTemplate.STREAM_CODEC, MovingStorageTierUpgradeShapedRecipe::getUpgradedStorageResult,
+					MovingStorageTierUpgradeShapedRecipe::new
+			)
+	);
 	private final ShapedRecipe compose;
+	private final ItemStackTemplate upgradedStorageResult;
 
-	public MovingStorageTierUpgradeShapedRecipe(ShapedRecipe compose) {
+	public MovingStorageTierUpgradeShapedRecipe(ShapedRecipe compose, ItemStackTemplate upgradedStorageResult) {
 		this.compose = compose;
+		this.upgradedStorageResult = upgradedStorageResult;
+	}
+
+	public static Function<ShapedRecipe, MovingStorageTierUpgradeShapedRecipe> wrapper(ItemStackTemplate upgradedStorageResult) {
+		return compose -> new MovingStorageTierUpgradeShapedRecipe(compose, upgradedStorageResult);
 	}
 
 	@Override
@@ -41,7 +61,7 @@ public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWr
 		ItemStack upgradedMovingStorage = compose.assemble(input);
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
-			ItemStack upgradedStorageItem = MovingStorageItem.getStorageItem(upgradedMovingStorage);
+			ItemStack upgradedStorageItem = upgradedStorageResult.create();
 			upgradedStorageItem.applyComponents(originalStorageItem.getComponentsPatch());
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, MovingStorageWrapper.getDefaultNumberOfUpgradeSlots(upgradedStorageItem));
@@ -72,6 +92,10 @@ public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWr
 		return ModItems.MOVING_STORAGE_TIER_UPGRADE_SHAPED_RECIPE_SERIALIZER.get();
 	}
 
+	public ItemStackTemplate getUpgradedStorageResult() {
+		return upgradedStorageResult;
+	}
+
 	@Override
 	public boolean showNotification() {
 		return compose.showNotification();
@@ -94,7 +118,7 @@ public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWr
 
 	@Override
 	public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
-		return compose.display();
+		return List.of();
 	}
 
 }

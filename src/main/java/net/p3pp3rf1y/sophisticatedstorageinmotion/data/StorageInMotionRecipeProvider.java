@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.data;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.neoforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ShapeBasedRecipeBuilder;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ShapelessBasedRecipeBuilder;
+import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
@@ -46,7 +48,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 
 		addStorageBoatFromStorageRecipes(output);
 
-		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, ItemStackTemplate.fromNonEmptyStack(MovingStorageItem.createWithStorage(new ItemStack(ModItems.STORAGE_MINECART.get()), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK))))
+		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, getMovingStorageTemplate(ModItems.STORAGE_MINECART.get(), null, getWoodStorageContent(ModBlocks.CHEST_ITEM.get(), WoodType.OAK)))
 				.requires(Items.CHEST_MINECART)
 				.requires(Items.REDSTONE_TORCH)
 				.unlockedBy("has_chest_minecart", has(Items.CHEST_MINECART))
@@ -72,7 +74,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 	}
 
 	private void addVanillaChestBoatConversionRecipe(RecipeOutput recipeOutput, WoodType woodType, Item vanillaChestBoat) {
-		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, ItemStackTemplate.fromNonEmptyStack(MovingStorageItem.createWithStorage(StorageBoatItem.setWoodType(new ItemStack(ModItems.STORAGE_BOAT.get()), woodType), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.CHEST_ITEM.get()), WoodType.OAK))))
+		ShapelessRecipeBuilder.shapeless(items, RecipeCategory.MISC, getMovingStorageTemplate(ModItems.STORAGE_BOAT.get(), woodType, getWoodStorageContent(ModBlocks.CHEST_ITEM.get(), WoodType.OAK)))
 				.requires(vanillaChestBoat)
 				.requires(Items.REDSTONE_TORCH)
 				.unlockedBy("has_" + BuiltInRegistries.ITEM.getKey(vanillaChestBoat).getPath(), has(vanillaChestBoat))
@@ -81,7 +83,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 
 	private void addStorageBoatFromStorageRecipes(RecipeOutput recipeOutput) {
 		StorageBoatItem.SUPPORTED_WOOD_TYPES.forEach((woodType, baseBoat) -> {
-			ShapelessBasedRecipeBuilder.shapeless(items, StorageBoatItem.setWoodType(new ItemStack(ModItems.STORAGE_BOAT.get()), woodType), MovingStorageFromStorageRecipe::new)
+			ShapelessBasedRecipeBuilder.shapeless(items, ModItems.STORAGE_BOAT.get(), getMovingStorageTemplate(ModItems.STORAGE_BOAT.get(), woodType, SimpleItemContent.EMPTY), MovingStorageFromStorageRecipe::new)
 					.requires(baseBoat.get())
 					.requires(ModBlocks.ALL_STORAGE_TAG)
 					.unlockedBy("has_sophisticated_storage", has(ModBlocks.ALL_STORAGE_TAG))
@@ -149,7 +151,7 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 
 	private void addMovingStorageTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem, TagKey<Item> material, UnaryOperator<ShapeBasedRecipeBuilder> patternInit) {
 		String storageItemPath = BuiltInRegistries.ITEM.getKey(storageItem).getPath();
-		patternInit.apply(ShapeBasedRecipeBuilder.shaped(items, MovingStorageItem.createWithStorage(new ItemStack(movingStorageItem.value()), new ItemStack(upgradedStorageItem)), MovingStorageTierUpgradeShapedRecipe::new))
+		patternInit.apply(ShapeBasedRecipeBuilder.shaped(items, movingStorageItem.value(), MovingStorageTierUpgradeShapedRecipe.wrapper(new ItemStackTemplate(upgradedStorageItem, 1))))
 				.define('S', MovingStorageIngredient.of(movingStorageItem, storageItem).toVanilla())
 				.define('M', material)
 				.unlockedBy("has_" + storageItemPath, has(storageItem))
@@ -158,11 +160,26 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 
 	private void addMovingStorageDiamondToNetheriteTierUpgradeRecipe(RecipeOutput recipeOutput, Holder<Item> movingStorageItem, Item storageItem, Item upgradedStorageItem) {
 		String storageItemPath = BuiltInRegistries.ITEM.getKey(storageItem).getPath();
-		ShapelessBasedRecipeBuilder.shapeless(items, MovingStorageItem.createWithStorage(new ItemStack(movingStorageItem.value()), new ItemStack(upgradedStorageItem)), MovingStorageTierUpgradeShapelessRecipe::new)
+		ShapelessBasedRecipeBuilder.shapeless(items, movingStorageItem.value(), MovingStorageTierUpgradeShapelessRecipe.wrapper(new ItemStackTemplate(upgradedStorageItem, 1)))
 				.requires(MovingStorageIngredient.of(movingStorageItem, storageItem).toVanilla())
 				.requires(Tags.Items.INGOTS_NETHERITE)
 				.unlockedBy("has_" + storageItemPath, has(storageItem))
 				.save(recipeOutput, SophisticatedStorageInMotion.getRegistryName(movingStorageItem.getKey().identifier().getPath() + "_with_" + storageItemPath + "_to_" + BuiltInRegistries.ITEM.getKey(upgradedStorageItem).getPath()));
+	}
+
+	private static SimpleItemContent getWoodStorageContent(Item item, WoodType woodType) {
+		return SimpleItemContent.of(item, 1, DataComponentPatch.builder().set(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.WOOD_TYPE.get(), woodType).build());
+	}
+
+	private static ItemStackTemplate getMovingStorageTemplate(Item movingStorageItem, WoodType boatWoodType, SimpleItemContent storageContent) {
+		DataComponentPatch.Builder components = DataComponentPatch.builder();
+		if (!storageContent.isEmpty()) {
+			components.set(net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents.STORAGE_ITEM.get(), storageContent);
+		}
+		if (boatWoodType != null) {
+			components.set(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.WOOD_TYPE.get(), boatWoodType);
+		}
+		return new ItemStackTemplate(movingStorageItem, components.build());
 	}
 
 	public static class Runner extends RecipeProvider.Runner {

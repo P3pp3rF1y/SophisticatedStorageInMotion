@@ -12,11 +12,9 @@
         "components": {
           "sophisticatedstorage:wood_type": "oak"
         },
-        "count": 1,
         "id": "sophisticatedstorage:chest"
       }
     },
-    "count": 1,
     "id": "sophisticatedstorageinmotion:storage_boat"
   }
 }

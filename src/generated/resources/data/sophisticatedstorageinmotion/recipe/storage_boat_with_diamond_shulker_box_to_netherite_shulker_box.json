@@ -16,13 +16,9 @@
     "#c:ingots/netherite"
   ],
   "result": {
-    "components": {
-      "sophisticatedstorageinmotion:storage_item": {
-        "count": 1,
-        "id": "sophisticatedstorage:netherite_shulker_box"
-      }
-    },
-    "count": 1,
     "id": "sophisticatedstorageinmotion:storage_boat"
+  },
+  "upgraded_storage_result": {
+    "id": "sophisticatedstorage:netherite_shulker_box"
   }
 }

@@ -21,13 +21,9 @@
     "MMM"
   ],
   "result": {
-    "components": {
-      "sophisticatedstorageinmotion:storage_item": {
-        "count": 1,
-        "id": "sophisticatedstorage:diamond_barrel"
-      }
-    },
-    "count": 1,
     "id": "sophisticatedstorageinmotion:storage_minecart"
+  },
+  "upgraded_storage_result": {
+    "id": "sophisticatedstorage:diamond_barrel"
   }
 }

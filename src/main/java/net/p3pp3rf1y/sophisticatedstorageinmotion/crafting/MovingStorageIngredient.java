@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
+import net.p3pp3rf1y.sophisticatedcore.crafting.IExactDisplayStacksIngredient;
 import net.p3pp3rf1y.sophisticatedcore.util.BlockItemBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MovingStorageIngredient implements ICustomIngredient {
+public class MovingStorageIngredient implements IExactDisplayStacksIngredient {
 	public static final MapCodec<MovingStorageIngredient> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 							Item.CODEC.fieldOf("moving_storage_item").forGetter(ingredient -> ingredient.movingStorageItem),
@@ -28,7 +29,6 @@ public class MovingStorageIngredient implements ICustomIngredient {
 	);
 	private final Holder<Item> movingStorageItem;
 	private final Holder<Item> storageItem;
-	private List<ItemStack> movingStorages = null;
 
 	private MovingStorageIngredient(Holder<Item> movingStorageItem, Holder<Item> storageItem) {
 		this.movingStorageItem = movingStorageItem;
@@ -64,22 +64,28 @@ public class MovingStorageIngredient implements ICustomIngredient {
 		return new SlotDisplay.Composite(getMovingStorages().stream().map(ItemStackTemplate::fromNonEmptyStack).map(SlotDisplay.ItemStackSlotDisplay::new).map(SlotDisplay.class::cast).toList());
 	}
 
+	@Override
+	public List<ItemStack> getExactDisplayStacks() {
+		return getMovingStorages();
+	}
+
 	private List<ItemStack> getMovingStorages() {
-		if (movingStorages != null) {
-			return movingStorages;
-		}
+		List<ItemStack> baseMovingStorageItems = movingStorageItem.value() instanceof MovingStorageItem movingStorage
+				? movingStorage.getBaseMovingStorageItems().stream().map(ItemStack::copy).toList()
+				: List.of(new ItemStack(movingStorageItem));
 
 		List<ItemStack> storageItemCreativeTabItems = new ArrayList<>();
 		if (storageItem.value() instanceof BlockItemBase itemBase) {
 			itemBase.addCreativeTabItems(storageItemCreativeTabItems::add);
 		}
 
-		movingStorages = new ArrayList<>();
-		storageItemCreativeTabItems.forEach(storageItemStack -> {
-			ItemStack movingStorageStack = new ItemStack(movingStorageItem);
-			MovingStorageItem.setStorageItem(movingStorageStack, storageItemStack);
-			movingStorages.add(movingStorageStack);
-		});
-		return movingStorages;
+		List<ItemStack> computedMovingStorages = new ArrayList<>();
+		baseMovingStorageItems.forEach(baseMovingStorage -> storageItemCreativeTabItems.forEach(storageItemStack -> {
+			ItemStack movingStorageStack = baseMovingStorage.copy();
+			MovingStorageItem.setStorageItem(movingStorageStack, storageItemStack.copy());
+			computedMovingStorages.add(movingStorageStack);
+		}));
+
+		return computedMovingStorages;
 	}
 }

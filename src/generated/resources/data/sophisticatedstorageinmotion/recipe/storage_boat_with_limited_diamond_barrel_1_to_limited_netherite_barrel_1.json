@@ -16,13 +16,9 @@
     "#c:ingots/netherite"
   ],
   "result": {
-    "components": {
-      "sophisticatedstorageinmotion:storage_item": {
-        "count": 1,
-        "id": "sophisticatedstorage:limited_netherite_barrel_1"
-      }
-    },
-    "count": 1,
     "id": "sophisticatedstorageinmotion:storage_boat"
+  },
+  "upgraded_storage_result": {
+    "id": "sophisticatedstorage:limited_netherite_barrel_1"
   }
 }

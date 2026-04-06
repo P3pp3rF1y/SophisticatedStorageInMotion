@@ -21,13 +21,9 @@
     "MMM"
   ],
   "result": {
-    "components": {
-      "sophisticatedstorageinmotion:storage_item": {
-        "count": 1,
-        "id": "sophisticatedstorage:iron_barrel"
-      }
-    },
-    "count": 1,
     "id": "sophisticatedstorageinmotion:storage_boat"
+  },
+  "upgraded_storage_result": {
+    "id": "sophisticatedstorage:iron_barrel"
   }
 }

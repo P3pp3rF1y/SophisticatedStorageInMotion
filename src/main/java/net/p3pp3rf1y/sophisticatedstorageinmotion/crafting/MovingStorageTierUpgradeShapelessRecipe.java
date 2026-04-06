@@ -1,6 +1,10 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.crafting;
 
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.PlacementInfo;
@@ -9,7 +13,6 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.crafting.CustomShapelessRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
-import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
@@ -17,14 +20,31 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
-	public static final RecipeSerializer<MovingStorageTierUpgradeShapelessRecipe> SERIALIZER = RecipeWrapperSerializer.create(MovingStorageTierUpgradeShapelessRecipe::new, ShapelessRecipe.SERIALIZER);
+	public static final RecipeSerializer<MovingStorageTierUpgradeShapelessRecipe> SERIALIZER = new RecipeSerializer<>(
+			RecordCodecBuilder.mapCodec(instance -> instance.group(
+					ShapelessRecipe.SERIALIZER.codec().forGetter(MovingStorageTierUpgradeShapelessRecipe::getCompose),
+					ItemStackTemplate.CODEC.fieldOf("upgraded_storage_result").forGetter(MovingStorageTierUpgradeShapelessRecipe::getUpgradedStorageResult)
+			).apply(instance, MovingStorageTierUpgradeShapelessRecipe::new)),
+			StreamCodec.composite(
+					ShapelessRecipe.SERIALIZER.streamCodec(), MovingStorageTierUpgradeShapelessRecipe::getCompose,
+					ItemStackTemplate.STREAM_CODEC, MovingStorageTierUpgradeShapelessRecipe::getUpgradedStorageResult,
+					MovingStorageTierUpgradeShapelessRecipe::new
+			)
+	);
 	private final ShapelessRecipe compose;
+	private final ItemStackTemplate upgradedStorageResult;
 
-	public MovingStorageTierUpgradeShapelessRecipe(ShapelessRecipe compose) {
+	public MovingStorageTierUpgradeShapelessRecipe(ShapelessRecipe compose, ItemStackTemplate upgradedStorageResult) {
 		super(compose.group(), compose.category(), compose.result, compose.ingredients);
 		this.compose = compose;
+		this.upgradedStorageResult = upgradedStorageResult;
+	}
+
+	public static Function<ShapelessRecipe, MovingStorageTierUpgradeShapelessRecipe> wrapper(ItemStackTemplate upgradedStorageResult) {
+		return compose -> new MovingStorageTierUpgradeShapelessRecipe(compose, upgradedStorageResult);
 	}
 
 	@Override
@@ -42,7 +62,7 @@ public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessReci
 		ItemStack upgradedMovingStorage = super.assemble(input);
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
-			ItemStack upgradedStorageItem = MovingStorageItem.getStorageItem(upgradedMovingStorage);
+			ItemStack upgradedStorageItem = upgradedStorageResult.create();
 			upgradedStorageItem.applyComponents(originalStorageItem.getComponentsPatch());
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, MovingStorageWrapper.getDefaultNumberOfUpgradeSlots(upgradedStorageItem));
@@ -73,6 +93,10 @@ public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessReci
 		return ModItems.MOVING_STORAGE_TIER_UPGRADE_SHAPELESS_RECIPE_SERIALIZER.get();
 	}
 
+	public ItemStackTemplate getUpgradedStorageResult() {
+		return upgradedStorageResult;
+	}
+
 	@Override
 	public boolean showNotification() {
 		return compose.showNotification();
@@ -95,7 +119,7 @@ public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessReci
 
 	@Override
 	public List<net.minecraft.world.item.crafting.display.RecipeDisplay> display() {
-		return compose.display();
+		return List.of();
 	}
 
 }
