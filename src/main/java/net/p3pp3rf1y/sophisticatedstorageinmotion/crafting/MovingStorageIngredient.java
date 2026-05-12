@@ -69,7 +69,7 @@ public class MovingStorageIngredient implements IExactDisplayStacksIngredient {
 		return getMovingStorages();
 	}
 
-	private List<ItemStack> getMovingStorages() {
+	public List<ItemStack> getMovingStorages() {
 		List<ItemStack> baseMovingStorageItems = movingStorageItem.value() instanceof MovingStorageItem movingStorage
 				? movingStorage.getBaseMovingStorageItems().stream().map(ItemStack::copy).toList()
 				: List.of(new ItemStack(movingStorageItem));
