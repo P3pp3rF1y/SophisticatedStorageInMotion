@@ -197,6 +197,10 @@ dependencies {
             transitive = false
         }
     }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.+'
+    testImplementation "org.mockito:mockito-core:5.12.+"
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.+'
 }
 
 mixin {
@@ -238,6 +242,28 @@ tasks.withType(ProcessResources).configureEach {
     filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
+}
+
+def runRecipeViewerRegressionTests = gradle.startParameter.taskNames.any { it == 'recipeViewerRegressionTest' || it == "${project.path}:recipeViewerRegressionTest" } || project.hasProperty('recipeViewerRegression')
+
+test {
+    inputs.property('recipeViewerRegressionMode', runRecipeViewerRegressionTests)
+    useJUnitPlatform {
+        if (runRecipeViewerRegressionTests) {
+            includeTags 'recipeViewerRegression'
+        } else {
+            excludeTags 'recipeViewerRegression'
+        }
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+tasks.register('recipeViewerRegressionTest') {
+    description = 'Runs recipe viewer regression tests.'
+    group = 'verification'
+    dependsOn test
 }
 
 static def getBuildNumber() {
