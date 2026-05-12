@@ -213,6 +213,10 @@ dependencies {
             transitive = false
         }
     }
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.+'
+    testImplementation "org.mockito:mockito-core:5.12.+"
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.+'
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -240,11 +244,26 @@ sourceSets.main.resources.srcDir generateModMetadata
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
+def runRecipeViewerRegressionTests = gradle.startParameter.taskNames.any { it == 'recipeViewerRegressionTest' || it == "${project.path}:recipeViewerRegressionTest" } || project.hasProperty('recipeViewerRegression')
+
 test {
-    useJUnitPlatform()
+    inputs.property('recipeViewerRegressionMode', runRecipeViewerRegressionTests)
+    useJUnitPlatform {
+        if (runRecipeViewerRegressionTests) {
+            includeTags 'recipeViewerRegression'
+        } else {
+            excludeTags 'recipeViewerRegression'
+        }
+    }
     testLogging {
         events "passed", "skipped", "failed"
     }
+}
+
+tasks.register('recipeViewerRegressionTest') {
+    description = 'Runs recipe viewer regression tests.'
+    group = 'verification'
+    dependsOn test
 }
 
 tasks.withType(JavaCompile).configureEach {

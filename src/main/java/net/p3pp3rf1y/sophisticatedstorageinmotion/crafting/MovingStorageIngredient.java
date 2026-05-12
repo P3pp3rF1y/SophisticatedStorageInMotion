@@ -58,6 +58,10 @@ public class MovingStorageIngredient implements ICustomIngredient {
 		return Stream.of(movingStorageItem);
 	}
 
+	public List<ItemStack> getMatchingStacks() {
+		return movingStorages.stream().map(ItemStack::copy).toList();
+	}
+
 	@Override
 	public boolean isSimple() {
 		return false;
