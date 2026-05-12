@@ -6,8 +6,11 @@ import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.widget.Bounds;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayContext;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiClientRecipeHelper;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.CraftingSpecEmiRecipe;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
@@ -15,13 +18,12 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSu
 import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.AssembleRecipesMaker;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageTierUpgradeRecipesMaker;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageRecipeViewerDisplays;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 
 import java.util.Map;
+import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreter;
 import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
 @SuppressWarnings("unused")
@@ -68,23 +70,18 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 		// Add Storage subtype interpreters as well
 		subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
 
-		AssembleRecipesMaker.getShapelessCraftingRecipes(
-						stack -> getSubtypeInterpreter(subtypeInterpreters, stack),
-						EmiClientRecipeHelper::wrapSyntheticShapelessRecipe
-				)
+		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
+		registry.removeRecipes(recipe -> recipe.getBackingRecipe() != null && catalog.replacesCraftingRecipe(recipe.getBackingRecipe()));
+		catalog.getCraftingSpecs().stream()
+				.flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream())
 				.forEach(registry::addRecipe);
+	}
 
-		MovingStorageTierUpgradeRecipesMaker.getShapedCraftingRecipes(
-						stack -> getSubtypeInterpreter(subtypeInterpreters, stack),
-						EmiClientRecipeHelper::wrapSyntheticShapedRecipe
-				)
-				.forEach(registry::addRecipe);
-
-		MovingStorageTierUpgradeRecipesMaker.getShapelessCraftingRecipes(
-						stack -> getSubtypeInterpreter(subtypeInterpreters, stack),
-						EmiClientRecipeHelper::wrapSyntheticShapelessRecipe
-				)
-				.forEach(registry::addRecipe);
+	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {
+		IRecipeViewerDisplayCatalog catalog = new RecipeViewerDisplayCatalog();
+		IRecipeViewerDisplayContext context = stack -> Optional.ofNullable(subtypeInterpreters.get(stack.getItem()));
+		MovingStorageRecipeViewerDisplays.register(catalog, context);
+		return catalog;
 	}
 
 	private void registerRecipeHandlers(EmiRegistry registry) {
