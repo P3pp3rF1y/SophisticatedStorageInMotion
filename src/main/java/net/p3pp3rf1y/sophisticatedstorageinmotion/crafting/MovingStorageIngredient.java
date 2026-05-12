@@ -72,4 +72,8 @@ public class MovingStorageIngredient implements ICustomIngredient {
 	public SlotDisplay display() {
 		return new SlotDisplay.Composite(movingStorages.stream().map(SlotDisplay.ItemStackSlotDisplay::new).map(SlotDisplay.class::cast).toList());
 	}
+
+	public List<ItemStack> getMatchingStacks() {
+		return movingStorages;
+	}
 }
