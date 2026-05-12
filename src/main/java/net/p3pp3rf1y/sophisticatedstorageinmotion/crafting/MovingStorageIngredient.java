@@ -48,6 +48,10 @@ public class MovingStorageIngredient implements ICustomIngredient {
 		return new MovingStorageIngredient(movingStorageItem, BuiltInRegistries.ITEM.get(BuiltInRegistries.ITEM.getKey(storageItem)).orElseThrow());
 	}
 
+	public List<ItemStack> getMovingStorages() {
+		return movingStorages.stream().map(ItemStack::copy).toList();
+	}
+
 	@Override
 	public boolean test(ItemStack itemStack) {
 		return itemStack.getItem() == movingStorageItem.value() && MovingStorageItem.getStorageItem(itemStack).getItem() == storageItem.value();

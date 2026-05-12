@@ -3,43 +3,49 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.jei;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.types.IRecipeType;
-import mezz.jei.api.registration.IGuiHandlerRegistration;
-import mezz.jei.api.registration.IRecipeRegistration;
-import mezz.jei.api.registration.IRecipeTransferRegistration;
-import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.registration.*;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayContext;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingContainerRecipeTransferHandlerBase;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiRecipeDisplayGenerator;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiSettingsGhostIngredientHandler;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiStorageGhostIngredientHandler;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.*;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
+import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.AssembleRecipesMaker;
-import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageTierUpgradeRecipesMaker;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageRecipeViewerDisplays;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreter;
 import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @JeiPlugin
 public class StorageInMotionJeiPlugin implements IModPlugin {
+	private IRecipeViewerDisplayCatalog catalog = null;
+
+	public StorageInMotionJeiPlugin() {
+		RecipeHelper.addRecipeChangeListener(() -> catalog = null);
+	}
 
 	@Override
 	public ResourceLocation getPluginUid() {
@@ -48,7 +54,7 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		getSubtypeInterpreters().forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
+		getSubtypeInterpreters().forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
 	}
 
 	@Override
@@ -76,17 +82,40 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 		registration.addGhostIngredientHandler(MovingStorageSettingsScreen.class, new JeiSettingsGhostIngredientHandler<>());
 	}
 
+	private IRecipeViewerDisplayCatalog getCatalog() {
+		if (catalog == null) {
+			Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
+			// Add Storage subtype interpreters as well
+			subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
+			catalog = createCatalog(subtypeInterpreters);
+		}
+		return catalog;
+	}
+
+	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {
+		IRecipeViewerDisplayCatalog catalog = new RecipeViewerDisplayCatalog();
+		IRecipeViewerDisplayContext context = stack -> Optional.ofNullable(subtypeInterpreters.get(stack.getItem()));
+		MovingStorageRecipeViewerDisplays.register(catalog, context);
+		return catalog;
+	}
+
 	@Override
-	public void registerRecipes(IRecipeRegistration registration) {
-		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
-		// Add Storage subtype interpreters as well
-		subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
+	public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
+		JeiCraftingSpecExtensionRegistrar.registerCraftingSpecExtensions(registration, this::getCatalog, stack -> true, List.of());
+	}
 
-		JeiRecipeDisplayGenerator generator = new JeiRecipeDisplayGenerator();
-		AssembleRecipesMaker.addRecipes(generator, stack -> getSubtypeInterpreter(subtypeInterpreters, stack));
-		MovingStorageTierUpgradeRecipesMaker.addRecipes(generator, stack -> getSubtypeInterpreter(subtypeInterpreters, stack));
+	@Override
+	public void registerAdvanced(IAdvancedRegistration registration) {
+		registration.addRecipeManagerPlugin(new CraftingDisplayCatalogRecipeManagerPluginCompat(this::getCatalog,
+				StorageInMotionJeiPlugin::canShowMovingStorageUsagesFor, StorageInMotionJeiPlugin::canShowMovingStorageRecipesFor));
+	}
 
-		registration.addRecipes(RecipeTypes.CRAFTING, generator.getCraftingRecipes());
+	private static boolean canShowMovingStorageUsagesFor(ItemStack stack) {
+		return stack.getItem() instanceof StorageBlockItem || stack.getItem() instanceof MovingStorageItem;
+	}
+
+	private static boolean canShowMovingStorageRecipesFor(ItemStack stack) {
+		return stack.getItem() instanceof MovingStorageItem;
 	}
 
 	@Override
