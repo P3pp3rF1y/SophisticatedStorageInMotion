@@ -233,9 +233,21 @@ public record MovingStorageTierUpgradeDisplayRecipe(ResourceLocation id, RecipeH
 	}
 
 	private Optional<CraftingDisplayVariant> focusAssemblySource(CraftingDisplayVariant variant, ItemStack focusedInput) {
-		return findAssemblyUsageForSource(focusedInput)
-				.filter(pair -> ItemStack.isSameItemSameComponents(getSource(variant), pair.source()))
-				.map(pair -> toVariant(pair));
+		if (!(focusedInput.getItem() instanceof StorageBlockItem)) {
+			return Optional.empty();
+		}
+
+		MovingStorageTierUpgradeVariantPair pair = toPair(variant);
+		if (ItemStack.isSameItemSameComponents(pair.source(), focusedInput)) {
+			return Optional.of(toVariant(pair));
+		}
+		if (!ItemStack.isSameItem(pair.source(), focusedInput) || findBySource(focusedInput).isPresent()) {
+			return Optional.empty();
+		}
+
+		return findBySourceItem(focusedInput)
+				.filter(templatePair -> ItemStack.isSameItemSameComponents(pair.source(), templatePair.source()))
+				.map(templatePair -> toVariant(withAssemblySource(templatePair, focusedInput)));
 	}
 
 	private Optional<CraftingDisplayVariant> focusAssemblyResult(CraftingDisplayVariant variant, ItemStack focusedOutput) {
