@@ -16,6 +16,7 @@ import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
@@ -28,12 +29,15 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingConta
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiSettingsGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiStorageGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
+import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
 import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageRecipeViewerDisplays;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +50,10 @@ import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.co
 @JeiPlugin
 public class StorageInMotionJeiPlugin implements IModPlugin {
 	private IRecipeViewerDisplayCatalog catalog = null;
+
+	public StorageInMotionJeiPlugin() {
+		RecipeHelper.addRecipeChangeListener(() -> catalog = null);
+	}
 
 	@Override
 	public ResourceLocation getPluginUid() {
@@ -106,7 +114,16 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerAdvanced(IAdvancedRegistration registration) {
-		registration.addRecipeManagerPlugin(new CraftingDisplayCatalogRecipeManagerPluginCompat(this::getCatalog, stack -> true));
+		registration.addRecipeManagerPlugin(new CraftingDisplayCatalogRecipeManagerPluginCompat(this::getCatalog,
+				StorageInMotionJeiPlugin::canShowMovingStorageUsagesFor, StorageInMotionJeiPlugin::canShowMovingStorageRecipesFor));
+	}
+
+	private static boolean canShowMovingStorageUsagesFor(ItemStack stack) {
+		return stack.getItem() instanceof StorageBlockItem || stack.getItem() instanceof MovingStorageItem;
+	}
+
+	private static boolean canShowMovingStorageRecipesFor(ItemStack stack) {
+		return stack.getItem() instanceof MovingStorageItem;
 	}
 
 	@Override
