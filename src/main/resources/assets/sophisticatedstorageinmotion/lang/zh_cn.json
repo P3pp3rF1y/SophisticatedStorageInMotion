@@ -5,5 +5,6 @@
   "item.sophisticatedstorageinmotion.storage_raft": "带%2$s的%1$s筏",
   "entity.sophisticatedstorageinmotion.storage_minecart": "带%s的矿车",
   "entity.sophisticatedstorageinmotion.storage_boat": "带%2$s的%1$s船",
-  "entity.sophisticatedstorageinmotion.storage_raft": "带%2$s的%1$s筏"
+  "entity.sophisticatedstorageinmotion.storage_raft": "带%2$s的%1$s筏",
+  "entity.sophisticatedstorageinmotion.chested_horse_with_storage": "带%2$s的%1$s"
 }
