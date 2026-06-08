@@ -262,10 +262,17 @@ test {
     }
 }
 
-tasks.register('recipeViewerRegressionTest') {
+tasks.register('recipeViewerRegressionTest', Test) {
     description = 'Runs recipe viewer regression tests.'
     group = 'verification'
-    dependsOn test
+    testClassesDirs = files("$buildDir/classes/java/test")
+    classpath = files("$buildDir/classes/java/test", "$buildDir/resources/test", "$buildDir/classes/java/main", "$buildDir/resources/main", { configurations.testCompileClasspath.resolve().toList() }, { configurations.detachedConfiguration(dependencies.create('org.junit.jupiter:junit-jupiter-engine:5.11.+')).resolve().toList() })
+    useJUnitPlatform {
+        includeTags 'recipeViewerRegression'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 static def getBuildNumber() {
