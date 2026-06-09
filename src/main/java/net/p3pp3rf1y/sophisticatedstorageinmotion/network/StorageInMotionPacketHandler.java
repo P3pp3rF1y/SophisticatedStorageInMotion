@@ -4,10 +4,10 @@ import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 
 public class StorageInMotionPacketHandler extends PacketHandler {
-	public static final StorageInMotionPacketHandler INSTANCE = new StorageInMotionPacketHandler(SophisticatedStorageInMotion.MOD_ID);
+	public static final StorageInMotionPacketHandler INSTANCE = new StorageInMotionPacketHandler(SophisticatedStorageInMotion.MOD_ID, SophisticatedStorageInMotion.getNetworkProtocolVersion());
 
-	private StorageInMotionPacketHandler(String modId) {
-		super(modId);
+	private StorageInMotionPacketHandler(String modId, String protocol) {
+		super(modId, protocol);
 	}
 
 	@Override

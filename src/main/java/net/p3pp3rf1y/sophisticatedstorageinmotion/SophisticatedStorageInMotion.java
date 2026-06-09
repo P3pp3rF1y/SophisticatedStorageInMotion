@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -22,9 +23,11 @@ import org.apache.logging.log4j.Logger;
 public class SophisticatedStorageInMotion {
 	public static final String MOD_ID = "sophisticatedstorageinmotion";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+	private static String networkProtocolVersion;
 
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedStorageInMotion() {
+		networkProtocolVersion = ModLoadingContext.get().getActiveContainer().getModInfo().getVersion().toString();
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		ModItems.registerHandlers(modBus);
 		ModEntities.registerHandlers(modBus);
@@ -44,6 +47,10 @@ public class SophisticatedStorageInMotion {
 
 	public static String getRegistryName(String regName) {
 		return MOD_ID + ":" + regName;
+	}
+
+	public static String getNetworkProtocolVersion() {
+		return networkProtocolVersion;
 	}
 
 	private static void setup(FMLCommonSetupEvent event) {
