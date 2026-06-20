@@ -177,7 +177,7 @@ public class StorageBoatItem extends MovingStorageItem {
 			boat.setYRot(player.getYRot());
 		}
 		if (level instanceof ServerLevel serverLevel) {
-			EntityType.createDefaultStackConfig(serverLevel, stack, player).accept(boat);
+			EntityType.createDefaultStackConfig(serverLevel, stack, player).apply(boat);
 		}
 		return boat;
 	}

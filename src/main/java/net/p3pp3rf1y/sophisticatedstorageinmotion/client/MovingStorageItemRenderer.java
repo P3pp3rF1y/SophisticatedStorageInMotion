@@ -55,6 +55,7 @@ public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorag
 	private T getMovingStorage(Minecraft mc) {
 		if (movingStorage == null) {
 			movingStorage = instantiateMovingStorage(mc);
+			movingStorage.setId(Math.floorMod(movingStorage.getClass().getName().hashCode(), Integer.MAX_VALUE - 1) + 1);
 		}
 
 		return movingStorage;

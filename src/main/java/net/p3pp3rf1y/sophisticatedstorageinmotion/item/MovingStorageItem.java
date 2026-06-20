@@ -198,7 +198,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
-		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPickup(player) || slot.getItem().isEmpty() || action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
+		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPickup(player) || slot.getItem().isEmpty() || action != ClickAction.PRIMARY || !isShulkerBoxMovingStorage(stack)) {
 			return super.overrideStackedOnOther(stack, slot, action, player);
 		}
 
@@ -221,7 +221,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess carriedAccess) {
-		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPlace(stack) || action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
+		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPlace(stack) || action != ClickAction.PRIMARY || !isShulkerBoxMovingStorage(stack)) {
 			return super.overrideOtherStackedOnMe(stack, otherStack, slot, action, player, carriedAccess);
 		}
 

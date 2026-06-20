@@ -6,7 +6,6 @@
     }
   ],
   "type": "sophisticatedstorageinmotion:moving_storage_from_storage",
-  "category": "misc",
   "ingredients": [
     "minecraft:dark_oak_boat",
     "#sophisticatedstorage:all_storage"

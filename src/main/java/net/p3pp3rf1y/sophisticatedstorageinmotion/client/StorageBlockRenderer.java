@@ -77,10 +77,10 @@ public class StorageBlockRenderer {
 		}
 
 		if (!cutoutQuads.isEmpty()) {
-			submitQuads(poseStack, submitNodeCollector, state, wrappedLevel, packedLight, cutoutQuads, Sheets.cutoutBlockSheet());
+			submitQuads(poseStack, submitNodeCollector, state, wrappedLevel, packedLight, cutoutQuads, Sheets.cutoutBlockItemSheet());
 		}
 		if (!translucentQuads.isEmpty()) {
-			submitQuads(poseStack, submitNodeCollector, state, wrappedLevel, packedLight, translucentQuads, Sheets.translucentBlockSheet());
+			submitQuads(poseStack, submitNodeCollector, state, wrappedLevel, packedLight, translucentQuads, Sheets.translucentBlockItemSheet());
 		}
 	}
 

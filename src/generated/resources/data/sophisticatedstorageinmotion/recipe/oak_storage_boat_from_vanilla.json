@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shapeless",
-  "category": "misc",
   "ingredients": [
     "minecraft:oak_chest_boat",
     "minecraft:redstone_torch"
@@ -12,6 +11,7 @@
         "components": {
           "sophisticatedstorage:wood_type": "oak"
         },
+        "count": 1,
         "id": "sophisticatedstorage:chest"
       }
     },

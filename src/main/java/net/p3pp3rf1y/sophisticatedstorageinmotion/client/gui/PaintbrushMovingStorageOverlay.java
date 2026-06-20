@@ -64,8 +64,8 @@ public class PaintbrushMovingStorageOverlay {
 
 	public static final GuiLayer HUD_PAINTBRUSH_INFO = (guiGraphics, deltaTracker) -> {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.screen != null) {
-			if (!mc.screen.isPauseScreen()) {
+		if (mc.gui.screen() != null) {
+			if (!mc.gui.screen().isPauseScreen()) {
 				lastEntityIdCached = -1;
 				lastPaintbrushCached = null;
 			}

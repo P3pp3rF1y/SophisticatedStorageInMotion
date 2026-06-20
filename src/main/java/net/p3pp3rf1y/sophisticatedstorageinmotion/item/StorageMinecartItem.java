@@ -116,7 +116,7 @@ public class StorageMinecartItem extends MovingStorageItem {
 		EntityStorageHolder<?> storageHolder = minecart.getStorageHolder();
 		storageHolder.setStorageItemAndCustomNameFromMovingStorageStack(stack, true);
 		storageHolder.onPlace();
-		EntityType.createDefaultStackConfig(serverlevel, stack, player).accept(minecart);
+		EntityType.createDefaultStackConfig(serverlevel, stack, player).apply(minecart);
 		return minecart;
 	}
 
