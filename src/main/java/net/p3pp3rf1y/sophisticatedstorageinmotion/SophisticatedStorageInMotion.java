@@ -25,7 +25,7 @@ public class SophisticatedStorageInMotion {
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	private static String networkProtocolVersion;
 
-	@SuppressWarnings("java:S1118") //needs to be public for mod to work
+	@SuppressWarnings("java:S1118") // needs to be public for mod to work
 	public SophisticatedStorageInMotion() {
 		networkProtocolVersion = ModLoadingContext.get().getActiveContainer().getModInfo().getVersion().toString();
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

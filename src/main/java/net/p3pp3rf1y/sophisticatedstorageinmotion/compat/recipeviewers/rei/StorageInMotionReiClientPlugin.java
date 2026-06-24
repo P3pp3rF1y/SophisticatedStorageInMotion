@@ -21,18 +21,18 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.CraftingSpecReiD
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiCraftingContainerTransferHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiSettingsGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.rei.ReiStorageGhostIngredientHandler;
-import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageRecipeViewerDisplays;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
+import static net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @REIPluginClient
@@ -48,7 +48,8 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 			return ret.stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList();
 		});
 
-		zones.register(MovingStorageSettingsScreen.class, screen -> screen.getExtendedControlsRectangles().stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList());
+		zones.register(MovingStorageSettingsScreen.class,
+				screen -> screen.getExtendedControlsRectangles().stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList());
 	}
 
 	@Override
@@ -59,9 +60,9 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerDisplays(DisplayRegistry registry) {
-		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
+		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = new HashMap<>(getSubtypeInterpreters());
 		// Add Storage subtype interpreters as well
-		subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
+		subtypeInterpreters.putAll(getSubtypeInterpreters());
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.registerGlobalDisplayGenerator(new CraftingSpecReiDisplayGenerator(() -> catalog, stack -> true));
 		registry.registerVisibilityPredicate((category, display) -> {

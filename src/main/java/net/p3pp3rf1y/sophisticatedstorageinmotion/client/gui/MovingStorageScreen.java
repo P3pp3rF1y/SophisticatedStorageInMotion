@@ -72,7 +72,9 @@ public class MovingStorageScreen extends StorageScreenBase<MovingStorageContaine
 				int entityViewX = x + HORSE_WIDGET_WIDTH - HORSE_VIEW_PADDING - HORSE_VIEW_SIZE;
 				int entityViewY = y + HORSE_VIEW_PADDING;
 				guiGraphics.fill(entityViewX, entityViewY, entityViewX + HORSE_VIEW_SIZE, entityViewY + HORSE_VIEW_SIZE, 0xFF_000000);
-				InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, entityViewX + HORSE_VIEW_SIZE / 2, entityViewY + HORSE_VIEW_SIZE - HORSE_VIEW_PADDING, 17, entityViewX + HORSE_VIEW_SIZE / 2 - mouseX, entityViewY + HORSE_VIEW_PADDING - mouseY, horse);
+				InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, entityViewX + HORSE_VIEW_SIZE / 2,
+						entityViewY + HORSE_VIEW_SIZE - HORSE_VIEW_PADDING, 17, entityViewX + HORSE_VIEW_SIZE / 2 - mouseX,
+						entityViewY + HORSE_VIEW_PADDING - mouseY, horse);
 			}
 		});
 	}

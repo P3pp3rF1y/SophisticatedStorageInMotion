@@ -40,15 +40,16 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContai
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.ItemNBTHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessMessage;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.StorageInMotionPacketHandler;
-
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase {
 	public static final String STORAGE_ITEM_TAG = "storageItem";
 	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
@@ -112,8 +113,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		Vector3f point = new Vector3f(vector);
 		point.rotate(Axis.YN.rotationDegrees(side > 0 ? 90.0F : -90.0F));
 		point.add((float) (chestedHorse.getBbWidth() * (chestedHorse instanceof Llama ? 0.75F : 0.62F)) * side,
-				(float) (chestedHorse.getBbHeight() * (chestedHorse instanceof Llama ? 0.62F : 0.55F)),
-				chestedHorse instanceof Llama ? -0.08F : -0.05F);
+				(float) (chestedHorse.getBbHeight() * (chestedHorse instanceof Llama ? 0.62F : 0.55F)), chestedHorse instanceof Llama ? -0.08F : -0.05F);
 		point.rotate(Axis.YN.rotationDegrees(chestedHorse.yBodyRot - 180.0F));
 		point.add(chestedHorse.position().toVector3f());
 		return point;
@@ -122,11 +122,13 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
 		setStorageItem(storageItem);
 		if (setupDefaults && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
-			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
+			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(),
+					getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper
+							? movingStorageWrapper.getNumberOfInventorySlots()
+							: getStorageWrapper().getInventoryHandler().getSlots());
 			LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
 		}
 	}
-
 
 	public CompoundTag saveData() {
 		CompoundTag ret = new CompoundTag();
@@ -192,16 +194,11 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 				if (blockItem.getBlock() instanceof ChestBlock) {
 					renderBlockEntity = new ChestBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
 				} else if (blockItem.getBlock() instanceof LimitedBarrelBlock) {
-					renderBlockEntity = new LimitedBarrelBlockEntity(BlockPos.ZERO,
-							blockItem.getBlock().defaultBlockState()
-									.setValue(LimitedBarrelBlock.HORIZONTAL_FACING, Direction.NORTH)
-									.setValue(LimitedBarrelBlock.VERTICAL_FACING, VerticalFacing.UP)
-					);
+					renderBlockEntity = new LimitedBarrelBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState()
+							.setValue(LimitedBarrelBlock.HORIZONTAL_FACING, Direction.NORTH).setValue(LimitedBarrelBlock.VERTICAL_FACING, VerticalFacing.UP));
 				} else if (blockItem.getBlock() instanceof BarrelBlock) {
 					renderBlockEntity = new BarrelBlockEntity(BlockPos.ZERO,
-							blockItem.getBlock().defaultBlockState()
-									.setValue(BarrelBlock.FACING, Direction.UP)
-					);
+							blockItem.getBlock().defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
 				} else if (blockItem.getBlock() instanceof ShulkerBoxBlock) {
 					renderBlockEntity = new ShulkerBoxBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
 				}
@@ -239,7 +236,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	private void dropAllItems() {
-		InventoryHelper.dropItems(getStorageWrapper().getInventoryHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
+		InventoryHelper.dropItems(getStorageWrapper().getInventoryHandler(), entity.level(), entity.position().x(), entity.position().y(),
+				entity.position().z());
 		InventoryHelper.dropItems(getStorageWrapper().getUpgradeHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
 	}
 
@@ -282,7 +280,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			if (stack.isEmpty()) {
 				return;
 			}
-			droppedItemEntityCount.addAndGet((int) Math.ceil(stack.getCount() / (double) Math.min(stack.getMaxStackSize(), AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE)));
+			droppedItemEntityCount
+					.addAndGet((int) Math.ceil(stack.getCount() / (double) Math.min(stack.getMaxStackSize(), AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE)));
 		});
 
 		if (droppedItemEntityCount.get() <= Config.SERVER.tooManyItemEntityDrops.get()) {
@@ -291,11 +290,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 		ItemBase packingTapeItem = ModItems.PACKING_TAPE.get();
 		Component packingTapeItemName = packingTapeItem.getName(new ItemStack(packingTapeItem)).copy().withStyle(ChatFormatting.GREEN);
-		player.sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
-				entity.getName().copy().withStyle(ChatFormatting.GREEN),
-				Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED),
-				packingTapeItemName)
-		);
+		player.sendSystemMessage(
+				StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops", entity.getName().copy().withStyle(ChatFormatting.GREEN),
+						Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED), packingTapeItemName));
 		return false;
 	}
 
@@ -317,7 +314,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	@Override
 	protected void openMenu(Player player) {
 		if (player instanceof ServerPlayer serverPlayer) {
-			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((w, p, pl) -> createMenu(w, pl), entity.getName()), buffer -> buffer.writeInt(entity.getId()));
+			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((w, p, pl) -> createMenu(w, pl), entity.getName()),
+					buffer -> buffer.writeInt(entity.getId()));
 		}
 	}
 

@@ -83,7 +83,8 @@ public class CommonEventHandler {
 	private static void onPacked(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
 		ItemStack itemInHand = player.getItemInHand(event.getHand());
-		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof PackingTapeItem) || Config.COMMON.dropPacked.get()) {
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof PackingTapeItem)
+				|| Config.COMMON.dropPacked.get()) {
 			return;
 		}
 
@@ -102,7 +103,8 @@ public class CommonEventHandler {
 	private static void onMovingStorageUncrafted(PlayerEvent.ItemCraftedEvent event) {
 		ItemStack result = event.getCrafting();
 
-		if (event.getEntity().level().isClientSide() || !(result.getItem() instanceof StorageBlockItem) || !isUncraftedFromSingleMovingStorage(event.getInventory())) {
+		if (event.getEntity().level().isClientSide() || !(result.getItem() instanceof StorageBlockItem)
+				|| !isUncraftedFromSingleMovingStorage(event.getInventory())) {
 			return;
 		}
 
@@ -168,7 +170,8 @@ public class CommonEventHandler {
 	public static void onStorageToolInteract(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
 		ItemStack itemInHand = player.getItemInHand(event.getHand());
-		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorageEntity) || itemInHand.getItem() != ModItems.STORAGE_TOOL.get() || movingStorageEntity.getStorageHolder().isPacked()) {
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorageEntity) || itemInHand.getItem() != ModItems.STORAGE_TOOL.get()
+				|| movingStorageEntity.getStorageHolder().isPacked()) {
 			return;
 		}
 

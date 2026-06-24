@@ -43,7 +43,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Unique
 	private final EntityStorageHolder<MixinAbstractChestedHorse> entityStorageHolder = new EntityStorageHolder<>(this);
 	@Unique
-	private static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(MixinAbstractChestedHorse.class, EntityDataSerializers.ITEM_STACK);
+	private static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(MixinAbstractChestedHorse.class,
+			EntityDataSerializers.ITEM_STACK);
 
 	protected MixinAbstractChestedHorse(EntityType<? extends AbstractChestedHorse> pEntityType, Level pLevel) {
 		super(pEntityType, pLevel);
@@ -132,7 +133,7 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public ItemStack getDropStack(ItemStack storageItem) {
-		NBTHelper.getUniqueId(storageItem, StorageWrapper.UUID_TAG).ifPresent(storageId-> MovingStorageData.moveToItemStorage(storageItem, storageId));
+		NBTHelper.getUniqueId(storageItem, StorageWrapper.UUID_TAG).ifPresent(storageId -> MovingStorageData.moveToItemStorage(storageItem, storageId));
 		return storageItem;
 	}
 
@@ -155,7 +156,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	protected Component getTypeName() {
 		if (hasStorageItem()) {
-			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(), getStorageItem().getHoverName());
+			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(),
+					getStorageItem().getHoverName());
 		}
 		return super.getTypeName();
 	}

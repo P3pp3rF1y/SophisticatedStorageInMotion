@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedcore.network.ISplittableMessage;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -29,7 +30,6 @@ public record MovingStorageContentsMessage(UUID storageUuid, @Nullable CompoundT
 		context.enqueueWork(() -> handleMessage(msg));
 		context.setPacketHandled(true);
 	}
-
 
 	private static void handleMessage(MovingStorageContentsMessage msg) {
 		LocalPlayer player = Minecraft.getInstance().player;

@@ -19,19 +19,21 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.crafting.MovingStorageFromStor
 import java.util.*;
 import java.util.function.Function;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class AssembleRecipesMaker {
 	private AssembleRecipesMaker() {
 	}
 
-	public static <T extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedShapelessCraftingRecipes(Function<ItemStack, Optional<T>> getSubtypeInterpreter) {
+	public static <T extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedShapelessCraftingRecipes(
+			Function<ItemStack, Optional<T>> getSubtypeInterpreter) {
 		return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(RecipeType.CRAFTING, MovingStorageFromStorageRecipe.class, recipe -> {
 			MovingStorageTierUpgradeDisplayRecipe displayRecipe = createDisplayRecipe(recipe, getSubtypeInterpreter);
 			return List.of(displayRecipe);
 		});
 	}
 
-	private static <T extends MovingStorageFromStorageRecipe, U extends PropertyBasedSubtypeInterpreter> MovingStorageTierUpgradeDisplayRecipe createDisplayRecipe(T recipe,
-			Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
+	private static <T extends MovingStorageFromStorageRecipe, U extends PropertyBasedSubtypeInterpreter> MovingStorageTierUpgradeDisplayRecipe createDisplayRecipe(
+			T recipe, Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
 		int storageIngredientIndex = -1;
 
 		NonNullList<Ingredient> ingredients = recipe.getIngredients();
@@ -68,8 +70,10 @@ public class AssembleRecipesMaker {
 		}
 
 		ResourceLocation id = recipe.getId().withPath(path -> "assemble_moving_storage_grouped/" + path);
-		CraftingRecipe displayRecipe = new ShapelessRecipe(recipe.getId(), "", CraftingBookCategory.MISC, ClientRecipeHelper.getResultItem(recipe), ingredientsTemplate);
-		return new MovingStorageTierUpgradeDisplayRecipe(id, displayRecipe, true, 0, 0, ingredientsTemplate, storageIngredientIndex, List.copyOf(variantPairs.values()));
+		CraftingRecipe displayRecipe = new ShapelessRecipe(recipe.getId(), "", CraftingBookCategory.MISC, ClientRecipeHelper.getResultItem(recipe),
+				ingredientsTemplate);
+		return new MovingStorageTierUpgradeDisplayRecipe(id, displayRecipe, true, 0, 0, ingredientsTemplate, storageIngredientIndex,
+				List.copyOf(variantPairs.values()));
 	}
 
 	private static CraftingContainer createCraftingInventory() {
@@ -85,8 +89,10 @@ public class AssembleRecipesMaker {
 		}, 3, 3);
 	}
 
-	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(MovingStorageTierUpgradeVariantPair pair, Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
-		return getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result())).orElse(pair.result().toString());
+	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(MovingStorageTierUpgradeVariantPair pair,
+			Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
+		return getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result()))
+				.orElse(pair.result().toString());
 	}
 
 	private static List<ItemStack> expandStorageItems(ItemStack[] items) {

@@ -15,8 +15,8 @@ import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -24,8 +24,21 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.WoodType;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.*;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.VanillaIngredientSerializer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.moddiscovery.ModFile;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.forgespi.language.IModFileInfo;
+import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryObject;
 import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.*;
 import net.p3pp3rf1y.sophisticatedcore.init.ModRecipes;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedstorage.SophisticatedStorage;
@@ -45,26 +58,13 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.VanillaIngredientSerializer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.forgespi.language.IModFileInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.GameData;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryObject;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -75,10 +75,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -92,9 +92,7 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 
 		List<CraftingDisplayVariant> usages = catalog.getCraftingUsagesFor(tintedBarrel).stream().flatMap(view -> view.variants().stream()).toList();
 
-		CraftingDisplayVariant usage = usages.stream()
-				.filter(variant -> ItemStack.isSameItemSameTags(tintedBarrel, getSource(variant)))
-				.findFirst()
+		CraftingDisplayVariant usage = usages.stream().filter(variant -> ItemStack.isSameItemSameTags(tintedBarrel, getSource(variant))).findFirst()
 				.orElseThrow();
 		assertSameStack(tintedBarrel, getSource(usage));
 		assertSameStack(tintedBarrel, MovingStorageItem.getStorageItem(usage.firstOutput()));
@@ -108,11 +106,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 		ItemStack copperBarrelBoat = movingStorage(woodStorageStack(ModBlocks.COPPER_BARREL_ITEM.get()), Boat.Type.OAK);
 
 		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(ironBarrelBoat).stream().flatMap(view -> view.variants().stream()).toList();
-		List<Item> sourceStorageItems = recipes.stream()
-				.filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource)
-				.map(variant -> MovingStorageItem.getStorageItem(getSource(variant)).getItem())
-				.distinct()
-				.toList();
+		List<Item> sourceStorageItems = recipes.stream().filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource)
+				.map(variant -> MovingStorageItem.getStorageItem(getSource(variant)).getItem()).distinct().toList();
 
 		assertEquals(2, sourceStorageItems.size());
 		assertTrue(sourceStorageItems.contains(MovingStorageItem.getStorageItem(basicBarrelBoat).getItem()));
@@ -125,12 +120,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 		ItemStack basicBarrelBoat = movingStorage(woodStorageStack(ModBlocks.BARREL_ITEM.get()), Boat.Type.OAK);
 		ItemStack ironBarrelBoat = movingStorage(woodStorageStack(ModBlocks.IRON_BARREL_ITEM.get()), Boat.Type.OAK);
 		ItemStack goldBarrelBoat = movingStorage(woodStorageStack(ModBlocks.GOLD_BARREL_ITEM.get()), Boat.Type.OAK);
-		ItemStack previousTierResult = catalog.getCraftingRecipesFor(ironBarrelBoat).stream()
-				.flatMap(view -> view.variants().stream())
-				.filter(variant -> isSameMovingStorageItemAndBoat(basicBarrelBoat, getSource(variant)))
-				.findFirst()
-				.orElseThrow()
-				.firstOutput();
+		ItemStack previousTierResult = catalog.getCraftingRecipesFor(ironBarrelBoat).stream().flatMap(view -> view.variants().stream())
+				.filter(variant -> isSameMovingStorageItemAndBoat(basicBarrelBoat, getSource(variant))).findFirst().orElseThrow().firstOutput();
 
 		List<CraftingDisplayVariant> usages = catalog.getCraftingUsagesFor(previousTierResult).stream().flatMap(view -> view.variants().stream()).toList();
 
@@ -147,7 +138,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 		ItemStack diamondBarrelBoat = movingStorage(diamondBarrel, Boat.Type.OAK);
 
 		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(diamondBarrelBoat).stream().flatMap(view -> view.variants().stream()).toList();
-		List<CraftingDisplayVariant> assemblyRecipes = recipes.stream().filter(variant -> ItemStack.isSameItemSameTags(diamondBarrel, getSource(variant))).toList();
+		List<CraftingDisplayVariant> assemblyRecipes = recipes.stream().filter(variant -> ItemStack.isSameItemSameTags(diamondBarrel, getSource(variant)))
+				.toList();
 		List<CraftingDisplayVariant> tierUpgradeRecipes = recipes.stream().filter(variant -> isSameMovingStorage(goldBarrelBoat, getSource(variant))).toList();
 
 		assertEquals(1, assemblyRecipes.size());
@@ -165,9 +157,12 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 		ItemStack tintedDiamondBarrel = tintedStack(ModBlocks.DIAMOND_BARREL_ITEM.get());
 		ItemStack tintedDiamondBarrelBoat = movingStorage(tintedDiamondBarrel, Boat.Type.OAK);
 
-		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(tintedDiamondBarrelBoat).stream().flatMap(view -> view.variants().stream()).toList();
-		List<CraftingDisplayVariant> assemblyRecipes = recipes.stream().filter(variant -> ItemStack.isSameItemSameTags(tintedDiamondBarrel, getSource(variant))).toList();
-		List<CraftingDisplayVariant> tierUpgradeRecipes = recipes.stream().filter(variant -> isSameMovingStorage(tintedGoldBarrelBoat, getSource(variant))).toList();
+		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(tintedDiamondBarrelBoat).stream().flatMap(view -> view.variants().stream())
+				.toList();
+		List<CraftingDisplayVariant> assemblyRecipes = recipes.stream().filter(variant -> ItemStack.isSameItemSameTags(tintedDiamondBarrel, getSource(variant)))
+				.toList();
+		List<CraftingDisplayVariant> tierUpgradeRecipes = recipes.stream().filter(variant -> isSameMovingStorage(tintedGoldBarrelBoat, getSource(variant)))
+				.toList();
 
 		assertEquals(1, assemblyRecipes.size());
 		assertSameStack(tintedDiamondBarrel, getSource(assemblyRecipes.get(0)));
@@ -196,7 +191,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 		ItemStack tintedIronBarrelBoat = movingStorage(singleColorTintStack(ModBlocks.IRON_BARREL_ITEM.get()), Boat.Type.OAK);
 		ItemStack tintedGoldBarrelBoat = movingStorage(singleColorTintStack(ModBlocks.GOLD_BARREL_ITEM.get()), Boat.Type.OAK);
 
-		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(tintedGoldBarrelBoat).stream().flatMap(view -> view.variants().stream()).filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource).toList();
+		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(tintedGoldBarrelBoat).stream().flatMap(view -> view.variants().stream())
+				.filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource).toList();
 
 		assertEquals(1, recipes.size());
 		assertSameMovingStorage(tintedIronBarrelBoat, getSource(recipes.get(0)));
@@ -210,9 +206,11 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 		ItemStack tintedIronBarrelBoat = movingStorage(singleColorTintStack(ModBlocks.IRON_BARREL_ITEM.get()), Boat.Type.OAK);
 		ItemStack tintedGoldBarrelBoat = movingStorage(singleColorTintStack(ModBlocks.GOLD_BARREL_ITEM.get()), Boat.Type.OAK);
 
-		List<CraftingDisplayVariant> allDisplays = catalog.getCraftingSpecs().stream().flatMap(spec -> spec.getAllDisplays().stream()).filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource).toList();
+		List<CraftingDisplayVariant> allDisplays = catalog.getCraftingSpecs().stream().flatMap(spec -> spec.getAllDisplays().stream())
+				.filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource).toList();
 
-		assertTrue(allDisplays.stream().anyMatch(variant -> isSameMovingStorage(tintedIronBarrelBoat, getSource(variant)) && isSameMovingStorage(tintedGoldBarrelBoat, variant.firstOutput())));
+		assertTrue(allDisplays.stream().anyMatch(
+				variant -> isSameMovingStorage(tintedIronBarrelBoat, getSource(variant)) && isSameMovingStorage(tintedGoldBarrelBoat, variant.firstOutput())));
 	}
 
 	@Test
@@ -221,7 +219,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 		ItemStack tintedIronBarrelMinecart = movingStorageMinecart(singleColorTintStack(ModBlocks.IRON_BARREL_ITEM.get()));
 		ItemStack tintedGoldBarrelMinecart = movingStorageMinecart(singleColorTintStack(ModBlocks.GOLD_BARREL_ITEM.get()));
 
-		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(tintedGoldBarrelMinecart).stream().flatMap(view -> view.variants().stream()).filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource).toList();
+		List<CraftingDisplayVariant> recipes = catalog.getCraftingRecipesFor(tintedGoldBarrelMinecart).stream().flatMap(view -> view.variants().stream())
+				.filter(MovingStorageRecipeViewerDisplaySpecTest::hasMovingStorageSource).toList();
 
 		assertEquals(1, recipes.size());
 		assertSameMovingStorage(tintedIronBarrelMinecart, getSource(recipes.get(0)));
@@ -231,7 +230,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 
 	private static IRecipeViewerDisplayCatalog createCatalog() {
 		IRecipeViewerDisplayCatalog catalog = new RecipeViewerDisplayCatalog();
-		try (TestRecipeResources.LoadedResources resources = TestRecipeResources.load(); MockedStatic<ClientRecipeHelper> clientRecipeHelper = Mockito.mockStatic(ClientRecipeHelper.class, Mockito.CALLS_REAL_METHODS)) {
+		try (TestRecipeResources.LoadedResources resources = TestRecipeResources.load();
+				MockedStatic<ClientRecipeHelper> clientRecipeHelper = Mockito.mockStatic(ClientRecipeHelper.class, Mockito.CALLS_REAL_METHODS)) {
 			mockClientRecipeHelper(clientRecipeHelper, resources);
 			MovingStorageSubtypeInterpreter subtypeInterpreter = new MovingStorageSubtypeInterpreter();
 			IRecipeViewerDisplayContext context = stack -> stack.getItem() instanceof MovingStorageItem ? Optional.of(subtypeInterpreter) : Optional.empty();
@@ -243,13 +243,17 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static void mockClientRecipeHelper(MockedStatic<ClientRecipeHelper> clientRecipeHelper, TestRecipeResources.LoadedResources resources) {
 		RecipeManager recipeManager = resources.recipeManager();
-		clientRecipeHelper.when(() -> ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(Mockito.eq(RecipeType.CRAFTING), Mockito.any(), Mockito.any())).thenAnswer(invocation -> {
-			RecipeType recipeType = invocation.getArgument(0);
-			Class recipeClass = invocation.getArgument(1);
-			return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(recipeManager, recipeType, recipeClass, recipe -> invocation.<java.util.function.Function<Recipe, List>>getArgument(2).apply(normalizeRecipe(recipe, resources)));
-		});
-		clientRecipeHelper.when(() -> ClientRecipeHelper.assemble(Mockito.any(), Mockito.any())).thenAnswer(invocation -> assembleRecipe(invocation.getArgument(0), invocation.getArgument(1), resources));
-		clientRecipeHelper.when(() -> ClientRecipeHelper.getResultItem(Mockito.any())).thenAnswer(invocation -> ClientRecipeHelper.getResultItem(invocation.getArgument(0), resources.registryLookup()));
+		clientRecipeHelper.when(() -> ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(Mockito.eq(RecipeType.CRAFTING), Mockito.any(), Mockito.any()))
+				.thenAnswer(invocation -> {
+					RecipeType recipeType = invocation.getArgument(0);
+					Class recipeClass = invocation.getArgument(1);
+					return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(recipeManager, recipeType, recipeClass,
+							recipe -> invocation.<java.util.function.Function<Recipe, List>>getArgument(2).apply(normalizeRecipe(recipe, resources)));
+				});
+		clientRecipeHelper.when(() -> ClientRecipeHelper.assemble(Mockito.any(), Mockito.any()))
+				.thenAnswer(invocation -> assembleRecipe(invocation.getArgument(0), invocation.getArgument(1), resources));
+		clientRecipeHelper.when(() -> ClientRecipeHelper.getResultItem(Mockito.any()))
+				.thenAnswer(invocation -> ClientRecipeHelper.getResultItem(invocation.getArgument(0), resources.registryLookup()));
 	}
 
 	private static ItemStack assembleRecipe(Recipe<CraftingContainer> recipe, CraftingContainer input, TestRecipeResources.LoadedResources resources) {
@@ -280,7 +284,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 			for (Ingredient ingredient : movingStorageFromStorageRecipe.getIngredients()) {
 				ingredients.add(Ingredient.of(ingredient.getItems()));
 			}
-			ShapelessRecipe compose = new ShapelessRecipe(recipe.getId(), movingStorageFromStorageRecipe.getGroup(), CraftingBookCategory.MISC, movingStorageFromStorageRecipe.getResultItem(resources.registryLookup()), ingredients);
+			ShapelessRecipe compose = new ShapelessRecipe(recipe.getId(), movingStorageFromStorageRecipe.getGroup(), CraftingBookCategory.MISC,
+					movingStorageFromStorageRecipe.getResultItem(resources.registryLookup()), ingredients);
 			return new MovingStorageFromStorageRecipe(compose);
 		}
 		return recipe;
@@ -383,13 +388,9 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 				WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, WorldDataConfiguration.DEFAULT, false, false);
 				WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.INTEGRATED, 0);
 
-				return WorldLoader.load(
-						initConfig,
-						context -> new WorldLoader.DataLoadOutput<>(UnitCookie.INSTANCE, context.datapackDimensions()),
-						(resourceManager, resources, registries, cookie) -> new LoadedResources(resourceManager, resources, registries),
-						backgroundExecutor,
-						gameExecutor
-				).join();
+				return WorldLoader.load(initConfig, context -> new WorldLoader.DataLoadOutput<>(UnitCookie.INSTANCE, context.datapackDimensions()),
+						(resourceManager, resources, registries, cookie) -> new LoadedResources(resourceManager, resources, registries), backgroundExecutor,
+						gameExecutor).join();
 			} finally {
 				backgroundExecutor.shutdown();
 			}
@@ -474,7 +475,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 				}
 
 				String workerId = System.getProperty("org.gradle.test.worker", "main");
-				Path mergedResources = moduleRoot.resolve(Path.of("build", "recipe-viewer-test-resources", MovingStorageRecipeViewerDisplaySpecTest.class.getSimpleName() + "-" + workerId, modId));
+				Path mergedResources = moduleRoot.resolve(Path.of("build", "recipe-viewer-test-resources",
+						MovingStorageRecipeViewerDisplaySpecTest.class.getSimpleName() + "-" + workerId, modId));
 				try {
 					deleteRecursively(mergedResources);
 					Files.createDirectories(mergedResources);
@@ -525,7 +527,7 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 
 			@SuppressWarnings("unchecked")
 			private static <T> T proxy(Class<T> type, InvocationHandler handler) {
-				return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] {type}, (proxy, method, args) -> {
+				return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, (proxy, method, args) -> {
 					if (method.getDeclaringClass() == Object.class) {
 						return switch (method.getName()) {
 							case "toString" -> type.getSimpleName() + " test proxy";
@@ -594,7 +596,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 					DeferredRegister<T> deferredRegister = (DeferredRegister<T>) field.get(null);
 					Field entriesField = DeferredRegister.class.getDeclaredField("entries");
 					entriesField.setAccessible(true);
-					Map<RegistryObject<T>, java.util.function.Supplier<? extends T>> entries = (Map<RegistryObject<T>, java.util.function.Supplier<? extends T>>) entriesField.get(deferredRegister);
+					Map<RegistryObject<T>, java.util.function.Supplier<? extends T>> entries = (Map<RegistryObject<T>, java.util.function.Supplier<? extends T>>) entriesField
+							.get(deferredRegister);
 
 					for (Map.Entry<RegistryObject<T>, java.util.function.Supplier<? extends T>> entry : entries.entrySet()) {
 						RegistryObject<T> registryObject = entry.getKey();
@@ -693,7 +696,8 @@ class MovingStorageRecipeViewerDisplaySpecTest {
 			INSTANCE
 		}
 
-		private record LoadedResources(CloseableResourceManager resourceManager, ReloadableServerResources serverResources, LayeredRegistryAccess<RegistryLayer> registries) implements AutoCloseable {
+		private record LoadedResources(CloseableResourceManager resourceManager, ReloadableServerResources serverResources,
+				LayeredRegistryAccess<RegistryLayer> registries) implements AutoCloseable {
 			private RecipeManager recipeManager() {
 				return serverResources.getRecipeManager();
 			}

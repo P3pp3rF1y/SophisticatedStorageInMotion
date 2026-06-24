@@ -4,7 +4,8 @@ import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 
 public class StorageInMotionPacketHandler extends PacketHandler {
-	public static final StorageInMotionPacketHandler INSTANCE = new StorageInMotionPacketHandler(SophisticatedStorageInMotion.MOD_ID, SophisticatedStorageInMotion.getNetworkProtocolVersion());
+	public static final StorageInMotionPacketHandler INSTANCE = new StorageInMotionPacketHandler(SophisticatedStorageInMotion.MOD_ID,
+			SophisticatedStorageInMotion.getNetworkProtocolVersion());
 
 	private StorageInMotionPacketHandler(String modId, String protocol) {
 		super(modId, protocol);
@@ -12,9 +13,13 @@ public class StorageInMotionPacketHandler extends PacketHandler {
 
 	@Override
 	public void registerMessages() {
-		registerMessage(OpenMovingStorageInventoryMessage.class, OpenMovingStorageInventoryMessage::encode, OpenMovingStorageInventoryMessage::decode, OpenMovingStorageInventoryMessage::onMessage);
-		registerMessage(MovingStorageContentsMessage.class, MovingStorageContentsMessage::encode, MovingStorageContentsMessage::decode, MovingStorageContentsMessage::onMessage);
-		registerMessage(RequestMovingStorageInventoryContentsMessage.class, RequestMovingStorageInventoryContentsMessage::encode, RequestMovingStorageInventoryContentsMessage::decode, RequestMovingStorageInventoryContentsMessage::onMessage);
-		registerMessage(MovingStorageOpennessMessage.class, MovingStorageOpennessMessage::encode, MovingStorageOpennessMessage::decode, MovingStorageOpennessMessage::onMessage);
+		registerMessage(OpenMovingStorageInventoryMessage.class, OpenMovingStorageInventoryMessage::encode, OpenMovingStorageInventoryMessage::decode,
+				OpenMovingStorageInventoryMessage::onMessage);
+		registerMessage(MovingStorageContentsMessage.class, MovingStorageContentsMessage::encode, MovingStorageContentsMessage::decode,
+				MovingStorageContentsMessage::onMessage);
+		registerMessage(RequestMovingStorageInventoryContentsMessage.class, RequestMovingStorageInventoryContentsMessage::encode,
+				RequestMovingStorageInventoryContentsMessage::decode, RequestMovingStorageInventoryContentsMessage::onMessage);
+		registerMessage(MovingStorageOpennessMessage.class, MovingStorageOpennessMessage::encode, MovingStorageOpennessMessage::decode,
+				MovingStorageOpennessMessage::onMessage);
 	}
 }

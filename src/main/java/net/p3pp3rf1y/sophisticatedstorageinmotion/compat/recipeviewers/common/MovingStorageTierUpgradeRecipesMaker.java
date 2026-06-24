@@ -27,28 +27,29 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class MovingStorageTierUpgradeRecipesMaker {
 	private MovingStorageTierUpgradeRecipesMaker() {
 	}
 
-	public static <T extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedShapedCraftingRecipes(Function<ItemStack, Optional<T>> getSubtypeInterpreter) {
+	public static <T extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedShapedCraftingRecipes(
+			Function<ItemStack, Optional<T>> getSubtypeInterpreter) {
 		return getGroupedCraftingRecipes(MovingStorageTierUpgradeShapedRecipe.class, getSubtypeInterpreter, false);
 	}
 
-	public static <T extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedShapelessCraftingRecipes(Function<ItemStack, Optional<T>> getSubtypeInterpreter) {
+	public static <T extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedShapelessCraftingRecipes(
+			Function<ItemStack, Optional<T>> getSubtypeInterpreter) {
 		return getGroupedCraftingRecipes(MovingStorageTierUpgradeShapelessRecipe.class, getSubtypeInterpreter, true);
 	}
 
-	private static <T extends CraftingRecipe, U extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedCraftingRecipes(Class<T> originalRecipeClass,
-			Function<ItemStack, Optional<U>> getSubtypeInterpreter,
-			boolean shapeless) {
-		return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(RecipeType.CRAFTING, originalRecipeClass, recipe -> createDisplayRecipes(recipe, getSubtypeInterpreter, shapeless).stream()
-				.toList());
+	private static <T extends CraftingRecipe, U extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> getGroupedCraftingRecipes(
+			Class<T> originalRecipeClass, Function<ItemStack, Optional<U>> getSubtypeInterpreter, boolean shapeless) {
+		return ClientRecipeHelper.transformAllRecipesOfTypeIntoMultiple(RecipeType.CRAFTING, originalRecipeClass,
+				recipe -> createDisplayRecipes(recipe, getSubtypeInterpreter, shapeless).stream().toList());
 	}
 
-	private static <T extends CraftingRecipe, U extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> createDisplayRecipes(T recipe,
-			Function<ItemStack, Optional<U>> getSubtypeInterpreter,
-			boolean shapeless) {
+	private static <T extends CraftingRecipe, U extends PropertyBasedSubtypeInterpreter> List<MovingStorageTierUpgradeDisplayRecipe> createDisplayRecipes(
+			T recipe, Function<ItemStack, Optional<U>> getSubtypeInterpreter, boolean shapeless) {
 		CraftingContainer craftingInventory = createCraftingInventory();
 		int movingStorageIngredientIndex = findMovingStorageIngredientIndex(recipe.getIngredients());
 		NonNullList<Ingredient> ingredientsCopy = copyIngredients(recipe.getIngredients());
@@ -63,12 +64,15 @@ public class MovingStorageTierUpgradeRecipesMaker {
 				MovingStorageTierUpgradeVariantPair pair = new MovingStorageTierUpgradeVariantPair(sourceMovingStorage.copy(), result.copy());
 				variantPairs.putIfAbsent(getPairKey(pair, getSubtypeInterpreter), pair);
 			}
-			ResourceLocation id = recipe.getId().withPath(path -> "tier_upgrade_grouped/" + path + getMovingStorageGroupSuffix(baseMovingStorage, getSubtypeInterpreter));
+			ResourceLocation id = recipe.getId()
+					.withPath(path -> "tier_upgrade_grouped/" + path + getMovingStorageGroupSuffix(baseMovingStorage, getSubtypeInterpreter));
 			int width = recipe instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getWidth() : 0;
 			int height = recipe instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getHeight() : 0;
-			CraftingRecipe displayRecipe = shapeless ? new ShapelessRecipe(recipe.getId(), "", CraftingBookCategory.MISC, ClientRecipeHelper.getResultItem(recipe), ingredientsCopy)
+			CraftingRecipe displayRecipe = shapeless
+					? new ShapelessRecipe(recipe.getId(), "", CraftingBookCategory.MISC, ClientRecipeHelper.getResultItem(recipe), ingredientsCopy)
 					: new ShapedRecipe(recipe.getId(), "", CraftingBookCategory.MISC, width, height, ingredientsCopy, ClientRecipeHelper.getResultItem(recipe));
-			displayRecipes.add(new MovingStorageTierUpgradeDisplayRecipe(id, displayRecipe, shapeless, width, height, ingredientsCopy, movingStorageIngredientIndex, List.copyOf(variantPairs.values())));
+			displayRecipes.add(new MovingStorageTierUpgradeDisplayRecipe(id, displayRecipe, shapeless, width, height, ingredientsCopy,
+					movingStorageIngredientIndex, List.copyOf(variantPairs.values())));
 		}
 		return displayRecipes;
 	}
@@ -110,7 +114,8 @@ public class MovingStorageTierUpgradeRecipesMaker {
 		return movingStorageItem.getBaseMovingStorageItems();
 	}
 
-	private static void populateCraftingInventory(NonNullList<Ingredient> ingredients, CraftingContainer craftingInventory, int movingStorageIngredientIndex, ItemStack movingStorage) {
+	private static void populateCraftingInventory(NonNullList<Ingredient> ingredients, CraftingContainer craftingInventory, int movingStorageIngredientIndex,
+			ItemStack movingStorage) {
 		for (int i = 0; i < ingredients.size(); i++) {
 			if (i == movingStorageIngredientIndex) {
 				craftingInventory.setItem(i, movingStorage.copy());
@@ -122,15 +127,17 @@ public class MovingStorageTierUpgradeRecipesMaker {
 		}
 	}
 
-	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(MovingStorageTierUpgradeVariantPair pair, Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
-		return getSubtypeInterpreter.apply(pair.source()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.source())).orElse(pair.source().toString())
-				+ "->"
-				+ getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result())).orElse(pair.result().toString());
+	private static <U extends PropertyBasedSubtypeInterpreter> String getPairKey(MovingStorageTierUpgradeVariantPair pair,
+			Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
+		return getSubtypeInterpreter.apply(pair.source()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.source()))
+				.orElse(pair.source().toString()) + "->"
+				+ getSubtypeInterpreter.apply(pair.result()).map(interpreter -> interpreter.getRegistrySanitizedItemString(pair.result()))
+						.orElse(pair.result().toString());
 	}
 
-	private static <U extends PropertyBasedSubtypeInterpreter> String getMovingStorageGroupSuffix(ItemStack baseMovingStorage, Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
-		return getSubtypeInterpreter.apply(baseMovingStorage)
-				.map(interpreter -> "/" + interpreter.getRegistrySanitizedItemString(baseMovingStorage))
+	private static <U extends PropertyBasedSubtypeInterpreter> String getMovingStorageGroupSuffix(ItemStack baseMovingStorage,
+			Function<ItemStack, Optional<U>> getSubtypeInterpreter) {
+		return getSubtypeInterpreter.apply(baseMovingStorage).map(interpreter -> "/" + interpreter.getRegistrySanitizedItemString(baseMovingStorage))
 				.orElse("");
 	}
 

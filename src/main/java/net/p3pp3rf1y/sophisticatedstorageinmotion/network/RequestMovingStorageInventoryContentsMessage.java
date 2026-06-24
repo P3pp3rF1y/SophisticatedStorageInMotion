@@ -11,6 +11,7 @@ import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 import java.util.function.Supplier;
 

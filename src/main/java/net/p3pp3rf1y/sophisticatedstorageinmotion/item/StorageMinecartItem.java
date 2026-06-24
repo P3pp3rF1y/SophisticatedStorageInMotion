@@ -28,6 +28,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Consumer;
 
 public class StorageMinecartItem extends MovingStorageItem {
@@ -39,7 +40,9 @@ public class StorageMinecartItem extends MovingStorageItem {
 			ServerLevel serverlevel = blockSource.getLevel();
 			BlockPos blockpos = blockSource.getPos().relative(direction);
 			BlockState blockstate = serverlevel.getBlockState(blockpos);
-			RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock baseRailBlock ? baseRailBlock.getRailDirection(blockstate, serverlevel, blockpos, null) : RailShape.NORTH_SOUTH;
+			RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock baseRailBlock
+					? baseRailBlock.getRailDirection(blockstate, serverlevel, blockpos, null)
+					: RailShape.NORTH_SOUTH;
 			double slopeOffset;
 			if (blockstate.is(BlockTags.RAILS)) {
 				if (railshape.isAscending()) {
@@ -53,7 +56,9 @@ public class StorageMinecartItem extends MovingStorageItem {
 				}
 
 				BlockState stateBelow = serverlevel.getBlockState(blockpos.below());
-				RailShape railShapeBelow = stateBelow.getBlock() instanceof BaseRailBlock baseRailBlock ? baseRailBlock.getRailDirection(stateBelow, serverlevel, blockpos.below(), null) : RailShape.NORTH_SOUTH;
+				RailShape railShapeBelow = stateBelow.getBlock() instanceof BaseRailBlock baseRailBlock
+						? baseRailBlock.getRailDirection(stateBelow, serverlevel, blockpos.below(), null)
+						: RailShape.NORTH_SOUTH;
 				if (direction != Direction.DOWN && railShapeBelow.isAscending()) {
 					slopeOffset = -0.4;
 				} else {
@@ -81,7 +86,9 @@ public class StorageMinecartItem extends MovingStorageItem {
 		} else {
 			ItemStack stack = context.getItemInHand();
 			if (level instanceof ServerLevel serverlevel) {
-				RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock baseRailBlock ? baseRailBlock.getRailDirection(blockstate, level, blockpos, null) : RailShape.NORTH_SOUTH;
+				RailShape railshape = blockstate.getBlock() instanceof BaseRailBlock baseRailBlock
+						? baseRailBlock.getRailDirection(blockstate, level, blockpos, null)
+						: RailShape.NORTH_SOUTH;
 				double ascendingOffset = 0.0;
 				if (railshape.isAscending()) {
 					ascendingOffset = 0.5;
@@ -98,7 +105,8 @@ public class StorageMinecartItem extends MovingStorageItem {
 		}
 	}
 
-	private static StorageMinecart createMinecart(ServerLevel serverlevel, BlockPos blockpos, double ascendingOffset, ItemStack stack, @Nullable Player player) {
+	private static StorageMinecart createMinecart(ServerLevel serverlevel, BlockPos blockpos, double ascendingOffset, ItemStack stack,
+			@Nullable Player player) {
 		StorageMinecart minecart = new StorageMinecart(serverlevel, blockpos.getX() + 0.5, blockpos.getY() + 0.0625 + ascendingOffset, blockpos.getZ() + 0.5);
 		EntityStorageHolder<?> storageHolder = minecart.getStorageHolder();
 		storageHolder.setStorageItemAndCustomNameFromMovingStorageStack(stack, true);
@@ -114,8 +122,9 @@ public class StorageMinecartItem extends MovingStorageItem {
 
 	@Override
 	public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-		consumer.accept( new IClientItemExtensions() {
-			private final NonNullLazy<BlockEntityWithoutLevelRenderer> ister = NonNullLazy.of(() -> new StorageMinecartItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
+		consumer.accept(new IClientItemExtensions() {
+			private final NonNullLazy<BlockEntityWithoutLevelRenderer> ister = NonNullLazy.of(
+					() -> new StorageMinecartItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
 			@Override
 			public BlockEntityWithoutLevelRenderer getCustomRenderer() {
 				return ister.get();

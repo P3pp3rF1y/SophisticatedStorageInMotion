@@ -28,7 +28,7 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 	private CompoundTag movingStorageContents = new CompoundTag();
 
 	private boolean toRemove = false;
-	private static final Map<UUID, MovingStorageData> clientStorageCopy = new HashMap<>(); //TODO maybe change to cache so that deleted ones get removed?
+	private static final Map<UUID, MovingStorageData> clientStorageCopy = new HashMap<>(); // TODO maybe change to cache so that deleted ones get removed?
 	private final Set<UUID> updatedStorageSettingsFlags = new HashSet<>();
 
 	private MovingStorageData() {
@@ -39,7 +39,7 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				//noinspection ConstantConditions - by this time overworld is loaded
+				// noinspection ConstantConditions - by this time overworld is loaded
 				DimensionDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(MovingStorageData::load, MovingStorageData::new, SAVED_DATA_PREFIX + storageId);
 			}
@@ -94,7 +94,7 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 
 	public void setContents(UUID storageUuid, CompoundTag contents) {
 		for (String key : contents.getAllKeys()) {
-			//noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
+			// noinspection ConstantConditions - the key is one of the tag keys so there's no reason it wouldn't exist here
 			movingStorageContents.put(key, contents.get(key));
 
 			if (key.equals(MovingStorageWrapper.SETTINGS_TAG)) {

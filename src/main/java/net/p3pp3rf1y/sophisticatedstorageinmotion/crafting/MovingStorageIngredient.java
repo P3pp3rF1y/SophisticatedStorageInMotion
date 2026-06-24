@@ -16,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.BlockItemBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -53,7 +54,8 @@ public class MovingStorageIngredient extends AbstractIngredient {
 
 	@Override
 	public boolean test(@Nullable ItemStack itemStack) {
-		return itemStack != null && itemStack.getItem() == movingStorageItem.get() && MovingStorageItem.getStorageItem(itemStack).getItem() == storageItem.value();
+		return itemStack != null && itemStack.getItem() == movingStorageItem.get()
+				&& MovingStorageItem.getStorageItem(itemStack).getItem() == storageItem.value();
 	}
 
 	@Override
@@ -86,7 +88,8 @@ public class MovingStorageIngredient extends AbstractIngredient {
 
 		@Override
 		public MovingStorageIngredient parse(JsonObject json) {
-			return new MovingStorageIngredient(fromRegistryName(json.get("movingStorageItem").getAsString()), fromRegistryName(json.get("storageItem").getAsString()));
+			return new MovingStorageIngredient(fromRegistryName(json.get("movingStorageItem").getAsString()),
+					fromRegistryName(json.get("storageItem").getAsString()));
 		}
 
 		@Override

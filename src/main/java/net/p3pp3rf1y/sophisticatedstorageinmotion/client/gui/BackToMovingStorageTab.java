@@ -8,6 +8,7 @@ import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.OpenMovingStorageInventoryMessage;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.StorageInMotionPacketHandler;
 
+@SuppressWarnings("PMD.UnnecessaryImport")
 public class BackToMovingStorageTab extends Tab {
 	private static final TextureBlitData ICON = new TextureBlitData(GuiHelper.ICONS, Dimension.SQUARE_256, new UV(64, 80), Dimension.SQUARE_16);
 

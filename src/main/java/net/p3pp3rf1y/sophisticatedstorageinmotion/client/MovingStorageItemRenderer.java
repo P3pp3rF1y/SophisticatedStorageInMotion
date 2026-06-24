@@ -21,7 +21,8 @@ public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorag
 	}
 
 	@Override
-	public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay) {
+	public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight,
+			int packedOverlay) {
 		super.renderByItem(stack, displayContext, poseStack, buffer, packedLight, packedOverlay);
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.level == null) {

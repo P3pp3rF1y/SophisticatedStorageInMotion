@@ -16,10 +16,7 @@ public record MovingStorageOpennessMessage(int entityId, boolean shouldBeOpen) {
 	}
 
 	public static MovingStorageOpennessMessage decode(FriendlyByteBuf packetBuffer) {
-		return new MovingStorageOpennessMessage(
-				packetBuffer.readInt(),
-				packetBuffer.readBoolean()
-		);
+		return new MovingStorageOpennessMessage(packetBuffer.readInt(), packetBuffer.readBoolean());
 	}
 
 	static void onMessage(MovingStorageOpennessMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {

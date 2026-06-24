@@ -40,8 +40,10 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
 			ItemStack upgradedStorageItem = MovingStorageItem.getStorageItem(upgradedMovingStorage);
 			upgradedStorageItem.setTag(originalStorageItem.getTag());
-			NBTHelper.setInteger(upgradedStorageItem, StorageWrapper.NUMBER_OF_INVENTORY_SLOTS_TAG, MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
-			NBTHelper.setInteger(upgradedStorageItem, StorageWrapper.NUMBER_OF_UPGRADE_SLOTS_TAG, MovingStorageWrapper.getDefaultNumberOfUpgradeSlots(upgradedStorageItem));
+			NBTHelper.setInteger(upgradedStorageItem, StorageWrapper.NUMBER_OF_INVENTORY_SLOTS_TAG,
+					MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
+			NBTHelper.setInteger(upgradedStorageItem, StorageWrapper.NUMBER_OF_UPGRADE_SLOTS_TAG,
+					MovingStorageWrapper.getDefaultNumberOfUpgradeSlots(upgradedStorageItem));
 			upgradedMovingStorage.setTag(originalMovingStorage.getTag());
 			MovingStorageItem.setStorageItem(upgradedMovingStorage, upgradedStorageItem);
 		});

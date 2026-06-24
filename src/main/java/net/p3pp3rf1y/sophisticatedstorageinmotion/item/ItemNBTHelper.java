@@ -10,13 +10,8 @@ import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import java.util.Set;
 
 public class ItemNBTHelper {
-	private static final Set<String> DROP_TAGS = Set.of(
-			WoodStorageBlockItem.WOOD_TYPE_TAG,
-			StorageBlockItem.MAIN_COLOR_TAG,
-			StorageBlockItem.ACCENT_COLOR_TAG,
-			BarrelBlockItem.MATERIALS_TAG,
-			BarrelBlockItem.FLAT_TOP_TAG
-	);
+	private static final Set<String> DROP_TAGS = Set.of(WoodStorageBlockItem.WOOD_TYPE_TAG, StorageBlockItem.MAIN_COLOR_TAG, StorageBlockItem.ACCENT_COLOR_TAG,
+			BarrelBlockItem.MATERIALS_TAG, BarrelBlockItem.FLAT_TOP_TAG);
 
 	public static ItemStack cleanUpStack(ItemStack stack) {
 		ItemStack cleanedUpStack = stack.copy();

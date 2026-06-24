@@ -16,16 +16,16 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.comparison.EmiSubtypeInterpreter;
-import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettingsScreen;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageRecipeViewerDisplays;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
+import static net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @EmiEntrypoint
@@ -39,13 +39,12 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 	}
 
 	private void registerDefaultComparisons(EmiRegistry registry) {
-		getSubtypeInterpreters()
-				.forEach((item, comparator) -> registry.setDefaultComparison(item, EmiSubtypeInterpreter.of(comparator)));
+		getSubtypeInterpreters().forEach((item, comparator) -> registry.setDefaultComparison(item, EmiSubtypeInterpreter.of(comparator)));
 	}
 
 	private void registerGuiHandlers(EmiRegistry registry) {
 		registry.addExclusionArea(MovingStorageScreen.class, (screen, consumer) -> {
-			//noinspection ConstantValue
+			// noinspection ConstantValue
 			if (screen == null || screen.getUpgradeSettingsControl() == null) {
 				return;
 			}
@@ -67,18 +66,16 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 	}
 
 	public void registerRecipes(EmiRegistry registry) {
-		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
+		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = new HashMap<>(getSubtypeInterpreters());
 		// Add Storage subtype interpreters as well
-		subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
+		subtypeInterpreters.putAll(getSubtypeInterpreters());
 
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.removeRecipes(recipe -> {
 			Recipe<?> backingRecipe = recipe.getBackingRecipe();
 			return backingRecipe != null && catalog.replacesCraftingRecipe(backingRecipe);
 		});
-		catalog.getCraftingSpecs().stream()
-				.flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream())
-				.forEach(registry::addRecipe);
+		catalog.getCraftingSpecs().stream().flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(registry::addRecipe);
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {

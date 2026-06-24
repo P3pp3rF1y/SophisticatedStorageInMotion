@@ -7,6 +7,7 @@ import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
 import javax.annotation.Nullable;
+
 import java.util.function.Supplier;
 
 public record OpenMovingStorageInventoryMessage(int entityId) {

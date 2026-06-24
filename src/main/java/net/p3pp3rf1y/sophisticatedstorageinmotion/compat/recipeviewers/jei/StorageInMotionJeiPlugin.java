@@ -7,11 +7,11 @@ import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
-import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
 import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -22,13 +22,12 @@ import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewer
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.CraftingDisplayCatalogRecipeManagerPluginCompat;
-import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingSpecExtensionRegistrar;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingContainerRecipeTransferHandlerBase;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiCraftingSpecExtensionRegistrar;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiSettingsGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.JeiStorageGhostIngredientHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.jei.subtypes.JeiSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.util.RecipeHelper;
-import net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageScreen;
@@ -38,11 +37,12 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.Mo
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
+import static net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @JeiPlugin
@@ -60,7 +60,8 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		getSubtypeInterpreters().forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
+		getSubtypeInterpreters()
+				.forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
 	}
 
 	@Override
@@ -90,9 +91,9 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	private IRecipeViewerDisplayCatalog getCatalog() {
 		if (catalog == null) {
-			Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
+			Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = new HashMap<>(getSubtypeInterpreters());
 			// Add Storage subtype interpreters as well
-			subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
+			subtypeInterpreters.putAll(getSubtypeInterpreters());
 			catalog = createCatalog(subtypeInterpreters);
 		}
 		return catalog;
@@ -128,17 +129,18 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		IRecipeTransferHandlerHelper handlerHelper = registration.getTransferHelper();
 		IStackHelper stackHelper = registration.getJeiHelpers().getStackHelper();
-		registration.addRecipeTransferHandler(new JeiCraftingContainerRecipeTransferHandlerBase<MovingStorageContainerMenu<?>, CraftingRecipe>(handlerHelper, stackHelper) {
-			@Override
-			public Class<MovingStorageContainerMenu<?>> getContainerClass() {
-				//noinspection unchecked
-				return (Class<MovingStorageContainerMenu<?>>) (Class<?>) MovingStorageContainerMenu.class;
-			}
+		registration.addRecipeTransferHandler(
+				new JeiCraftingContainerRecipeTransferHandlerBase<MovingStorageContainerMenu<?>, CraftingRecipe>(handlerHelper, stackHelper) {
+					@Override
+					public Class<MovingStorageContainerMenu<?>> getContainerClass() {
+						// noinspection unchecked
+						return (Class<MovingStorageContainerMenu<?>>) (Class<?>) MovingStorageContainerMenu.class;
+					}
 
-			@Override
-			public RecipeType<CraftingRecipe> getRecipeType() {
-				return RecipeTypes.CRAFTING;
-			}
-		}, RecipeTypes.CRAFTING);
+					@Override
+					public RecipeType<CraftingRecipe> getRecipeType() {
+						return RecipeTypes.CRAFTING;
+					}
+				}, RecipeTypes.CRAFTING);
 	}
 }

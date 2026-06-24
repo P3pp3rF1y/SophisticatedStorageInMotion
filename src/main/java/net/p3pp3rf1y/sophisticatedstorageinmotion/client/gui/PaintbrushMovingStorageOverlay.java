@@ -20,6 +20,7 @@ import net.p3pp3rf1y.sophisticatedstorage.item.PaintbrushItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
 import javax.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +32,8 @@ public class PaintbrushMovingStorageOverlay {
 	@Nullable
 	private static ItemStack lastPaintbrushCached = null;
 
-	public static <T extends Entity & IMovingStorageEntity> Optional<PaintbrushItem.ItemRequirements> getItemRequirementsFor(ItemStack paintbrush, Player player, Entity entity) {
+	public static <T extends Entity & IMovingStorageEntity> Optional<PaintbrushItem.ItemRequirements> getItemRequirementsFor(ItemStack paintbrush,
+			Player player, Entity entity) {
 		if (!(entity instanceof IMovingStorageEntity)) {
 			return Optional.empty();
 		}
@@ -47,18 +49,21 @@ public class PaintbrushMovingStorageOverlay {
 		return ITEM_REQUIREMENTS_CACHE;
 	}
 
-	private static <T extends Entity & IMovingStorageEntity> Optional<PaintbrushItem.ItemRequirements> getItemRequirements(ItemStack paintbrush, Player player, T movingStorage) {
+	private static <T extends Entity & IMovingStorageEntity> Optional<PaintbrushItem.ItemRequirements> getItemRequirements(ItemStack paintbrush, Player player,
+			T movingStorage) {
 		Map<BarrelMaterial, ResourceLocation> materialsToApply = new HashMap<>(PaintbrushItem.getBarrelMaterials(paintbrush));
 		if (!materialsToApply.isEmpty()) {
 			if (!movingStorage.getStorageHolder().canHoldMaterials()) {
 				return Optional.empty();
 			}
 
-			return PaintbrushItem.getItemRequirements(paintbrush, player, PaintbrushItem.getMaterialHolderPartsNeeded(materialsToApply, movingStorage.getStorageHolder()));
+			return PaintbrushItem.getItemRequirements(paintbrush, player,
+					PaintbrushItem.getMaterialHolderPartsNeeded(materialsToApply, movingStorage.getStorageHolder()));
 		} else {
 			int mainColorToSet = PaintbrushItem.getMainColor(paintbrush);
 			int accentColorToSet = PaintbrushItem.getAccentColor(paintbrush);
-			return PaintbrushItem.getDyeItemRequirements(paintbrush, player, PaintbrushItem.getStorageDyePartsNeeded(mainColorToSet, accentColorToSet, movingStorage.getStorageHolder().getStorageWrapper()));
+			return PaintbrushItem.getDyeItemRequirements(paintbrush, player,
+					PaintbrushItem.getStorageDyePartsNeeded(mainColorToSet, accentColorToSet, movingStorage.getStorageHolder().getStorageWrapper()));
 		}
 	}
 
@@ -74,12 +79,13 @@ public class PaintbrushMovingStorageOverlay {
 
 		LocalPlayer player = mc.player;
 		Level level = mc.level;
-		if (player == null || level == null || !(mc.hitResult instanceof EntityHitResult entityHitResult) || !(entityHitResult.getEntity() instanceof IMovingStorageEntity)) {
+		if (player == null || level == null || !(mc.hitResult instanceof EntityHitResult entityHitResult)
+				|| !(entityHitResult.getEntity() instanceof IMovingStorageEntity)) {
 			return;
 		}
 
-		InventoryHelper.getItemFromEitherHand(player, ModItems.PAINTBRUSH.get()).flatMap(paintbrush -> getItemRequirementsFor(paintbrush, player, entityHitResult.getEntity()))
-				.ifPresent(itemRequirements -> {
+		InventoryHelper.getItemFromEitherHand(player, ModItems.PAINTBRUSH.get())
+				.flatMap(paintbrush -> getItemRequirementsFor(paintbrush, player, entityHitResult.getEntity())).ifPresent(itemRequirements -> {
 					if (itemRequirements.itemsMissing().isEmpty()) {
 						return;
 					}
@@ -89,7 +95,7 @@ public class PaintbrushMovingStorageOverlay {
 					int i = font.width(missingItems);
 					int x = (gui.screenWidth - i) / 2;
 					int y = gui.screenHeight - 75 - 10;
-					guiGraphics.drawString(font, missingItems,  x + 1, y, DyeColor.WHITE.getTextColor());
+					guiGraphics.drawString(font, missingItems, x + 1, y, DyeColor.WHITE.getTextColor());
 
 					x = (gui.screenWidth - itemRequirements.itemsMissing().size() * 18) / 2;
 					for (ItemStack missingItem : itemRequirements.itemsMissing()) {

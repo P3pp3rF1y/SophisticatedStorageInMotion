@@ -36,6 +36,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 
 import javax.annotation.Nullable;
+
 import java.util.Locale;
 
 public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
@@ -147,7 +148,8 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	@Override
 	protected Component getTypeName() {
 		String boatDescId = getVariant() == Type.BAMBOO ? "storage_raft" : "storage_boat";
-		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getVariant()), getStorageItem().getHoverName());
+		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getVariant()),
+				getStorageItem().getHoverName());
 	}
 
 	@Override
@@ -189,7 +191,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public void remove(RemovalReason pReason) {
-		//overriden to prevent default boat logic from using container overrides to drop items when in some cases they are not supposed to be dropped
+		// overriden to prevent default boat logic from using container overrides to drop items when in some cases they are not supposed to be dropped
 		setRemoved(pReason);
 	}
 
@@ -224,7 +226,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public void chestVehicleDestroyed(DamageSource damageSource, Level level, Entity p_entity) {
-		//noop
+		// noop
 	}
 
 	@Override
