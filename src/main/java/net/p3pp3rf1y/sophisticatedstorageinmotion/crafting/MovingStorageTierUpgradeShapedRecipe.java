@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.crafting;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -24,16 +23,13 @@ import java.util.function.Function;
 
 public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWrapperRecipe<ShapedRecipe> {
 	public static final RecipeSerializer<MovingStorageTierUpgradeShapedRecipe> SERIALIZER = new RecipeSerializer<>(
-			RecordCodecBuilder.mapCodec(instance -> instance.group(
-					ShapedRecipe.SERIALIZER.codec().forGetter(MovingStorageTierUpgradeShapedRecipe::getCompose),
-					ItemStackTemplate.CODEC.fieldOf("upgraded_storage_result").forGetter(MovingStorageTierUpgradeShapedRecipe::getUpgradedStorageResult)
-			).apply(instance, MovingStorageTierUpgradeShapedRecipe::new)),
-			StreamCodec.composite(
-					ShapedRecipe.SERIALIZER.streamCodec(), MovingStorageTierUpgradeShapedRecipe::getCompose,
-					ItemStackTemplate.STREAM_CODEC, MovingStorageTierUpgradeShapedRecipe::getUpgradedStorageResult,
-					MovingStorageTierUpgradeShapedRecipe::new
-			)
-	);
+			RecordCodecBuilder.mapCodec(instance -> instance
+					.group(ShapedRecipe.SERIALIZER.codec().forGetter(MovingStorageTierUpgradeShapedRecipe::getCompose),
+							ItemStackTemplate.CODEC.fieldOf("upgraded_storage_result")
+									.forGetter(MovingStorageTierUpgradeShapedRecipe::getUpgradedStorageResult))
+					.apply(instance, MovingStorageTierUpgradeShapedRecipe::new)),
+			StreamCodec.composite(ShapedRecipe.SERIALIZER.streamCodec(), MovingStorageTierUpgradeShapedRecipe::getCompose, ItemStackTemplate.STREAM_CODEC,
+					MovingStorageTierUpgradeShapedRecipe::getUpgradedStorageResult, MovingStorageTierUpgradeShapedRecipe::new));
 	private final ShapedRecipe compose;
 	private final ItemStackTemplate upgradedStorageResult;
 
@@ -63,7 +59,8 @@ public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWr
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
 			ItemStack upgradedStorageItem = upgradedStorageResult.create();
 			upgradedStorageItem.applyComponents(originalStorageItem.getComponentsPatch());
-			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
+			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS,
+					MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, MovingStorageWrapper.getDefaultNumberOfUpgradeSlots(upgradedStorageItem));
 			upgradedMovingStorage.applyComponents(originalMovingStorage.getComponentsPatch());
 			MovingStorageItem.setStorageItem(upgradedMovingStorage, upgradedStorageItem);

@@ -87,7 +87,8 @@ public class CommonEventHandler {
 	private static void onPacked(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
 		ItemStack itemInHand = player.getItemInHand(event.getHand());
-		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof PackingTapeItem) || Config.COMMON.dropPacked.get()) {
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof PackingTapeItem)
+				|| Config.COMMON.dropPacked.get()) {
 			return;
 		}
 
@@ -106,11 +107,13 @@ public class CommonEventHandler {
 	private static void onMovingStorageUncrafted(PlayerEvent.ItemCraftedEvent event) {
 		ItemStack result = event.getCrafting();
 
-		if (event.getEntity().level().isClientSide() || !(result.getItem() instanceof StorageBlockItem) || !isUncraftedFromSingleMovingStorage(event.getInventory())) {
+		if (event.getEntity().level().isClientSide() || !(result.getItem() instanceof StorageBlockItem)
+				|| !isUncraftedFromSingleMovingStorage(event.getInventory())) {
 			return;
 		}
 
-		@Nullable UUID storageId = result.get(ModCoreDataComponents.STORAGE_UUID);
+		@Nullable
+		UUID storageId = result.get(ModCoreDataComponents.STORAGE_UUID);
 
 		if (storageId == null) {
 			return;
@@ -151,7 +154,8 @@ public class CommonEventHandler {
 			shulkerStorageWrapper.getContentsUuid().ifPresent(id -> {
 				ItemContentsStorage itemContentsStorage = ItemContentsStorage.get();
 				ContainerContents contents = itemContentsStorage.getOrCreateContents(id);
-				CompoundTag renderDataNbt = itemContentsStorage.getOrCreateAddtionalBeData(id).getCompoundOrEmpty(StorageBlockEntity.STORAGE_WRAPPER).getCompoundOrEmpty(StorageWrapper.RENDER_DATA);
+				CompoundTag renderDataNbt = itemContentsStorage.getOrCreateAddtionalBeData(id).getCompoundOrEmpty(StorageBlockEntity.STORAGE_WRAPPER)
+						.getCompoundOrEmpty(StorageWrapper.RENDER_DATA);
 				RegistryOps<Tag> registryOps = level.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 				RenderData.CODEC.decode(registryOps, renderDataNbt).ifSuccess(pair -> {
 					storageItem.set(ModCoreDataComponents.RENDER_DATA, pair.getFirst());
@@ -178,7 +182,8 @@ public class CommonEventHandler {
 	public static void onStorageToolInteract(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
 		ItemStack itemInHand = player.getItemInHand(event.getHand());
-		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorageEntity) || itemInHand.getItem() != ModItems.STORAGE_TOOL.get() || movingStorageEntity.getStorageHolder().isPacked()) {
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorageEntity) || itemInHand.getItem() != ModItems.STORAGE_TOOL.get()
+				|| movingStorageEntity.getStorageHolder().isPacked()) {
 			return;
 		}
 

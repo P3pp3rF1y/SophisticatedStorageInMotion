@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.crafting;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -24,16 +23,13 @@ import java.util.function.Function;
 
 public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
 	public static final RecipeSerializer<MovingStorageTierUpgradeShapelessRecipe> SERIALIZER = new RecipeSerializer<>(
-			RecordCodecBuilder.mapCodec(instance -> instance.group(
-					ShapelessRecipe.SERIALIZER.codec().forGetter(MovingStorageTierUpgradeShapelessRecipe::getCompose),
-					ItemStackTemplate.CODEC.fieldOf("upgraded_storage_result").forGetter(MovingStorageTierUpgradeShapelessRecipe::getUpgradedStorageResult)
-			).apply(instance, MovingStorageTierUpgradeShapelessRecipe::new)),
-			StreamCodec.composite(
-					ShapelessRecipe.SERIALIZER.streamCodec(), MovingStorageTierUpgradeShapelessRecipe::getCompose,
-					ItemStackTemplate.STREAM_CODEC, MovingStorageTierUpgradeShapelessRecipe::getUpgradedStorageResult,
-					MovingStorageTierUpgradeShapelessRecipe::new
-			)
-	);
+			RecordCodecBuilder.mapCodec(instance -> instance
+					.group(ShapelessRecipe.SERIALIZER.codec().forGetter(MovingStorageTierUpgradeShapelessRecipe::getCompose),
+							ItemStackTemplate.CODEC.fieldOf("upgraded_storage_result")
+									.forGetter(MovingStorageTierUpgradeShapelessRecipe::getUpgradedStorageResult))
+					.apply(instance, MovingStorageTierUpgradeShapelessRecipe::new)),
+			StreamCodec.composite(ShapelessRecipe.SERIALIZER.streamCodec(), MovingStorageTierUpgradeShapelessRecipe::getCompose, ItemStackTemplate.STREAM_CODEC,
+					MovingStorageTierUpgradeShapelessRecipe::getUpgradedStorageResult, MovingStorageTierUpgradeShapelessRecipe::new));
 	private final ShapelessRecipe compose;
 	private final ItemStackTemplate upgradedStorageResult;
 
@@ -64,7 +60,8 @@ public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessReci
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
 			ItemStack upgradedStorageItem = upgradedStorageResult.create();
 			upgradedStorageItem.applyComponents(originalStorageItem.getComponentsPatch());
-			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS, MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
+			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_INVENTORY_SLOTS,
+					MovingStorageWrapper.getDefaultNumberOfInventorySlots(upgradedStorageItem));
 			upgradedStorageItem.set(ModCoreDataComponents.NUMBER_OF_UPGRADE_SLOTS, MovingStorageWrapper.getDefaultNumberOfUpgradeSlots(upgradedStorageItem));
 			upgradedMovingStorage.applyComponents(originalMovingStorage.getComponentsPatch());
 			MovingStorageItem.setStorageItem(upgradedMovingStorage, upgradedStorageItem);

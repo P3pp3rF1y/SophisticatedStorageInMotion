@@ -29,13 +29,10 @@ import java.util.*;
 
 //TODO after 1.22 remove support for legacy UUID deserialization via strings
 public class MovingStorageData extends SavedData implements IStorageSavedData {
-	private static final SavedDataType<MovingStorageData> TYPE = new SavedDataType<>(Identifier.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "moving_storage_data"), MovingStorageData::new,
-			RecordCodecBuilder.create(
-					builder -> builder.group(
-							Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, ContainerContents.CODEC)
-									.fieldOf("storageContents").forGetter((MovingStorageData data) -> data.movingStorageContents)
-					).apply(builder, MovingStorageData::new)
-			));
+	private static final SavedDataType<MovingStorageData> TYPE = new SavedDataType<>(
+			Identifier.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "moving_storage_data"), MovingStorageData::new,
+			RecordCodecBuilder.create(builder -> builder.group(Codec.unboundedMap(CodecHelper.STRING_ENCODED_UUID, ContainerContents.CODEC)
+					.fieldOf("storageContents").forGetter((MovingStorageData data) -> data.movingStorageContents)).apply(builder, MovingStorageData::new)));
 
 	private static final MovingStorageData clientStorageCopy = new MovingStorageData();
 
@@ -54,7 +51,7 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-				//noinspection ConstantConditions - by this time overworld is loaded
+				// noinspection ConstantConditions - by this time overworld is loaded
 				SavedDataStorage storage = overworld.getDataStorage();
 				return storage.computeIfAbsent(TYPE);
 			}

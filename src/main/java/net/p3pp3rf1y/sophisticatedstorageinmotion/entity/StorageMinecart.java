@@ -22,9 +22,9 @@ import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
@@ -154,7 +154,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public void remove(RemovalReason pReason) {
-		//overriden to prevent default minecart logic from using container overrides to drop items when in some cases they are not supposed to be dropped
+		// overriden to prevent default minecart logic from using container overrides to drop items when in some cases they are not supposed to be dropped
 		setRemoved(pReason);
 	}
 
@@ -187,7 +187,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public void chestVehicleDestroyed(DamageSource damageSource, ServerLevel level, Entity p_entity) {
-		//noop
+		// noop
 	}
 
 	@Override

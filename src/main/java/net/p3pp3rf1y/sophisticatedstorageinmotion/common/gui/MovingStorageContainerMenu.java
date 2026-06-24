@@ -40,11 +40,12 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 	}
 
 	public MovingStorageContainerMenu(MenuType<?> menuType, int containerId, Player player, int entityId) {
-		super(menuType, containerId, player, getWrapper(player.level(), entityId), NoopStorageWrapper.INSTANCE, -1, false, instantiateExtraSlots(player.level(), entityId));
+		super(menuType, containerId, player, getWrapper(player.level(), entityId), NoopStorageWrapper.INSTANCE, -1, false,
+				instantiateExtraSlots(player.level(), entityId));
 		if (!(player.level().getEntity(entityId) instanceof IMovingStorageEntity movingStorageEntity)) {
 			throw new IllegalArgumentException("Incorrect entity with id " + entityId + " expected to find IMovingStorageEntity");
 		}
-		storageEntity = new WeakReference<T>((T) movingStorageEntity);
+		storageEntity = new WeakReference<>((T) movingStorageEntity);
 		movingStorageEntity.getStorageHolder().startOpen(player, storageEntity.get());
 	}
 
@@ -102,10 +103,10 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
-		getStorageEntity().ifPresent(entity ->
-				player.openMenu(new SophisticatedMenuProvider((w, p, pl) -> instantiateSettingsContainerMenu(w, pl, entity.getId()),
-						Component.translatable(StorageTranslationHelper.INSTANCE.translGui("settings.title")), false), buffer -> buffer.writeInt(entity.getId()))
-		);
+		getStorageEntity().ifPresent(entity -> player.openMenu(
+				new SophisticatedMenuProvider((w, p, pl) -> instantiateSettingsContainerMenu(w, pl, entity.getId()),
+						Component.translatable(StorageTranslationHelper.INSTANCE.translGui("settings.title")), false),
+				buffer -> buffer.writeInt(entity.getId())));
 	}
 
 	protected MovingStorageSettingsContainerMenu instantiateSettingsContainerMenu(int windowId, Player player, int entityId) {
@@ -114,7 +115,7 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 
 	@Override
 	protected boolean storageItemHasChanged() {
-		return false; //the stack is only used for internal tracking in moving entities so it can't be swapped away by a player
+		return false; // the stack is only used for internal tracking in moving entities so it can't be swapped away by a player
 	}
 
 	@Override
