@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +51,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Unique
 	private final EntityStorageHolder<MixinAbstractChestedHorse> entityStorageHolder = new EntityStorageHolder<>(this);
 	@Unique
-	private static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(MixinAbstractChestedHorse.class, EntityDataSerializers.ITEM_STACK);
+	private static final EntityDataAccessor<ItemStack> DATA_STORAGE_ITEM = SynchedEntityData.defineId(MixinAbstractChestedHorse.class,
+			EntityDataSerializers.ITEM_STACK);
 
 	protected MixinAbstractChestedHorse(EntityType<? extends AbstractChestedHorse> pEntityType, Level pLevel) {
 		super(pEntityType, pLevel);
@@ -102,11 +104,12 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	public List<Slot> instantiateExtraSlots() {
 		if (canUseSlot(EquipmentSlot.BODY)) {
-			return List.of(new ArmorSlot(getBodyArmorAccess(), this, EquipmentSlot.BODY, 0, 8, 36, ((Object)this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
-				public boolean mayPlace(ItemStack stack) {
-					return isEquippableInSlot(stack, EquipmentSlot.BODY);
-				}
-			});
+			return List.of(
+					new ArmorSlot(getBodyArmorAccess(), this, EquipmentSlot.BODY, 0, 8, 36, ((Object) this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
+						public boolean mayPlace(ItemStack stack) {
+							return isEquippableInSlot(stack, EquipmentSlot.BODY);
+						}
+					});
 		} else if (isSaddleable()) {
 			return List.of(new Slot(getInventory(), 0, 0, 0) {
 				@Override
@@ -145,7 +148,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public ItemStack getDropStack(ItemStack storageItem) {
-		@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+		@Nullable
+		UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
 		if (storageId != null) {
 			MovingStorageData.moveToItemStorage(storageItem, storageId);
 		}
@@ -171,7 +175,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	protected Component getTypeName() {
 		if (hasStorageItem()) {
-			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(), getStorageItem().getHoverName());
+			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(),
+					getStorageItem().getHoverName());
 		}
 		return super.getTypeName();
 	}

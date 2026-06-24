@@ -28,24 +28,32 @@ import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.client.render.BarrelBakedModelBase;
 
 import javax.annotation.Nullable;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 public class StorageBlockRenderer {
-	public static void renderStorageBlock(float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight, StorageBlockEntity renderBlockEntity) {
+	public static void renderStorageBlock(float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight,
+			StorageBlockEntity renderBlockEntity) {
 		BlockState state = renderBlockEntity.getBlockState();
 		Minecraft minecraft = Minecraft.getInstance();
 		if (renderBlockEntity instanceof BarrelBlockEntity barrel) {
 			BlockRenderDispatcher blockRenderer = minecraft.getBlockRenderer();
 			BakedModel bakedModel = blockRenderer.getBlockModel(barrel.getBlockState());
 			ModelData modelData = BarrelBakedModelBase.getModelDataFromBlockEntity(barrel);
-			BlockAndTintGetter wrappedLevel = new StaticBlockEntityTintGetter(minecraft.level, renderBlockEntity, packedLight); //TODO try to optimize not to create a new instance all the time, perhaps level keyed cache for these and then only setting blockentity in the render call
+			BlockAndTintGetter wrappedLevel = new StaticBlockEntityTintGetter(minecraft.level, renderBlockEntity, packedLight); // TODO try to optimize not to
+																																// create a new instance all the
+																																// time, perhaps level keyed
+																																// cache for these and then only
+																																// setting blockentity in the
+																																// render call
 			for (RenderType renderType : bakedModel.getRenderTypes(state, RandomSource.create(42L), modelData)) {
 				VertexConsumer vertexConsumer = buffer.getBuffer(RenderTypeHelper.getEntityRenderType(renderType));
 				RandomSource randomsource = RandomSource.create();
 				randomsource.setSeed(42L);
-				blockRenderer.getModelRenderer().tesselateWithoutAO(wrappedLevel, bakedModel, barrel.getBlockState(), BlockPos.ZERO, poseStack, vertexConsumer, false, randomsource, state.getSeed(BlockPos.ZERO), OverlayTexture.NO_OVERLAY, modelData, renderType);
+				blockRenderer.getModelRenderer().tesselateWithoutAO(wrappedLevel, bakedModel, barrel.getBlockState(), BlockPos.ZERO, poseStack, vertexConsumer,
+						false, randomsource, state.getSeed(BlockPos.ZERO), OverlayTexture.NO_OVERLAY, modelData, renderType);
 			}
 		}
 
@@ -74,9 +82,11 @@ public class StorageBlockRenderer {
 		OFFSET_MAP.put(AbstractChestedHorse.class, (renderBlockEntity) -> MULE_OTHER_OFFSET);
 	}
 
-	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
+	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (
+			renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
 
-	public static void renderChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
+	public static void renderChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState,
+			PoseStack poseStack, MultiBufferSource buffer, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
 		if (renderBlockEntity == null) {
 			return;
 		}
@@ -85,7 +95,8 @@ public class StorageBlockRenderer {
 
 		Function<StorageBlockEntity, Vec3> offsetFunction = OFFSET_MAP.getOrDefault(chestedHorseClass, DEFAULT_OFFSET);
 		if (offsetFunction != null) {
-			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y, offsetFunction.apply(renderBlockEntity).z);
+			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y,
+					offsetFunction.apply(renderBlockEntity).z);
 		}
 
 		renderStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 90, 1, renderBlockEntity, packedLight, buffer, entityRenderState.partialTick);
@@ -93,7 +104,8 @@ public class StorageBlockRenderer {
 		poseStack.popPose();
 	}
 
-	private static void renderStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, MultiBufferSource buffer, float partialTick) {
+	private static void renderStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack,
+			int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, MultiBufferSource buffer, float partialTick) {
 		float halfWidth = entityRenderState.boundingBoxWidth / 2;
 		poseStack.pushPose();
 
@@ -116,7 +128,7 @@ public class StorageBlockRenderer {
 		}
 		poseStack.translate(-0.5, -0.5, -0.5);
 
-		StorageBlockRenderer.renderStorageBlock(partialTick, poseStack, buffer, packedLight, renderBlockEntity);
+		renderStorageBlock(partialTick, poseStack, buffer, packedLight, renderBlockEntity);
 		poseStack.popPose();
 	}
 }
