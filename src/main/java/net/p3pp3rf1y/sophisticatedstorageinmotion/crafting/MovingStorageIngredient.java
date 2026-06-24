@@ -18,13 +18,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class MovingStorageIngredient implements ICustomIngredient {
-	public static final MapCodec<MovingStorageIngredient> CODEC = RecordCodecBuilder.mapCodec(
-			instance -> instance.group(
-							Item.CODEC.fieldOf("moving_storage_item").forGetter(ingredient -> ingredient.movingStorageItem),
-							Item.CODEC.fieldOf("storage_item").forGetter(ingredient -> ingredient.storageItem)
-					)
-					.apply(instance, MovingStorageIngredient::new)
-	);
+	public static final MapCodec<MovingStorageIngredient> CODEC = RecordCodecBuilder
+			.mapCodec(
+					instance -> instance
+							.group(Item.CODEC.fieldOf("moving_storage_item").forGetter(ingredient -> ingredient.movingStorageItem),
+									Item.CODEC.fieldOf("storage_item").forGetter(ingredient -> ingredient.storageItem))
+							.apply(instance, MovingStorageIngredient::new));
 	private final Holder<Item> movingStorageItem;
 	private final Holder<Item> storageItem;
 	private final List<ItemStack> movingStorages;

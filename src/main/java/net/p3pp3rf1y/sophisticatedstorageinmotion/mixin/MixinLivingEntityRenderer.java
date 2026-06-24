@@ -14,14 +14,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class MixinLivingEntityRenderer {
-	@Inject(method = "render(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"))
-	private void renderSophisticatedStorage(LivingEntityRenderState renderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight, CallbackInfo ci) {
+	@Inject(method = "render(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;popPose()V"))
+	private void renderSophisticatedStorage(LivingEntityRenderState renderState, PoseStack poseStack, MultiBufferSource buffer, int packedLight,
+			CallbackInfo ci) {
 		Class<? extends AbstractChestedHorse> horseClass = renderState.getRenderData(ContextKeys.HORSE_CLASS);
 		if (horseClass == null) {
 			return;
 		}
 
-		StorageBlockRenderer.renderChestedHorseStorage(horseClass, renderState, poseStack, buffer, packedLight, renderState.getRenderData(ContextKeys.RENDER_BLOCK_ENTITY));
+		StorageBlockRenderer.renderChestedHorseStorage(horseClass, renderState, poseStack, buffer, packedLight,
+				renderState.getRenderData(ContextKeys.RENDER_BLOCK_ENTITY));
 	}
 }

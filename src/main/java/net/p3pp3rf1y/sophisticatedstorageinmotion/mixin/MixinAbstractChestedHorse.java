@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -45,7 +46,6 @@ import java.util.UUID;
 public abstract class MixinAbstractChestedHorse extends AbstractHorse implements IMovingStorageEntity, IStorageItemAttachmentHolder {
 	@Shadow
 	public abstract boolean hasChest();
-
 
 	private static final ResourceLocation SADDLE_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot/saddle");
 	private static final ResourceLocation LLAMA_ARMOR_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot/llama_armor");
@@ -137,7 +137,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public ItemStack getDropStack(ItemStack storageItem) {
-		@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+		@Nullable
+		UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
 		if (storageId != null) {
 			MovingStorageData.moveToItemStorage(storageItem, storageId);
 		}
@@ -159,7 +160,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	protected Component getTypeName() {
 		if (hasStorageItem()) {
-			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(), getStorageItem().getHoverName());
+			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(),
+					getStorageItem().getHoverName());
 		}
 		return super.getTypeName();
 	}

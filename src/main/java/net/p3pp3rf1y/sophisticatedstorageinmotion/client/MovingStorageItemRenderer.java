@@ -12,14 +12,18 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+
 import java.util.Set;
 
-public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorageEntity, D extends MovingStorageItemRenderer.RenderData> implements SpecialModelRenderer<D> {
+public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorageEntity, D extends MovingStorageItemRenderer.RenderData>
+		implements
+			SpecialModelRenderer<D> {
 	@Nullable
 	private T movingStorage = null;
 
 	@Override
-	public void render(@Nullable D data, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay, boolean hasFoil) {
+	public void render(@Nullable D data, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay,
+			boolean hasFoil) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.level == null || data == null) {
 			return;

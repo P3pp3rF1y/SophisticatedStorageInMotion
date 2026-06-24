@@ -34,6 +34,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,18 +44,10 @@ import java.util.function.Supplier;
 public class StorageBoatItem extends MovingStorageItem {
 	private static final Predicate<Entity> ENTITY_PREDICATE = EntitySelector.NO_SPECTATORS.and(Entity::isPickable);
 	private static final String RAFT_DESCRIPTION_ID = "item." + SophisticatedStorageInMotion.MOD_ID + ".storage_raft";
-	public static final Map<WoodType, Supplier<Item>> SUPPORTED_WOOD_TYPES = Map.of(
-			WoodType.ACACIA, () -> Items.ACACIA_BOAT,
-			WoodType.BAMBOO, () -> Items.BAMBOO_RAFT,
-			WoodType.BIRCH, () -> Items.BIRCH_BOAT,
-			WoodType.CHERRY, () -> Items.CHERRY_BOAT,
-			WoodType.DARK_OAK, () -> Items.DARK_OAK_BOAT,
-			WoodType.JUNGLE, () -> Items.JUNGLE_BOAT,
-			WoodType.MANGROVE, () -> Items.MANGROVE_BOAT,
-			WoodType.OAK, () -> Items.OAK_BOAT,
-			WoodType.PALE_OAK, () -> Items.PALE_OAK_BOAT,
-			WoodType.SPRUCE, () -> Items.SPRUCE_BOAT
-	);
+	public static final Map<WoodType, Supplier<Item>> SUPPORTED_WOOD_TYPES = Map.of(WoodType.ACACIA, () -> Items.ACACIA_BOAT, WoodType.BAMBOO,
+			() -> Items.BAMBOO_RAFT, WoodType.BIRCH, () -> Items.BIRCH_BOAT, WoodType.CHERRY, () -> Items.CHERRY_BOAT, WoodType.DARK_OAK,
+			() -> Items.DARK_OAK_BOAT, WoodType.JUNGLE, () -> Items.JUNGLE_BOAT, WoodType.MANGROVE, () -> Items.MANGROVE_BOAT, WoodType.OAK,
+			() -> Items.OAK_BOAT, WoodType.PALE_OAK, () -> Items.PALE_OAK_BOAT, WoodType.SPRUCE, () -> Items.SPRUCE_BOAT);
 
 	public static final DefaultDispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {
 		private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
@@ -172,7 +165,7 @@ public class StorageBoatItem extends MovingStorageItem {
 		storageHolder.setStorageItemAndCustomNameFromMovingStorageStack(stack, true);
 		storageHolder.onPlace();
 
-		boat.setWoodType(StorageBoatItem.getWoodType(stack));
+		boat.setWoodType(getWoodType(stack));
 		if (player != null) {
 			boat.setYRot(player.getYRot());
 		}

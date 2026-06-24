@@ -31,18 +31,12 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 	public StorageBoatRenderer(EntityRendererProvider.Context context) {
 		super(context);
 
-		baseBoatRenderers = Map.of(
-				WoodType.ACACIA, new BoatRenderer(context, ModelLayers.ACACIA_BOAT),
-				WoodType.BIRCH, new BoatRenderer(context, ModelLayers.BIRCH_BOAT),
-				WoodType.CHERRY, new BoatRenderer(context, ModelLayers.CHERRY_BOAT),
-				WoodType.DARK_OAK, new BoatRenderer(context, ModelLayers.DARK_OAK_BOAT),
-				WoodType.JUNGLE, new BoatRenderer(context, ModelLayers.JUNGLE_BOAT),
-				WoodType.MANGROVE, new BoatRenderer(context, ModelLayers.MANGROVE_BOAT),
-				WoodType.OAK, new BoatRenderer(context, ModelLayers.OAK_BOAT),
-				WoodType.PALE_OAK, new BoatRenderer(context, ModelLayers.PALE_OAK_BOAT),
-				WoodType.SPRUCE, new BoatRenderer(context, ModelLayers.SPRUCE_BOAT),
-				WoodType.BAMBOO, new BoatRenderer(context, ModelLayers.BAMBOO_RAFT)
-		);
+		baseBoatRenderers = Map.of(WoodType.ACACIA, new BoatRenderer(context, ModelLayers.ACACIA_BOAT), WoodType.BIRCH,
+				new BoatRenderer(context, ModelLayers.BIRCH_BOAT), WoodType.CHERRY, new BoatRenderer(context, ModelLayers.CHERRY_BOAT), WoodType.DARK_OAK,
+				new BoatRenderer(context, ModelLayers.DARK_OAK_BOAT), WoodType.JUNGLE, new BoatRenderer(context, ModelLayers.JUNGLE_BOAT), WoodType.MANGROVE,
+				new BoatRenderer(context, ModelLayers.MANGROVE_BOAT), WoodType.OAK, new BoatRenderer(context, ModelLayers.OAK_BOAT), WoodType.PALE_OAK,
+				new BoatRenderer(context, ModelLayers.PALE_OAK_BOAT), WoodType.SPRUCE, new BoatRenderer(context, ModelLayers.SPRUCE_BOAT), WoodType.BAMBOO,
+				new BoatRenderer(context, ModelLayers.BAMBOO_RAFT));
 	}
 
 	@Override
@@ -54,7 +48,7 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 	public void extractRenderState(StorageBoat storageBoat, BoatRenderState boatRenderState, float partialTick) {
 		super.extractRenderState(storageBoat, boatRenderState, partialTick);
 		boatRenderState.yRot = storageBoat.getYRot(partialTick);
-		boatRenderState.hurtTime = (float)storageBoat.getHurtTime() - partialTick;
+		boatRenderState.hurtTime = (float) storageBoat.getHurtTime() - partialTick;
 		boatRenderState.hurtDir = storageBoat.getHurtDir();
 		boatRenderState.damageTime = Math.max(storageBoat.getDamage() - partialTick, 0.0F);
 		boatRenderState.bubbleAngle = storageBoat.getBubbleAngle(partialTick);
@@ -74,7 +68,7 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		}
 
 		poseStack.pushPose();
-		poseStack.translate(0, woodType == WoodType.BAMBOO ? 8/16F : 3/16F, 0);
+		poseStack.translate(0, woodType == WoodType.BAMBOO ? 8 / 16F : 3 / 16F, 0);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - renderState.yRot));
 		float interpolatedHurtTime = renderState.hurtTime;
 		float interpolatedDamage = renderState.damageTime;
@@ -83,7 +77,8 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		}
 
 		if (interpolatedHurtTime > 0.0F) {
-			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * (float)renderState.hurtDir));
+			poseStack.mulPose(
+					Axis.XP.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * (float) renderState.hurtDir));
 		}
 
 		float bubbleAngle = renderState.bubbleAngle;
@@ -94,8 +89,9 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
 		poseStack.mulPose(Axis.XP.rotationDegrees(180));
-		poseStack.scale(6/7F, 6/7F, 6/7F);
-		poseStack.translate(-0.5F, 0, (renderBlockEntity instanceof BarrelBlockEntity || renderBlockEntity instanceof ShulkerBoxBlockEntity ? 0 : 1/16F) + 0.02F);
+		poseStack.scale(6 / 7F, 6 / 7F, 6 / 7F);
+		poseStack.translate(-0.5F, 0,
+				(renderBlockEntity instanceof BarrelBlockEntity || renderBlockEntity instanceof ShulkerBoxBlockEntity ? 0 : 1 / 16F) + 0.02F);
 		StorageBlockRenderer.renderStorageBlock(renderState.partialTick, poseStack, buffer, packedLight, renderBlockEntity);
 		poseStack.popPose();
 

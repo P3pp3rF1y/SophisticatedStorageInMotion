@@ -19,7 +19,7 @@ public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<Stora
 
 	@Override
 	protected void setMovingStoragePropertiesFromData(StorageMinecart movingStorage, RenderData data) {
-		//noop
+		// noop
 	}
 
 	@Override

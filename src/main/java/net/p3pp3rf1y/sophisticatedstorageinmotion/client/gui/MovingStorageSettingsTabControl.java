@@ -12,6 +12,7 @@ public class MovingStorageSettingsTabControl extends StorageSettingsTabControl {
 
 	@Override
 	protected Tab instantiateReturnBackTab() {
-		return new BackToMovingStorageTab(new Position(x, getTopY()), screen.getMenu() instanceof MovingStorageSettingsContainerMenu menu ? menu.getEntityId() : -1);
+		return new BackToMovingStorageTab(new Position(x, getTopY()),
+				screen.getMenu() instanceof MovingStorageSettingsContainerMenu menu ? menu.getEntityId() : -1);
 	}
 }
