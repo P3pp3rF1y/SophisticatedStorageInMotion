@@ -63,7 +63,7 @@ public class MovingStorageFromStorageRecipe extends ShapelessRecipe implements I
 
 	public static class Serializer extends RecipeWrapperSerializer<ShapelessRecipe, MovingStorageFromStorageRecipe> {
 		public Serializer() {
-			super(MovingStorageFromStorageRecipe::new, RecipeSerializer.SHAPELESS_RECIPE);
+			super(MovingStorageFromStorageRecipe::new, SHAPELESS_RECIPE);
 		}
 	}
 }

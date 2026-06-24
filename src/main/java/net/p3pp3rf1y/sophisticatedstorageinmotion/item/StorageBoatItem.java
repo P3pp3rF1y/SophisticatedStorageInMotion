@@ -33,6 +33,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,17 +43,10 @@ import java.util.function.Supplier;
 public class StorageBoatItem extends MovingStorageItem {
 	private static final Predicate<Entity> ENTITY_PREDICATE = EntitySelector.NO_SPECTATORS.and(Entity::isPickable);
 	private static final String RAFT_DESCRIPTION_ID = "item." + SophisticatedStorageInMotion.MOD_ID + ".storage_raft";
-	public static final Map<Boat.Type, Supplier<Item>> SUPPORTED_BOAT_TYPES = Map.of(
-			Boat.Type.ACACIA, () -> Items.ACACIA_BOAT,
-			Boat.Type.BAMBOO, () -> Items.BAMBOO_RAFT,
-			Boat.Type.BIRCH, () -> Items.BIRCH_BOAT,
-			Boat.Type.CHERRY, () -> Items.CHERRY_BOAT,
-			Boat.Type.DARK_OAK, () -> Items.DARK_OAK_BOAT,
-			Boat.Type.JUNGLE, () -> Items.JUNGLE_BOAT,
-			Boat.Type.MANGROVE, () -> Items.MANGROVE_BOAT,
-			Boat.Type.OAK, () -> Items.OAK_BOAT,
-			Boat.Type.SPRUCE, () -> Items.SPRUCE_BOAT
-	);
+	public static final Map<Boat.Type, Supplier<Item>> SUPPORTED_BOAT_TYPES = Map.of(Boat.Type.ACACIA, () -> Items.ACACIA_BOAT, Boat.Type.BAMBOO,
+			() -> Items.BAMBOO_RAFT, Boat.Type.BIRCH, () -> Items.BIRCH_BOAT, Boat.Type.CHERRY, () -> Items.CHERRY_BOAT, Boat.Type.DARK_OAK,
+			() -> Items.DARK_OAK_BOAT, Boat.Type.JUNGLE, () -> Items.JUNGLE_BOAT, Boat.Type.MANGROVE, () -> Items.MANGROVE_BOAT, Boat.Type.OAK,
+			() -> Items.OAK_BOAT, Boat.Type.SPRUCE, () -> Items.SPRUCE_BOAT);
 
 	public static final DefaultDispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {
 		private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
@@ -169,7 +163,7 @@ public class StorageBoatItem extends MovingStorageItem {
 		EntityStorageHolder<?> storageHolder = boat.getStorageHolder();
 		storageHolder.setStorageItemAndCustomNameFromMovingStorageStack(stack, true);
 		storageHolder.onPlace();
-		boat.setVariant(StorageBoatItem.getBoatType(stack));
+		boat.setVariant(getBoatType(stack));
 		if (player != null) {
 			boat.setYRot(player.getYRot());
 		}

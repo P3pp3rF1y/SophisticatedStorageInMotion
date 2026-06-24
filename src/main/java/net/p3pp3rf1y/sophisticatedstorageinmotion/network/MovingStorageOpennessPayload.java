@@ -12,12 +12,8 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 
 public record MovingStorageOpennessPayload(int entityId, boolean shouldBeOpen) implements CustomPacketPayload {
 	public static final Type<MovingStorageOpennessPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getRL("storage_openness"));
-	public static final StreamCodec<ByteBuf, MovingStorageOpennessPayload> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT,
-			MovingStorageOpennessPayload::entityId,
-			ByteBufCodecs.BOOL,
-			MovingStorageOpennessPayload::shouldBeOpen,
-			MovingStorageOpennessPayload::new);
+	public static final StreamCodec<ByteBuf, MovingStorageOpennessPayload> STREAM_CODEC = StreamCodec.composite(ByteBufCodecs.INT,
+			MovingStorageOpennessPayload::entityId, ByteBufCodecs.BOOL, MovingStorageOpennessPayload::shouldBeOpen, MovingStorageOpennessPayload::new);
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {

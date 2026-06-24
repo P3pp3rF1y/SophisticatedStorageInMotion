@@ -21,12 +21,14 @@ public class ModDataComponents {
 
 	private static final StreamCodec<FriendlyByteBuf, Boat.Type> BOAT_TYPE_STREAM_CODEC = NeoForgeStreamCodecs.enumCodec(Boat.Type.class);
 
-	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, SophisticatedStorageInMotion.MOD_ID);
+	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			SophisticatedStorageInMotion.MOD_ID);
 
 	public static final Supplier<DataComponentType<SimpleItemContent>> STORAGE_ITEM = DATA_COMPONENT_TYPES.register("storage_item",
-			() -> new DataComponentType.Builder<SimpleItemContent>().persistent(SimpleItemContent.CODEC).networkSynchronized(SimpleItemContent.STREAM_CODEC).build());
+			() -> new DataComponentType.Builder<SimpleItemContent>().persistent(SimpleItemContent.CODEC).networkSynchronized(SimpleItemContent.STREAM_CODEC)
+					.build());
 
-	@Deprecated //TODO change to use the component in storage in 1.22
+	@Deprecated // TODO change to use the component in storage in 1.22
 	public static final Supplier<DataComponentType<Boolean>> LOCKED = DATA_COMPONENT_TYPES.register("locked",
 			() -> new DataComponentType.Builder<Boolean>().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
 

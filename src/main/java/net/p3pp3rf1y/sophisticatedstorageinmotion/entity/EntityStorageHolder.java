@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.entity;
 
+import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,13 +11,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
-import net.minecraft.world.entity.animal.horse.Donkey;
 import net.minecraft.world.entity.animal.horse.Llama;
-import net.minecraft.world.entity.animal.horse.Mule;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -26,13 +24,8 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
-import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
-import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeRenderData;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
-import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
@@ -49,15 +42,14 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContai
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.ItemComponentHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessPayload;
+import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
-
-import com.mojang.math.Axis;
-import org.joml.Vector3f;
 
 public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase {
 	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
@@ -123,8 +115,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		Vector3f point = new Vector3f(vector);
 		point.rotate(Axis.YN.rotationDegrees(side > 0 ? 90.0F : -90.0F));
 		point.add((float) (chestedHorse.getBbWidth() * (chestedHorse instanceof Llama ? 0.75F : 0.62F)) * side,
-				(float) (chestedHorse.getBbHeight() * (chestedHorse instanceof Llama ? 0.62F : 0.55F)),
-				chestedHorse instanceof Llama ? -0.08F : -0.05F);
+				(float) (chestedHorse.getBbHeight() * (chestedHorse instanceof Llama ? 0.62F : 0.55F)), chestedHorse instanceof Llama ? -0.08F : -0.05F);
 		point.rotate(Axis.YN.rotationDegrees(chestedHorse.yBodyRot - 180.0F));
 		point.add(chestedHorse.position().toVector3f());
 		return point;
@@ -133,11 +124,13 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
 		setStorageItem(storageItem);
 		if (setupDefaults && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
-			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().getSlots());
+			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(),
+					getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper
+							? movingStorageWrapper.getNumberOfInventorySlots()
+							: getStorageWrapper().getInventoryHandler().getSlots());
 			LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
 		}
 	}
-
 
 	public CompoundTag saveData(HolderLookup.Provider registries) {
 		CompoundTag ret = new CompoundTag();
@@ -203,16 +196,11 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 				if (blockItem.getBlock() instanceof ChestBlock) {
 					renderBlockEntity = new ChestBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
 				} else if (blockItem.getBlock() instanceof LimitedBarrelBlock) {
-					renderBlockEntity = new LimitedBarrelBlockEntity(BlockPos.ZERO,
-							blockItem.getBlock().defaultBlockState()
-									.setValue(LimitedBarrelBlock.HORIZONTAL_FACING, Direction.NORTH)
-									.setValue(LimitedBarrelBlock.VERTICAL_FACING, VerticalFacing.UP)
-					);
+					renderBlockEntity = new LimitedBarrelBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState()
+							.setValue(LimitedBarrelBlock.HORIZONTAL_FACING, Direction.NORTH).setValue(LimitedBarrelBlock.VERTICAL_FACING, VerticalFacing.UP));
 				} else if (blockItem.getBlock() instanceof BarrelBlock) {
 					renderBlockEntity = new BarrelBlockEntity(BlockPos.ZERO,
-							blockItem.getBlock().defaultBlockState()
-									.setValue(BarrelBlock.FACING, Direction.UP)
-					);
+							blockItem.getBlock().defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
 				} else if (blockItem.getBlock() instanceof ShulkerBoxBlock) {
 					renderBlockEntity = new ShulkerBoxBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
 				}
@@ -250,7 +238,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	private void dropAllItems() {
-		InventoryHelper.dropItems(getStorageWrapper().getInventoryHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
+		InventoryHelper.dropItems(getStorageWrapper().getInventoryHandler(), entity.level(), entity.position().x(), entity.position().y(),
+				entity.position().z());
 		InventoryHelper.dropItems(getStorageWrapper().getUpgradeHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
 	}
 
@@ -293,7 +282,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			if (stack.isEmpty()) {
 				return;
 			}
-			droppedItemEntityCount.addAndGet((int) Math.ceil(stack.getCount() / (double) Math.min(stack.getMaxStackSize(), AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE)));
+			droppedItemEntityCount
+					.addAndGet((int) Math.ceil(stack.getCount() / (double) Math.min(stack.getMaxStackSize(), AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE)));
 		});
 
 		if (droppedItemEntityCount.get() <= Config.SERVER.tooManyItemEntityDrops.get()) {
@@ -302,11 +292,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 		ItemBase packingTapeItem = ModItems.PACKING_TAPE.get();
 		Component packingTapeItemName = packingTapeItem.getName(new ItemStack(packingTapeItem)).copy().withStyle(ChatFormatting.GREEN);
-		player.sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
-				entity.getName().copy().withStyle(ChatFormatting.GREEN),
-				Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED),
-				packingTapeItemName)
-		);
+		player.sendSystemMessage(
+				StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops", entity.getName().copy().withStyle(ChatFormatting.GREEN),
+						Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED), packingTapeItemName));
 		return false;
 	}
 

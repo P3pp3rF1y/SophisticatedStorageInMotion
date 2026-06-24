@@ -11,7 +11,8 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 
 public class StorageBoatItemRenderer extends MovingStorageItemRenderer<StorageBoat> {
-	public static final Lazy<StorageBoatItemRenderer> STORAGE_BOAT_ITEM_RENDERER = Lazy.of(() -> new StorageBoatItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
+	public static final Lazy<StorageBoatItemRenderer> STORAGE_BOAT_ITEM_RENDERER = Lazy
+			.of(() -> new StorageBoatItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
 	public StorageBoatItemRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet) {
 		super(blockEntityRenderDispatcher, entityModelSet);
 	}

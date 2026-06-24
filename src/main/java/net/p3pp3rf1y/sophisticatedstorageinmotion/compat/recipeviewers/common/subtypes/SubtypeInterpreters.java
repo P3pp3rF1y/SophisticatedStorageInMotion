@@ -11,13 +11,16 @@ import java.util.Optional;
 
 public class SubtypeInterpreters {
 	public static Map<Item, PropertyBasedSubtypeInterpreter> getSubtypeInterpreters() {
-		return new HashMap<>() {{
-			put(ModItems.STORAGE_MINECART.get(), new MovingStorageSubtypeInterpreter());
-			put(ModItems.STORAGE_BOAT.get(), new StorageBoatSubtypeInterpreter());
-		}};
+		return new HashMap<>() {
+			{
+				put(ModItems.STORAGE_MINECART.get(), new MovingStorageSubtypeInterpreter());
+				put(ModItems.STORAGE_BOAT.get(), new StorageBoatSubtypeInterpreter());
+			}
+		};
 	}
 
-	public static Optional<PropertyBasedSubtypeInterpreter> getSubtypeInterpreter(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters, ItemStack stack) {
+	public static Optional<PropertyBasedSubtypeInterpreter> getSubtypeInterpreter(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters,
+			ItemStack stack) {
 		return Optional.ofNullable(subtypeInterpreters.get(stack.getItem()));
 	}
 }

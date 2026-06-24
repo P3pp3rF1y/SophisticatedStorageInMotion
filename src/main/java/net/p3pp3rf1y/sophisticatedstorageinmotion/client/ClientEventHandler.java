@@ -29,7 +29,9 @@ public class ClientEventHandler {
 	}
 
 	private static void registerOverlay(RegisterGuiLayersEvent event) {
-		event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "paintbrush_moving_storage_info"), PaintbrushMovingStorageOverlay.HUD_PAINTBRUSH_INFO);
+		event.registerAbove(VanillaGuiLayers.HOTBAR,
+				ResourceLocation.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "paintbrush_moving_storage_info"),
+				PaintbrushMovingStorageOverlay.HUD_PAINTBRUSH_INFO);
 	}
 
 	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {

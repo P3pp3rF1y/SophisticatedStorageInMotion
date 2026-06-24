@@ -10,7 +10,8 @@ import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 
 public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<StorageMinecart> {
-	public static final Lazy<StorageMinecartItemRenderer> STORAGE_MINECART_ITEM_RENDERER = Lazy.of(() -> new StorageMinecartItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
+	public static final Lazy<StorageMinecartItemRenderer> STORAGE_MINECART_ITEM_RENDERER = Lazy
+			.of(() -> new StorageMinecartItemRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels()));
 
 	public StorageMinecartItemRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet) {
 		super(blockEntityRenderDispatcher, entityModelSet);
@@ -18,7 +19,7 @@ public class StorageMinecartItemRenderer extends MovingStorageItemRenderer<Stora
 
 	@Override
 	protected void setMovingStoragePropertiesFromStack(StorageMinecart movingStorage, ItemStack stack) {
-		//noop
+		// noop
 	}
 
 	public static IClientItemExtensions getItemRenderProperties() {

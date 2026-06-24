@@ -19,7 +19,7 @@ public class SophisticatedStorageInMotion {
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	private static String networkProtocolVersion;
 
-	@SuppressWarnings("java:S1118") //needs to be public for mod to work
+	@SuppressWarnings("java:S1118") // needs to be public for mod to work
 	public SophisticatedStorageInMotion(IEventBus modBus, Dist dist, ModContainer container) {
 		networkProtocolVersion = container.getModInfo().getVersion().toString();
 		ModItems.registerHandlers(modBus);
@@ -29,7 +29,7 @@ public class SophisticatedStorageInMotion {
 		ModCompat.register();
 		if (dist == Dist.CLIENT) {
 			ClientEventHandler.registerHandlers(modBus);
-			ModEntitiesClient.registerHandlers(modBus); //TODO move this to client event handler
+			ModEntitiesClient.registerHandlers(modBus); // TODO move this to client event handler
 		}
 		modBus.addListener(ModPayloads::registerPayloads);
 		modBus.addListener(DataGenerators::gatherData);

@@ -31,16 +31,17 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat> {
 		super.render(storageBoat, entityYaw, partialTicks, poseStack, buffer, packedLight);
 
 		poseStack.pushPose();
-		poseStack.translate(0,  storageBoat.getVariant().isRaft() ? 8/16F : 3/16F, 0);
+		poseStack.translate(0, storageBoat.getVariant().isRaft() ? 8 / 16F : 3 / 16F, 0);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - entityYaw));
-		float interpolatedHurtTime = (float)storageBoat.getHurtTime() - partialTicks;
+		float interpolatedHurtTime = (float) storageBoat.getHurtTime() - partialTicks;
 		float interpolatedDamage = storageBoat.getDamage() - partialTicks;
 		if (interpolatedDamage < 0.0F) {
 			interpolatedDamage = 0.0F;
 		}
 
 		if (interpolatedHurtTime > 0.0F) {
-			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * (float)storageBoat.getHurtDir()));
+			poseStack.mulPose(Axis.XP
+					.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * (float) storageBoat.getHurtDir()));
 		}
 
 		float bubbleAngle = storageBoat.getBubbleAngle(partialTicks);
@@ -51,9 +52,10 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat> {
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
 		poseStack.mulPose(Axis.XP.rotationDegrees(180));
-		poseStack.scale(6/7F, 6/7F, 6/7F);
+		poseStack.scale(6 / 7F, 6 / 7F, 6 / 7F);
 		StorageBlockEntity renderBlockEntity = storageBoat.getStorageHolder().getRenderBlockEntity();
-		poseStack.translate(-0.5F, 0, (renderBlockEntity instanceof BarrelBlockEntity || renderBlockEntity instanceof ShulkerBoxBlockEntity ? 0 : 1/16F) + 0.02F);
+		poseStack.translate(-0.5F, 0,
+				(renderBlockEntity instanceof BarrelBlockEntity || renderBlockEntity instanceof ShulkerBoxBlockEntity ? 0 : 1 / 16F) + 0.02F);
 		StorageBlockRenderer.renderStorageBlock(partialTicks, poseStack, buffer, packedLight, renderBlockEntity);
 		poseStack.popPose();
 		boatRenderer.render(storageBoat, entityYaw, partialTicks, poseStack, buffer, packedLight);

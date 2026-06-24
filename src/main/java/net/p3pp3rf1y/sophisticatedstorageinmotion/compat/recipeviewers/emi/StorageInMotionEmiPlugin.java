@@ -38,13 +38,12 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 	}
 
 	private void registerDefaultComparisons(EmiRegistry registry) {
-		getSubtypeInterpreters()
-				.forEach((item, comparator) -> registry.setDefaultComparison(item, EmiSubtypeInterpreter.of(comparator)));
+		getSubtypeInterpreters().forEach((item, comparator) -> registry.setDefaultComparison(item, EmiSubtypeInterpreter.of(comparator)));
 	}
 
 	private void registerGuiHandlers(EmiRegistry registry) {
 		registry.addExclusionArea(MovingStorageScreen.class, (screen, consumer) -> {
-			//noinspection ConstantValue
+			// noinspection ConstantValue
 			if (screen == null || screen.getUpgradeSettingsControl() == null) {
 				return;
 			}
@@ -72,9 +71,7 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.removeRecipes(recipe -> recipe.getBackingRecipe() != null && catalog.replacesCraftingRecipe(recipe.getBackingRecipe()));
-		catalog.getCraftingSpecs().stream()
-				.flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream())
-				.forEach(registry::addRecipe);
+		catalog.getCraftingSpecs().stream().flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(registry::addRecipe);
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {
