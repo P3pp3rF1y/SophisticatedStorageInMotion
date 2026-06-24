@@ -13,10 +13,12 @@ public class ModDataComponents {
 	private ModDataComponents() {
 	}
 
-	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, SophisticatedStorageInMotion.MOD_ID);
+	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE,
+			SophisticatedStorageInMotion.MOD_ID);
 
 	public static final Supplier<DataComponentType<SimpleItemContent>> STORAGE_ITEM = DATA_COMPONENT_TYPES.register("storage_item",
-			() -> new DataComponentType.Builder<SimpleItemContent>().persistent(SimpleItemContent.CODEC).networkSynchronized(SimpleItemContent.STREAM_CODEC).build());
+			() -> new DataComponentType.Builder<SimpleItemContent>().persistent(SimpleItemContent.CODEC).networkSynchronized(SimpleItemContent.STREAM_CODEC)
+					.build());
 
 	public static void register(IEventBus modBus) {
 		DATA_COMPONENT_TYPES.register(modBus);

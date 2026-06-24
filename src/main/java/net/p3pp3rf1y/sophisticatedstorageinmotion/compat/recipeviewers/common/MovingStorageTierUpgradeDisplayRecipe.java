@@ -22,7 +22,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<CraftingRecipe> recipeHolder, boolean shapeless, int width, int height,
-													 NonNullList<Ingredient> ingredients, int movingStorageIngredientIndex, List<MovingStorageTierUpgradeVariantPair> variantPairs) {
+		NonNullList<Ingredient> ingredients, int movingStorageIngredientIndex, List<MovingStorageTierUpgradeVariantPair> variantPairs) {
 	public Optional<MovingStorageTierUpgradeVariantPair> findBySource(ItemStack stack) {
 		return variantPairs.stream().filter(pair -> ItemStack.isSameItemSameComponents(pair.source(), stack)).findFirst();
 	}
@@ -49,8 +49,7 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		}
 
 		ItemStack storage = MovingStorageItem.getStorageItem(stack);
-		return findByResultItem(stack)
-				.filter(pair -> ItemStack.isSameItem(pair.source(), storage))
+		return findByResultItem(stack).filter(pair -> ItemStack.isSameItem(pair.source(), storage))
 				.map(pair -> new MovingStorageTierUpgradeVariantPair(storage.copy(), stack.copy()));
 	}
 
@@ -66,8 +65,10 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		return findBySourceItem(stack).map(pair -> withAssemblySource(pair, stack));
 	}
 
-	public Optional<MovingStorageTierUpgradeVariantPair> findTierUpgradeRecipeForResult(ItemStack stack, Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
-		Optional<MovingStorageTierUpgradeVariantPair> exactPair = variantPairs.stream().filter(pair -> matchesFocusedResult(pair.result(), stack, getSubtypeInterpreter)).findFirst();
+	public Optional<MovingStorageTierUpgradeVariantPair> findTierUpgradeRecipeForResult(ItemStack stack,
+			Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
+		Optional<MovingStorageTierUpgradeVariantPair> exactPair = variantPairs.stream()
+				.filter(pair -> matchesFocusedResult(pair.result(), stack, getSubtypeInterpreter)).findFirst();
 		if (exactPair.isPresent()) {
 			return exactPair;
 		}
@@ -79,10 +80,9 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		}
 
 		ItemStack resultStorage = MovingStorageItem.getStorageItem(stack);
-		return variantPairs.stream()
-				.filter(pair -> ItemStack.isSameItem(pair.result(), stack) && ItemStack.isSameItem(MovingStorageItem.getStorageItem(pair.result()), resultStorage))
-				.findFirst()
-				.map(pair -> new MovingStorageTierUpgradeVariantPair(createFocusedTierSource(pair, stack, resultStorage), stack.copy()));
+		return variantPairs.stream().filter(
+				pair -> ItemStack.isSameItem(pair.result(), stack) && ItemStack.isSameItem(MovingStorageItem.getStorageItem(pair.result()), resultStorage))
+				.findFirst().map(pair -> new MovingStorageTierUpgradeVariantPair(createFocusedTierSource(pair, stack, resultStorage), stack.copy()));
 	}
 
 	public Optional<MovingStorageTierUpgradeVariantPair> findTierUpgradeUsageForSource(ItemStack stack) {
@@ -95,10 +95,9 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		}
 
 		ItemStack sourceStorage = MovingStorageItem.getStorageItem(stack);
-		return variantPairs.stream()
-				.filter(pair -> ItemStack.isSameItem(pair.source(), stack) && ItemStack.isSameItem(MovingStorageItem.getStorageItem(pair.source()), sourceStorage))
-				.findFirst()
-				.map(pair -> new MovingStorageTierUpgradeVariantPair(stack.copy(), createFocusedTierResult(pair, stack, sourceStorage)));
+		return variantPairs.stream().filter(
+				pair -> ItemStack.isSameItem(pair.source(), stack) && ItemStack.isSameItem(MovingStorageItem.getStorageItem(pair.source()), sourceStorage))
+				.findFirst().map(pair -> new MovingStorageTierUpgradeVariantPair(stack.copy(), createFocusedTierResult(pair, stack, sourceStorage)));
 	}
 
 	private static MovingStorageTierUpgradeVariantPair withAssemblySource(MovingStorageTierUpgradeVariantPair pair, ItemStack sourceStack) {
@@ -140,7 +139,8 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		}
 	}
 
-	private static boolean matchesFocusedSource(ItemStack recipeSource, ItemStack queriedStack, Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
+	private static boolean matchesFocusedSource(ItemStack recipeSource, ItemStack queriedStack,
+			Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
 		if (!ItemStack.isSameItem(recipeSource, queriedStack)) {
 			return false;
 		}
@@ -156,7 +156,8 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		return ItemStack.isSameItemSameComponents(recipeSource, queriedStack);
 	}
 
-	private static boolean matchesFocusedResult(ItemStack recipeResult, ItemStack queriedStack, Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
+	private static boolean matchesFocusedResult(ItemStack recipeResult, ItemStack queriedStack,
+			Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
 		if (!ItemStack.isSameItem(recipeResult, queriedStack)) {
 			return false;
 		}
@@ -178,46 +179,53 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		if (isTintedStorage(queriedStorage)) {
 			if (isTintedStorage(recipeStorage)) {
 				return ItemStack.isSameItem(recipeStorage, queriedStorage)
-						&& Objects.equals(StorageBlockItem.getMainColorFromComponentHolder(recipeStorage), StorageBlockItem.getMainColorFromComponentHolder(queriedStorage))
-						&& Objects.equals(StorageBlockItem.getAccentColorFromComponentHolder(recipeStorage), StorageBlockItem.getAccentColorFromComponentHolder(queriedStorage))
+						&& Objects.equals(StorageBlockItem.getMainColorFromComponentHolder(recipeStorage),
+								StorageBlockItem.getMainColorFromComponentHolder(queriedStorage))
+						&& Objects.equals(StorageBlockItem.getAccentColorFromComponentHolder(recipeStorage),
+								StorageBlockItem.getAccentColorFromComponentHolder(queriedStorage))
 						&& MovingStorageItem.isStorageItemFlatTopBarrel(recipeStack) == MovingStorageItem.isStorageItemFlatTopBarrel(queriedStack)
-						&& (!(recipeStack.getItem() instanceof StorageBoatItem) || StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(queriedStack));
+						&& (!(recipeStack.getItem() instanceof StorageBoatItem)
+								|| StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(queriedStack));
 			}
-			return ItemStack.isSameItem(recipeStorage, queriedStorage)
-					&& WoodStorageBlockItem.getWoodType(recipeStorage).isEmpty()
+			return ItemStack.isSameItem(recipeStorage, queriedStorage) && WoodStorageBlockItem.getWoodType(recipeStorage).isEmpty()
 					&& MovingStorageItem.isStorageItemFlatTopBarrel(recipeStack) == MovingStorageItem.isStorageItemFlatTopBarrel(queriedStack)
-					&& (!(recipeStack.getItem() instanceof StorageBoatItem) || StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(queriedStack));
+					&& (!(recipeStack.getItem() instanceof StorageBoatItem)
+							|| StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(queriedStack));
 		}
 		return ItemStack.isSameItem(recipeStorage, queriedStorage)
 				&& Objects.equals(MovingStorageItem.getStorageItemWoodType(recipeStack), MovingStorageItem.getStorageItemWoodType(queriedStack))
 				&& MovingStorageItem.isStorageItemFlatTopBarrel(recipeStack) == MovingStorageItem.isStorageItemFlatTopBarrel(queriedStack)
-				&& (!(recipeStack.getItem() instanceof StorageBoatItem) || StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(queriedStack));
+				&& (!(recipeStack.getItem() instanceof StorageBoatItem)
+						|| StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(queriedStack));
 	}
 
 	private static boolean isTintedStorage(ItemStack storageStack) {
-		return StorageBlockItem.getMainColorFromComponentHolder(storageStack).isPresent() || StorageBlockItem.getAccentColorFromComponentHolder(storageStack).isPresent();
+		return StorageBlockItem.getMainColorFromComponentHolder(storageStack).isPresent()
+				|| StorageBlockItem.getAccentColorFromComponentHolder(storageStack).isPresent();
 	}
 
 	public CraftingDisplaySpec toAssemblySpec() {
-		return new CraftingDisplaySpec(id, shapeless, width, height, ingredients, variantPairs.stream().map(this::toVariant).toList(), getGlobalVariants(), Set.of(recipeHolder.id().identifier()),
+		return new CraftingDisplaySpec(id, shapeless, width, height, ingredients, variantPairs.stream().map(this::toVariant).toList(), getGlobalVariants(),
+				Set.of(recipeHolder.id().identifier()),
 				new SourceResultFocusBehavior(movingStorageIngredientIndex, this::focusAssemblySource, this::focusAssemblyResult));
 	}
 
 	public CraftingDisplaySpec toTierUpgradeSpec(Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
-		return new CraftingDisplaySpec(id, shapeless, width, height, ingredients, variantPairs.stream().map(this::toVariant).toList(), getGlobalVariants(), Set.of(recipeHolder.id().identifier()),
-				new SourceResultFocusBehavior(movingStorageIngredientIndex, (variant, focusedInput) -> focusTierSource(variant, focusedInput, getSubtypeInterpreter), (variant, focusedOutput) -> focusTierResult(variant, focusedOutput, getSubtypeInterpreter)));
+		return new CraftingDisplaySpec(id, shapeless, width, height, ingredients, variantPairs.stream().map(this::toVariant).toList(), getGlobalVariants(),
+				Set.of(recipeHolder.id().identifier()),
+				new SourceResultFocusBehavior(movingStorageIngredientIndex,
+						(variant, focusedInput) -> focusTierSource(variant, focusedInput, getSubtypeInterpreter),
+						(variant, focusedOutput) -> focusTierResult(variant, focusedOutput, getSubtypeInterpreter)));
 	}
 
 	private List<CraftingDisplayVariant> getGlobalVariants() {
-		return variantPairs.stream()
-				.filter(pair -> isUntintedStorage(pair.source()) && isUntintedStorage(pair.result()))
-				.map(this::toVariant)
-				.toList();
+		return variantPairs.stream().filter(pair -> isUntintedStorage(pair.source()) && isUntintedStorage(pair.result())).map(this::toVariant).toList();
 	}
 
 	private static boolean isUntintedStorage(ItemStack stack) {
 		ItemStack storageStack = stack.getItem() instanceof MovingStorageItem ? MovingStorageItem.getStorageItem(stack) : stack;
-		return StorageBlockItem.getMainColorFromComponentHolder(storageStack).isEmpty() && StorageBlockItem.getAccentColorFromComponentHolder(storageStack).isEmpty();
+		return StorageBlockItem.getMainColorFromComponentHolder(storageStack).isEmpty()
+				&& StorageBlockItem.getAccentColorFromComponentHolder(storageStack).isEmpty();
 	}
 
 	private CraftingDisplayVariant toVariant(MovingStorageTierUpgradeVariantPair pair) {
@@ -241,8 +249,7 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 			return Optional.empty();
 		}
 
-		return findBySourceItem(focusedInput)
-				.filter(templatePair -> ItemStack.isSameItemSameComponents(pair.source(), templatePair.source()))
+		return findBySourceItem(focusedInput).filter(templatePair -> ItemStack.isSameItemSameComponents(pair.source(), templatePair.source()))
 				.map(templatePair -> toVariant(withAssemblySource(templatePair, focusedInput)));
 	}
 
@@ -258,22 +265,24 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		ItemStack focusedStorage = MovingStorageItem.getStorageItem(focusedOutput);
 		Optional<MovingStorageTierUpgradeVariantPair> templatePair = variantPairs.stream()
 				.filter(candidate -> movingStorageItemAndBoatTypeMatch(candidate.result(), focusedOutput))
-				.filter(candidate -> ItemStack.isSameItem(candidate.source(), focusedStorage))
-				.findFirst();
-		if (templatePair.isEmpty() || !ItemStack.isSameItemSameComponents(pair.source(), templatePair.get().source()) || !ItemStack.isSameItemSameComponents(pair.result(), templatePair.get().result())) {
+				.filter(candidate -> ItemStack.isSameItem(candidate.source(), focusedStorage)).findFirst();
+		if (templatePair.isEmpty() || !ItemStack.isSameItemSameComponents(pair.source(), templatePair.get().source())
+				|| !ItemStack.isSameItemSameComponents(pair.result(), templatePair.get().result())) {
 			return Optional.empty();
 		}
 		return Optional.of(toVariant(new MovingStorageTierUpgradeVariantPair(focusedStorage.copy(), focusedOutput.copy())));
 	}
 
 	private static boolean movingStorageItemAndBoatTypeMatch(ItemStack recipeStack, ItemStack focusedStack) {
-		return ItemStack.isSameItem(recipeStack, focusedStack)
-				&& (!(recipeStack.getItem() instanceof StorageBoatItem) || StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(focusedStack));
+		return ItemStack.isSameItem(recipeStack, focusedStack) && (!(recipeStack.getItem() instanceof StorageBoatItem)
+				|| StorageBoatItem.getWoodType(recipeStack) == StorageBoatItem.getWoodType(focusedStack));
 	}
 
-	private Optional<CraftingDisplayVariant> focusTierSource(CraftingDisplayVariant variant, ItemStack focusedInput, Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
+	private Optional<CraftingDisplayVariant> focusTierSource(CraftingDisplayVariant variant, ItemStack focusedInput,
+			Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
 		MovingStorageTierUpgradeVariantPair pair = toPair(variant);
-		Optional<MovingStorageTierUpgradeVariantPair> exactPair = variantPairs.stream().filter(candidate -> ItemStack.isSameItemSameComponents(candidate.source(), focusedInput)).findFirst();
+		Optional<MovingStorageTierUpgradeVariantPair> exactPair = variantPairs.stream()
+				.filter(candidate -> ItemStack.isSameItemSameComponents(candidate.source(), focusedInput)).findFirst();
 		if (exactPair.isPresent()) {
 			return exactPair.filter(candidate -> ItemStack.isSameItemSameComponents(pair.source(), candidate.source())).map(this::toVariant);
 		}
@@ -283,12 +292,15 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		if (ItemStack.isSameItemSameComponents(pair.source(), focusedInput)) {
 			return Optional.of(toVariant(pair));
 		}
-		return Optional.of(toVariant(new MovingStorageTierUpgradeVariantPair(focusedInput.copy(), createFocusedTierResult(pair, focusedInput, MovingStorageItem.getStorageItem(focusedInput)))));
+		return Optional.of(toVariant(new MovingStorageTierUpgradeVariantPair(focusedInput.copy(),
+				createFocusedTierResult(pair, focusedInput, MovingStorageItem.getStorageItem(focusedInput)))));
 	}
 
-	private Optional<CraftingDisplayVariant> focusTierResult(CraftingDisplayVariant variant, ItemStack focusedOutput, Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
+	private Optional<CraftingDisplayVariant> focusTierResult(CraftingDisplayVariant variant, ItemStack focusedOutput,
+			Function<ItemStack, Optional<PropertyBasedSubtypeInterpreter>> getSubtypeInterpreter) {
 		MovingStorageTierUpgradeVariantPair pair = toPair(variant);
-		Optional<MovingStorageTierUpgradeVariantPair> exactPair = variantPairs.stream().filter(candidate -> ItemStack.isSameItemSameComponents(candidate.result(), focusedOutput)).findFirst();
+		Optional<MovingStorageTierUpgradeVariantPair> exactPair = variantPairs.stream()
+				.filter(candidate -> ItemStack.isSameItemSameComponents(candidate.result(), focusedOutput)).findFirst();
 		if (exactPair.isPresent()) {
 			return exactPair.filter(candidate -> ItemStack.isSameItemSameComponents(pair.result(), candidate.result())).map(this::toVariant);
 		}
@@ -298,7 +310,8 @@ public record MovingStorageTierUpgradeDisplayRecipe(Identifier id, RecipeHolder<
 		if (ItemStack.isSameItemSameComponents(pair.result(), focusedOutput)) {
 			return Optional.of(toVariant(pair));
 		}
-		return Optional.of(toVariant(new MovingStorageTierUpgradeVariantPair(createFocusedTierSource(pair, focusedOutput, MovingStorageItem.getStorageItem(focusedOutput)), focusedOutput.copy())));
+		return Optional.of(toVariant(new MovingStorageTierUpgradeVariantPair(
+				createFocusedTierSource(pair, focusedOutput, MovingStorageItem.getStorageItem(focusedOutput)), focusedOutput.copy())));
 	}
 
 	private static ItemStack getSource(CraftingDisplayVariant variant) {

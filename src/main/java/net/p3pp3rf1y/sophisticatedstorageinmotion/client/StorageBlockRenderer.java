@@ -40,7 +40,8 @@ import java.util.*;
 import java.util.function.Function;
 
 public class StorageBlockRenderer {
-	public static void submitStorageBlock(float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, StorageBlockEntity renderBlockEntity) {
+	public static void submitStorageBlock(float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight,
+			StorageBlockEntity renderBlockEntity) {
 		BlockState state = renderBlockEntity.getBlockState();
 		Minecraft minecraft = Minecraft.getInstance();
 		if (renderBlockEntity instanceof BarrelBlockEntity barrel) {
@@ -49,7 +50,12 @@ public class StorageBlockRenderer {
 			if (blockStateModel instanceof BarrelBlockStateModelBase barrelModel) {
 				barrelModel.setModelPropertiesFromBlockEntity(barrel);
 			}
-			BlockAndTintGetter wrappedLevel = new StaticBlockEntityTintGetter(minecraft.level, renderBlockEntity, packedLight); //TODO try to optimize not to create a new instance all the time, perhaps level keyed cache for these and then only setting blockentity in the render call
+			BlockAndTintGetter wrappedLevel = new StaticBlockEntityTintGetter(minecraft.level, renderBlockEntity, packedLight); // TODO try to optimize not to
+																																// create a new instance all the
+																																// time, perhaps level keyed
+																																// cache for these and then only
+																																// setting blockentity in the
+																																// render call
 			List<BlockModelPart> parts = blockStateModel.collectParts(wrappedLevel, BlockPos.ZERO, state, RandomSource.create(42L));
 			List<BlockModelPart> translucentParts = new ArrayList<>();
 			Iterator<BlockModelPart> it = parts.iterator();
@@ -66,29 +72,33 @@ public class StorageBlockRenderer {
 				}
 			});
 			if (!translucentParts.isEmpty()) {
-				submitNodeCollector.submitCustomGeometry(poseStack, RenderTypeHelper.getEntityRenderType(ChunkSectionLayer.TRANSLUCENT), (pose, vertexConsumer) -> {
-					for (BlockModelPart translucentPart : translucentParts) {
-						renderBlockModelPart(packedLight, pose, vertexConsumer, translucentPart, state, wrappedLevel);
-					}
-				});
+				submitNodeCollector.submitCustomGeometry(poseStack, RenderTypeHelper.getEntityRenderType(ChunkSectionLayer.TRANSLUCENT),
+						(pose, vertexConsumer) -> {
+							for (BlockModelPart translucentPart : translucentParts) {
+								renderBlockModelPart(packedLight, pose, vertexConsumer, translucentPart, state, wrappedLevel);
+							}
+						});
 			}
 		}
 
-		BlockEntityRenderer<StorageBlockEntity, ? extends BlockEntityRenderState> renderer = minecraft.getBlockEntityRenderDispatcher().getRenderer(renderBlockEntity);
+		BlockEntityRenderer<StorageBlockEntity, ? extends BlockEntityRenderState> renderer = minecraft.getBlockEntityRenderDispatcher()
+				.getRenderer(renderBlockEntity);
 		if (renderer == null) {
 			return;
 		}
 		submitBlockEntityRender(renderer, renderBlockEntity, partialTicks, poseStack, submitNodeCollector, packedLight);
 	}
 
-	private static void renderBlockModelPart(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part, BlockState state, BlockAndTintGetter wrappedLevel) {
+	private static void renderBlockModelPart(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part, BlockState state,
+			BlockAndTintGetter wrappedLevel) {
 		for (Direction direction : Direction.values()) {
 			renderBlockModelPartQuads(packedLight, pose, vertexConsumer, part, direction, state, wrappedLevel);
 		}
 		renderBlockModelPartQuads(packedLight, pose, vertexConsumer, part, null, state, wrappedLevel);
 	}
 
-	private static void renderBlockModelPartQuads(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part, @Nullable Direction direction, BlockState state, BlockAndTintGetter wrappedLevel) {
+	private static void renderBlockModelPartQuads(int packedLight, PoseStack.Pose pose, VertexConsumer vertexConsumer, BlockModelPart part,
+			@Nullable Direction direction, BlockState state, BlockAndTintGetter wrappedLevel) {
 		for (BakedQuad quad : part.getQuads(direction)) {
 			float red = 1.0F;
 			float green = 1.0F;
@@ -103,8 +113,8 @@ public class StorageBlockRenderer {
 		}
 	}
 
-	private static <T extends BlockEntity, S extends BlockEntityRenderState> void submitBlockEntityRender(
-			BlockEntityRenderer<T, S> renderer, T blockEntity, float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
+	private static <T extends BlockEntity, S extends BlockEntityRenderState> void submitBlockEntityRender(BlockEntityRenderer<T, S> renderer, T blockEntity,
+			float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
 		S renderState = renderer.createRenderState();
 		renderer.extractRenderState(blockEntity, renderState, partialTicks, Vec3.ZERO, null);
 		renderState.lightCoords = packedLight;
@@ -130,9 +140,11 @@ public class StorageBlockRenderer {
 		OFFSET_MAP.put(AbstractChestedHorse.class, (renderBlockEntity) -> MULE_OTHER_OFFSET);
 	}
 
-	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
+	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (
+			renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
 
-	public static void submitChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
+	public static void submitChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState,
+			PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
 		if (renderBlockEntity == null) {
 			return;
 		}
@@ -141,15 +153,20 @@ public class StorageBlockRenderer {
 
 		Function<StorageBlockEntity, Vec3> offsetFunction = OFFSET_MAP.getOrDefault(chestedHorseClass, DEFAULT_OFFSET);
 		if (offsetFunction != null) {
-			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y, offsetFunction.apply(renderBlockEntity).z);
+			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y,
+					offsetFunction.apply(renderBlockEntity).z);
 		}
 
-		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 90, 1, renderBlockEntity, packedLight, submitNodeCollector, entityRenderState.partialTick);
-		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 270, -1, renderBlockEntity, packedLight, submitNodeCollector, entityRenderState.partialTick);
+		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 90, 1, renderBlockEntity, packedLight, submitNodeCollector,
+				entityRenderState.partialTick);
+		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 270, -1, renderBlockEntity, packedLight, submitNodeCollector,
+				entityRenderState.partialTick);
 		poseStack.popPose();
 	}
 
-	private static void submitStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, SubmitNodeCollector submitNodeCollector, float partialTick) {
+	private static void submitStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack,
+			int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, SubmitNodeCollector submitNodeCollector,
+			float partialTick) {
 		float halfWidth = entityRenderState.boundingBoxWidth / 2;
 		poseStack.pushPose();
 
@@ -172,7 +189,7 @@ public class StorageBlockRenderer {
 		}
 		poseStack.translate(-0.5, -0.5, -0.5);
 
-		StorageBlockRenderer.submitStorageBlock(partialTick, poseStack, submitNodeCollector, packedLight, renderBlockEntity);
+		submitStorageBlock(partialTick, poseStack, submitNodeCollector, packedLight, renderBlockEntity);
 		poseStack.popPose();
 	}
 }

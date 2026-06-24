@@ -46,7 +46,6 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Shadow
 	public abstract boolean hasChest();
 
-
 	private static final Identifier SADDLE_SLOT_SPRITE = Identifier.withDefaultNamespace("container/slot/saddle");
 	private static final Identifier LLAMA_ARMOR_SLOT_SPRITE = Identifier.withDefaultNamespace("container/slot/llama_armor");
 	private static final String STORAGE_HOLDER = "storageHolder";
@@ -137,7 +136,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public ItemStack getDropStack(ItemStack storageItem) {
-		@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+		@Nullable
+		UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
 		if (storageId != null) {
 			MovingStorageData.moveToItemStorage(level().registryAccess(), storageItem, storageId);
 		}
@@ -159,7 +159,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	protected Component getTypeName() {
 		if (hasStorageItem()) {
-			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(), getStorageItem().getHoverName());
+			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(),
+					getStorageItem().getHoverName());
 		}
 		return super.getTypeName();
 	}

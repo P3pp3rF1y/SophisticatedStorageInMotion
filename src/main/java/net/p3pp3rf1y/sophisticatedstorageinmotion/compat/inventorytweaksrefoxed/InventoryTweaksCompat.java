@@ -20,6 +20,6 @@ public class InventoryTweaksCompat implements ICompat {
 
 	@Override
 	public void setup() {
-		//noop
+		// noop
 	}
 }

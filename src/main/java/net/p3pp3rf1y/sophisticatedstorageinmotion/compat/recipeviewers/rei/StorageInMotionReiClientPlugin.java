@@ -43,7 +43,8 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 			return ret.stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList();
 		});
 
-		zones.register(MovingStorageSettingsScreen.class, screen -> screen.getExtendedControlsRectangles().stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList());
+		zones.register(MovingStorageSettingsScreen.class,
+				screen -> screen.getExtendedControlsRectangles().stream().map(r -> new Rectangle(r.getX(), r.getY(), r.getWidth(), r.getHeight())).toList());
 	}
 
 	@Override
@@ -73,8 +74,7 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 
 	private static boolean craftingDisplayReplaced(IRecipeViewerDisplayCatalog catalog, DefaultCraftingDisplay craftingDisplay) {
 		return craftingDisplay.getDisplayLocation()
-				.map(displayId -> catalog.getCraftingSpecs().stream().anyMatch(spec -> spec.replacedRecipeIds().contains(displayId)))
-				.orElse(false);
+				.map(displayId -> catalog.getCraftingSpecs().stream().anyMatch(spec -> spec.replacedRecipeIds().contains(displayId))).orElse(false);
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {

@@ -17,12 +17,15 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorageEntity, D extends MovingStorageItemRenderer.RenderData> implements SpecialModelRenderer<D> {
+public abstract class MovingStorageItemRenderer<T extends Entity & IMovingStorageEntity, D extends MovingStorageItemRenderer.RenderData>
+		implements
+			SpecialModelRenderer<D> {
 	@Nullable
 	private T movingStorage = null;
 
 	@Override
-	public void submit(@Nullable D data, ItemDisplayContext itemDisplayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, int packedOverlay, boolean hasFoil, int color) {
+	public void submit(@Nullable D data, ItemDisplayContext itemDisplayContext, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight,
+			int packedOverlay, boolean hasFoil, int color) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.level == null || data == null) {
 			return;

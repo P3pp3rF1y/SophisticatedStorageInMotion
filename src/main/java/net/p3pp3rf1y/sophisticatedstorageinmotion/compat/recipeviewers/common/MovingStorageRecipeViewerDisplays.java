@@ -9,13 +9,10 @@ public class MovingStorageRecipeViewerDisplays {
 
 	public static void register(IRecipeViewerDisplayCatalog catalog, IRecipeViewerDisplayContext context) {
 		AssembleRecipesMaker.getGroupedShapelessCraftingRecipes(context::getSubtypeInterpreter).stream()
-				.map(MovingStorageTierUpgradeDisplayRecipe::toAssemblySpec)
-				.forEach(catalog::addCraftingSpec);
+				.map(MovingStorageTierUpgradeDisplayRecipe::toAssemblySpec).forEach(catalog::addCraftingSpec);
 		MovingStorageTierUpgradeRecipesMaker.getGroupedShapedCraftingRecipes(context::getSubtypeInterpreter).stream()
-				.map(recipe -> recipe.toTierUpgradeSpec(context::getSubtypeInterpreter))
-				.forEach(catalog::addCraftingSpec);
+				.map(recipe -> recipe.toTierUpgradeSpec(context::getSubtypeInterpreter)).forEach(catalog::addCraftingSpec);
 		MovingStorageTierUpgradeRecipesMaker.getGroupedShapelessCraftingRecipes(context::getSubtypeInterpreter).stream()
-				.map(recipe -> recipe.toTierUpgradeSpec(context::getSubtypeInterpreter))
-				.forEach(catalog::addCraftingSpec);
+				.map(recipe -> recipe.toTierUpgradeSpec(context::getSubtypeInterpreter)).forEach(catalog::addCraftingSpec);
 	}
 }
