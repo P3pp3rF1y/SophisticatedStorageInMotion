@@ -8,7 +8,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
-import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IExactDisplayStacksIngredient;
 import net.p3pp3rf1y.sophisticatedcore.util.BlockItemBase;
@@ -20,13 +19,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class MovingStorageIngredient implements IExactDisplayStacksIngredient {
-	public static final MapCodec<MovingStorageIngredient> CODEC = RecordCodecBuilder.mapCodec(
-			instance -> instance.group(
-							Item.CODEC.fieldOf("moving_storage_item").forGetter(ingredient -> ingredient.movingStorageItem),
-							Item.CODEC.fieldOf("storage_item").forGetter(ingredient -> ingredient.storageItem)
-					)
-					.apply(instance, MovingStorageIngredient::new)
-	);
+	public static final MapCodec<MovingStorageIngredient> CODEC = RecordCodecBuilder
+			.mapCodec(
+					instance -> instance
+							.group(Item.CODEC.fieldOf("moving_storage_item").forGetter(ingredient -> ingredient.movingStorageItem),
+									Item.CODEC.fieldOf("storage_item").forGetter(ingredient -> ingredient.storageItem))
+							.apply(instance, MovingStorageIngredient::new));
 	private final Holder<Item> movingStorageItem;
 	private final Holder<Item> storageItem;
 
@@ -61,7 +59,8 @@ public class MovingStorageIngredient implements IExactDisplayStacksIngredient {
 
 	@Override
 	public SlotDisplay display() {
-		return new SlotDisplay.Composite(getMovingStorages().stream().map(ItemStackTemplate::fromNonEmptyStack).map(SlotDisplay.ItemStackSlotDisplay::new).map(SlotDisplay.class::cast).toList());
+		return new SlotDisplay.Composite(getMovingStorages().stream().map(ItemStackTemplate::fromNonEmptyStack).map(SlotDisplay.ItemStackSlotDisplay::new)
+				.map(SlotDisplay.class::cast).toList());
 	}
 
 	@Override

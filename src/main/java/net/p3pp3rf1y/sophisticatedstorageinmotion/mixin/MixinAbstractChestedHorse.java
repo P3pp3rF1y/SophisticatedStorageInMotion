@@ -46,7 +46,6 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Shadow
 	public abstract boolean hasChest();
 
-
 	private static final Identifier SADDLE_SLOT_SPRITE = Identifier.withDefaultNamespace("container/slot/saddle");
 	private static final Identifier LLAMA_ARMOR_SLOT_SPRITE = Identifier.withDefaultNamespace("container/slot/llama_armor");
 	private static final String STORAGE_HOLDER = "storageHolder";
@@ -96,7 +95,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public List<Slot> instantiateExtraSlots() {
-		if (canUseSlot(EquipmentSlot.BODY) && (((AbstractChestedHorse) (Object) this).is(EntityTypeTags.CAN_WEAR_HORSE_ARMOR) || ((Object) this) instanceof Llama)) {
+		if (canUseSlot(EquipmentSlot.BODY)
+				&& (((AbstractChestedHorse) (Object) this).is(EntityTypeTags.CAN_WEAR_HORSE_ARMOR) || ((Object) this) instanceof Llama)) {
 			Container container = createEquipmentSlotContainer(EquipmentSlot.BODY);
 			return List.of(new ArmorSlot(container, this, EquipmentSlot.BODY, 0, 8, 36, ((Object) this) instanceof Llama ? LLAMA_ARMOR_SLOT_SPRITE : null) {
 				public boolean mayPlace(ItemStack stack) {
@@ -108,7 +108,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 			return List.of(new ArmorSlot(container, this, EquipmentSlot.SADDLE, 0, 0, 0, SADDLE_SLOT_SPRITE) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
-					return stack.is(Items.SADDLE) && !hasItem() && canUseSlot(EquipmentSlot.SADDLE) && ((AbstractChestedHorse) (Object) this).is(EntityTypeTags.CAN_EQUIP_SADDLE);
+					return stack.is(Items.SADDLE) && !hasItem() && canUseSlot(EquipmentSlot.SADDLE)
+							&& ((AbstractChestedHorse) (Object) this).is(EntityTypeTags.CAN_EQUIP_SADDLE);
 				}
 			});
 		}
@@ -137,7 +138,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 
 	@Override
 	public ItemStack getDropStack(ItemStack storageItem) {
-		@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+		@Nullable
+		UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
 		if (storageId != null) {
 			MovingStorageData.moveToItemStorage(level().registryAccess(), storageItem, storageId);
 		}
@@ -159,7 +161,8 @@ public abstract class MixinAbstractChestedHorse extends AbstractHorse implements
 	@Override
 	protected Component getTypeName() {
 		if (hasStorageItem()) {
-			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(), getStorageItem().getHoverName());
+			return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity("chested_horse_with_storage"), super.getTypeName(),
+					getStorageItem().getHoverName());
 		}
 		return super.getTypeName();
 	}

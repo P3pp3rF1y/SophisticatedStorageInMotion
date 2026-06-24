@@ -44,14 +44,17 @@ public class TierUpgradeHandler {
 			return;
 		}
 
-		if (event.getTarget() instanceof IMovingStorageEntity movingStorage && !movingStorage.getStorageHolder().isOpen() && !movingStorage.getStorageHolder().isPacked()) {
-			upgradeEntity(event, event.getTarget(), player, itemInHand, tierDefinitions, movingStorage.getStorageItem().getItem(), movingStorage.getStorageItem());
+		if (event.getTarget() instanceof IMovingStorageEntity movingStorage && !movingStorage.getStorageHolder().isOpen()
+				&& !movingStorage.getStorageHolder().isPacked()) {
+			upgradeEntity(event, event.getTarget(), player, itemInHand, tierDefinitions, movingStorage.getStorageItem().getItem(),
+					movingStorage.getStorageItem());
 		} else if (event.getTarget() instanceof MinecartChest minecartChest) {
 			upgradeEntity(event, minecartChest, player, itemInHand, tierDefinitions, Items.CHEST, ItemStack.EMPTY);
 		}
 	}
 
-	private static void upgradeEntity(PlayerInteractEvent.EntityInteract event, Entity entity, Player player, ItemStack tierUpgrade, Map<Item, IEntityTierUpgradeDefinition> tierDefinitions, Item tierDefinitionItem, ItemStack storageItem) {
+	private static void upgradeEntity(PlayerInteractEvent.EntityInteract event, Entity entity, Player player, ItemStack tierUpgrade,
+			Map<Item, IEntityTierUpgradeDefinition> tierDefinitions, Item tierDefinitionItem, ItemStack storageItem) {
 		IEntityTierUpgradeDefinition upgradeDefinition = tierDefinitions.get(tierDefinitionItem);
 		if (upgradeDefinition == null) {
 			SophisticatedStorageInMotion.LOGGER.warn("No tier upgrade definition found for {}", () -> BuiltInRegistries.ITEM.getKey(tierDefinitionItem));
@@ -141,57 +144,81 @@ public class TierUpgradeHandler {
 	}
 
 	static {
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC, Map.of(
-				Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.CHEST_ITEM.get())
-		));
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_COPPER, EntityTierUpgradeMap.builder()
-				.put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.COPPER_CHEST_ITEM.get()))
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_COPPER))
-				.build());
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_IRON, EntityTierUpgradeMap.builder()
-				.put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.IRON_CHEST_ITEM.get()))
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_IRON))
-				.build()
-		);
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_GOLD, EntityTierUpgradeMap.builder()
-				.put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.GOLD_CHEST_ITEM.get()))
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_GOLD))
-				.build()
-		);
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC,
+				Map.of(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.CHEST_ITEM.get())));
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_COPPER,
+				EntityTierUpgradeMap.builder().put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.COPPER_CHEST_ITEM.get()))
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_COPPER))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_IRON,
+				EntityTierUpgradeMap.builder().put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.IRON_CHEST_ITEM.get()))
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_IRON))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_GOLD,
+				EntityTierUpgradeMap.builder().put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.GOLD_CHEST_ITEM.get()))
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_GOLD))
+						.build());
 		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_DIAMOND, EntityTierUpgradeMap.builder()
 				.put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.DIAMOND_CHEST_ITEM.get()))
 				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_DIAMOND))
-				.build()
-		);
+				.build());
 		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_NETHERITE, EntityTierUpgradeMap.builder()
 				.put(Items.CHEST, new VanillaMinecartChestTierUpgradeDefinition(ModBlocks.NETHERITE_CHEST_ITEM.get()))
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_NETHERITE))
-				.build()
-		);
+				.putAllWrapped(
+						StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.BASIC_TO_NETHERITE))
+				.build());
 
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_IRON, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_IRON)).build());
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_GOLD, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_GOLD)).build());
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_DIAMOND, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_DIAMOND)).build());
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_NETHERITE, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_NETHERITE)).build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_IRON,
+				EntityTierUpgradeMap.builder()
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_IRON))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_GOLD,
+				EntityTierUpgradeMap.builder()
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_GOLD))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_DIAMOND,
+				EntityTierUpgradeMap.builder().putAllWrapped(
+						StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_DIAMOND))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_NETHERITE,
+				EntityTierUpgradeMap.builder().putAllWrapped(
+						StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.COPPER_TO_NETHERITE))
+						.build());
 
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.IRON_TO_GOLD, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.IRON_TO_GOLD)).build());
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.IRON_TO_DIAMOND, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.IRON_TO_DIAMOND)).build());
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.IRON_TO_NETHERITE, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.IRON_TO_NETHERITE)).build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.IRON_TO_GOLD,
+				EntityTierUpgradeMap.builder()
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.IRON_TO_GOLD))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.IRON_TO_DIAMOND,
+				EntityTierUpgradeMap.builder()
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.IRON_TO_DIAMOND))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.IRON_TO_NETHERITE,
+				EntityTierUpgradeMap.builder().putAllWrapped(
+						StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.IRON_TO_NETHERITE))
+						.build());
 
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_DIAMOND, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_DIAMOND)).build());
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_NETHERITE, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_NETHERITE)).build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_DIAMOND,
+				EntityTierUpgradeMap.builder()
+						.putAllWrapped(
+								StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_DIAMOND))
+						.build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_NETHERITE,
+				EntityTierUpgradeMap.builder().putAllWrapped(
+						StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.GOLD_TO_NETHERITE))
+						.build());
 
-		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.DIAMOND_TO_NETHERITE, EntityTierUpgradeMap.builder()
-				.putAllWrapped(StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.DIAMOND_TO_NETHERITE)).build());
+		ENTITY_TIER_UPGRADE_DEFINITIONS.put(StorageTierUpgradeItem.TierUpgrade.DIAMOND_TO_NETHERITE,
+				EntityTierUpgradeMap.builder().putAllWrapped(
+						StorageHolderTierUpgradeHandler.STORAGE_HOLDER_TIER_UPGRADE_DEFINITIONS.get(StorageTierUpgradeItem.TierUpgrade.DIAMOND_TO_NETHERITE))
+						.build());
 
 	}
 }

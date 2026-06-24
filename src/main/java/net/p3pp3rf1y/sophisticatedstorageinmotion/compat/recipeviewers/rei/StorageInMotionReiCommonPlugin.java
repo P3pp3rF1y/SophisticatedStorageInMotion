@@ -12,7 +12,6 @@ import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.co
 public class StorageInMotionReiCommonPlugin implements REICommonPlugin {
 	@Override
 	public void registerItemComparators(ItemComparatorRegistry registry) {
-		getSubtypeInterpreters()
-				.forEach((item, subtypeInterpreter) -> registry.register(ReiSubtypeInterpreter.of(subtypeInterpreter), item));
+		getSubtypeInterpreters().forEach((item, subtypeInterpreter) -> registry.register(ReiSubtypeInterpreter.of(subtypeInterpreter), item));
 	}
 }

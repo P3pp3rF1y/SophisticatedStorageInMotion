@@ -27,29 +27,37 @@ public class ModItems {
 	}
 
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(SophisticatedStorageInMotion.MOD_ID);
-	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.identifier(), SophisticatedStorageInMotion.MOD_ID);
+	public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB.identifier(),
+			SophisticatedStorageInMotion.MOD_ID);
 
 	public static final DeferredHolder<Item, StorageMinecartItem> STORAGE_MINECART = ITEMS.registerItem("storage_minecart", StorageMinecartItem::new);
 
 	public static final DeferredHolder<Item, StorageBoatItem> STORAGE_BOAT = ITEMS.registerItem("storage_boat", StorageBoatItem::new);
 
-	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, SophisticatedStorageInMotion.MOD_ID);
+	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES,
+			SophisticatedStorageInMotion.MOD_ID);
 
-	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedStorageInMotion.MOD_ID);
-	public static final Supplier<RecipeSerializer<MovingStorageFromStorageRecipe>> MOVING_STORAGE_FROM_STORAGE_SERIALIZER = RECIPE_SERIALIZERS.register("moving_storage_from_storage", () -> MovingStorageFromStorageRecipe.SERIALIZER);
-	public static final Supplier<RecipeSerializer<UncraftMovingStorageRecipe>> UNCRAFT_MOVING_STORAGE_SERIALIZER = RECIPE_SERIALIZERS.register("uncraft_moving_storage", () -> UncraftMovingStorageRecipe.SERIALIZER);
-	public static final Supplier<RecipeSerializer<MovingStorageTierUpgradeShapedRecipe>> MOVING_STORAGE_TIER_UPGRADE_SHAPED_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("moving_storage_tier_upgrade_shaped_recipe", () -> MovingStorageTierUpgradeShapedRecipe.SERIALIZER);
-	public static final Supplier<RecipeSerializer<MovingStorageTierUpgradeShapelessRecipe>> MOVING_STORAGE_TIER_UPGRADE_SHAPELESS_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("moving_storage_tier_upgrade_shapeless_recipe", () -> MovingStorageTierUpgradeShapelessRecipe.SERIALIZER);
-	private static final DeferredRegister<IngredientType<?>> INGREDIENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, SophisticatedStorageInMotion.MOD_ID);
-	public static final Supplier<IngredientType<MovingStorageIngredient>> MOVING_STORAGE_INGREDIENT_TYPE = INGREDIENT_TYPES.register("moving_storage", () -> new IngredientType<>(MovingStorageIngredient.CODEC));
+	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(BuiltInRegistries.RECIPE_SERIALIZER,
+			SophisticatedStorageInMotion.MOD_ID);
+	public static final Supplier<RecipeSerializer<MovingStorageFromStorageRecipe>> MOVING_STORAGE_FROM_STORAGE_SERIALIZER = RECIPE_SERIALIZERS
+			.register("moving_storage_from_storage", () -> MovingStorageFromStorageRecipe.SERIALIZER);
+	public static final Supplier<RecipeSerializer<UncraftMovingStorageRecipe>> UNCRAFT_MOVING_STORAGE_SERIALIZER = RECIPE_SERIALIZERS
+			.register("uncraft_moving_storage", () -> UncraftMovingStorageRecipe.SERIALIZER);
+	public static final Supplier<RecipeSerializer<MovingStorageTierUpgradeShapedRecipe>> MOVING_STORAGE_TIER_UPGRADE_SHAPED_RECIPE_SERIALIZER = RECIPE_SERIALIZERS
+			.register("moving_storage_tier_upgrade_shaped_recipe", () -> MovingStorageTierUpgradeShapedRecipe.SERIALIZER);
+	public static final Supplier<RecipeSerializer<MovingStorageTierUpgradeShapelessRecipe>> MOVING_STORAGE_TIER_UPGRADE_SHAPELESS_RECIPE_SERIALIZER = RECIPE_SERIALIZERS
+			.register("moving_storage_tier_upgrade_shapeless_recipe", () -> MovingStorageTierUpgradeShapelessRecipe.SERIALIZER);
+	private static final DeferredRegister<IngredientType<?>> INGREDIENT_TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES,
+			SophisticatedStorageInMotion.MOD_ID);
+	public static final Supplier<IngredientType<MovingStorageIngredient>> MOVING_STORAGE_INGREDIENT_TYPE = INGREDIENT_TYPES.register("moving_storage",
+			() -> new IngredientType<>(MovingStorageIngredient.CODEC));
 
-	public static Supplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("main", () ->
-			CreativeModeTab.builder().icon(() -> new ItemStack(STORAGE_MINECART.get()))
-					.title(Component.translatable("itemGroup.sophisticatedstorageinmotion"))
-					.displayItems((featureFlags, output) -> {
-						ITEMS.getEntries().stream().filter(i -> i.get() instanceof ItemBase).forEach(i -> ((ItemBase) i.get()).addCreativeTabItems(output::accept));
-					})
-					.build());
+	public static Supplier<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("main",
+			() -> CreativeModeTab.builder().icon(() -> new ItemStack(STORAGE_MINECART.get()))
+					.title(Component.translatable("itemGroup.sophisticatedstorageinmotion")).displayItems((featureFlags, output) -> {
+						ITEMS.getEntries().stream().filter(i -> i.get() instanceof ItemBase)
+								.forEach(i -> ((ItemBase) i.get()).addCreativeTabItems(output::accept));
+					}).build());
 
 	public static void registerHandlers(IEventBus modBus) {
 		ITEMS.register(modBus);

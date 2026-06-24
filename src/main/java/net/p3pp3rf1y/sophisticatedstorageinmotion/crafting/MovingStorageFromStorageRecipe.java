@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class MovingStorageFromStorageRecipe extends CustomShapelessRecipe implements IWrapperRecipe<ShapelessRecipe> {
-	public static final RecipeSerializer<MovingStorageFromStorageRecipe> SERIALIZER = RecipeWrapperSerializer.create(MovingStorageFromStorageRecipe::new, ShapelessRecipe.SERIALIZER);
+	public static final RecipeSerializer<MovingStorageFromStorageRecipe> SERIALIZER = RecipeWrapperSerializer.create(MovingStorageFromStorageRecipe::new,
+			ShapelessRecipe.SERIALIZER);
 	private final ShapelessRecipe compose;
 
 	public MovingStorageFromStorageRecipe(ShapelessRecipe compose) {

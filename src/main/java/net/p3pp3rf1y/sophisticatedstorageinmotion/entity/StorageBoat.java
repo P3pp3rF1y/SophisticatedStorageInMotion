@@ -24,9 +24,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemResourceHandler;
@@ -154,7 +154,8 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 	@Override
 	protected Component getTypeName() {
 		String boatDescId = isRaft() ? "storage_raft" : "storage_boat";
-		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getWoodType()), getStorageItem().getHoverName());
+		return Component.translatable(StorageInMotionTranslationHelper.INSTANCE.translEntity(boatDescId), getWoodName(getWoodType()),
+				getStorageItem().getHoverName());
 	}
 
 	public WoodType getWoodType() {
@@ -206,7 +207,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public void remove(RemovalReason pReason) {
-		//overridden to prevent default boat logic from using container overrides to drop items when in some cases they are not supposed to be dropped
+		// overridden to prevent default boat logic from using container overrides to drop items when in some cases they are not supposed to be dropped
 		setRemoved(pReason);
 	}
 
@@ -239,7 +240,7 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	@Override
 	public void chestVehicleDestroyed(DamageSource damageSource, ServerLevel level, Entity p_entity) {
-		//noop
+		// noop
 	}
 
 	@Override

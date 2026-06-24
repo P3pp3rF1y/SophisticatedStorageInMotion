@@ -42,7 +42,8 @@ public class ClientEventHandler {
 	private static final int PAINTBRUSH_MISSING_ITEMS_HIGHLIGHT_COLOR = 0xc53b3b;
 
 	private static final BiConsumer<LivingEntity, LivingEntityRenderState> STORAGE_HORSE_RENDER_STATE_MODIFIER = (entity, renderState) -> {
-		if (!(entity instanceof AbstractChestedHorse chestedHorse) || !(entity instanceof IMovingStorageEntity movingStorage) || movingStorage.getStorageItem().isEmpty()) {
+		if (!(entity instanceof AbstractChestedHorse chestedHorse) || !(entity instanceof IMovingStorageEntity movingStorage)
+				|| movingStorage.getStorageItem().isEmpty()) {
 			return;
 		}
 
@@ -65,23 +66,20 @@ public class ClientEventHandler {
 	private static void submitCustomGeometry(SubmitCustomGeometryEvent event) {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer player = mc.player;
-		if (player == null || mc.level == null || mc.gui.screen() != null || !(mc.hitResult instanceof EntityHitResult entityHitResult) || !(entityHitResult.getEntity() instanceof IMovingStorageEntity)) {
+		if (player == null || mc.level == null || mc.gui.screen() != null || !(mc.hitResult instanceof EntityHitResult entityHitResult)
+				|| !(entityHitResult.getEntity() instanceof IMovingStorageEntity)) {
 			return;
 		}
 
 		InventoryHelper.getItemFromEitherHand(player, net.p3pp3rf1y.sophisticatedstorage.init.ModItems.PAINTBRUSH.get())
 				.flatMap(paintbrush -> PaintbrushMovingStorageOverlay.getItemRequirementsFor(paintbrush, player, entityHitResult.getEntity()))
-				.ifPresent(itemRequirements -> submitPaintbrushEntityHighlight(
-						event.getSubmitNodeCollector(),
-						event.getPoseStack(),
-						mc.getDeltaTracker().getGameTimeDeltaPartialTick(false),
-						event.getLevelRenderState().cameraRenderState.pos,
-						entityHitResult.getEntity(),
-						itemRequirements.itemsMissing().isEmpty()
-				));
+				.ifPresent(itemRequirements -> submitPaintbrushEntityHighlight(event.getSubmitNodeCollector(), event.getPoseStack(),
+						mc.getDeltaTracker().getGameTimeDeltaPartialTick(false), event.getLevelRenderState().cameraRenderState.pos, entityHitResult.getEntity(),
+						itemRequirements.itemsMissing().isEmpty()));
 	}
 
-	private static void submitPaintbrushEntityHighlight(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos, Entity entity, boolean canApply) {
+	private static void submitPaintbrushEntityHighlight(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos,
+			Entity entity, boolean canApply) {
 		AABB boundingBox = entity.getBoundingBox();
 		double x = Mth.lerp(partialTick, entity.xOld, entity.getX());
 		double y = Mth.lerp(partialTick, entity.yOld, entity.getY());
@@ -90,28 +88,29 @@ public class ClientEventHandler {
 
 		poseStack.pushPose();
 		poseStack.translate(x - cameraPos.x(), y - cameraPos.y(), z - cameraPos.z());
-		BlockHighlightRenderHelper.submitThickEdges(submitNodeCollector, poseStack, color, VoxelOutliner.edgesFromAABB(boundingBox), entity.getX(), entity.getY(), entity.getZ());
+		BlockHighlightRenderHelper.submitThickEdges(submitNodeCollector, poseStack, color, VoxelOutliner.edgesFromAABB(boundingBox), entity.getX(),
+				entity.getY(), entity.getZ());
 		poseStack.popPose();
 	}
 
 	private static void registerMovingStorageRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
 		event.registerEntityModifier(StorageBoatRenderer.class, StorageBoatRenderer.RENDER_STATE_MODIFIER);
 		event.registerEntityModifier(StorageMinecartRenderer.class, StorageMinecartRenderer.RENDER_STATE_MODIFIER);
-		event.registerEntityModifier((Class<EntityRenderer<LivingEntity, LivingEntityRenderState>>) (Class<?>) LivingEntityRenderer.class, STORAGE_HORSE_RENDER_STATE_MODIFIER);
+		event.registerEntityModifier((Class<EntityRenderer<LivingEntity, LivingEntityRenderState>>) (Class<?>) LivingEntityRenderer.class,
+				STORAGE_HORSE_RENDER_STATE_MODIFIER);
 	}
 
 	private static void registerSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
-		ModItems.ITEMS.getEntries().stream()
-				.filter(i -> i.get() instanceof StorageMinecartItem)
+		ModItems.ITEMS.getEntries().stream().filter(i -> i.get() instanceof StorageMinecartItem)
 				.forEach(i -> event.register(i.getId(), StorageMinecartItemRenderer.Unbaked.MAP_CODEC));
 
-		ModItems.ITEMS.getEntries().stream()
-				.filter(i -> i.get() instanceof StorageBoatItem)
+		ModItems.ITEMS.getEntries().stream().filter(i -> i.get() instanceof StorageBoatItem)
 				.forEach(b -> event.register(b.getId(), StorageBoatItemRenderer.Unbaked.MAP_CODEC));
 	}
 
 	private static void registerOverlay(RegisterGuiLayersEvent event) {
-		event.registerAbove(VanillaGuiLayers.HOTBAR, Identifier.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "paintbrush_moving_storage_info"), PaintbrushMovingStorageOverlay.HUD_PAINTBRUSH_INFO);
+		event.registerAbove(VanillaGuiLayers.HOTBAR, Identifier.fromNamespaceAndPath(SophisticatedStorageInMotion.MOD_ID, "paintbrush_moving_storage_info"),
+				PaintbrushMovingStorageOverlay.HUD_PAINTBRUSH_INFO);
 	}
 
 	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {

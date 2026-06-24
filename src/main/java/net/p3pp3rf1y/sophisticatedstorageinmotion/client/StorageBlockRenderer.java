@@ -4,9 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockStateModelSet;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
@@ -18,12 +18,12 @@ import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.equine.Donkey;
 import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.animal.equine.Mule;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ChestBlockEntity;
@@ -39,7 +39,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class StorageBlockRenderer {
-	public static void submitStorageBlock(float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, StorageBlockEntity renderBlockEntity) {
+	public static void submitStorageBlock(float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight,
+			StorageBlockEntity renderBlockEntity) {
 		Minecraft minecraft = Minecraft.getInstance();
 		BlockState state = renderBlockEntity.getBlockState();
 		if (renderBlockEntity instanceof BarrelBlockEntity barrel && minecraft.level != null) {
@@ -54,22 +55,24 @@ public class StorageBlockRenderer {
 			submitModelParts(poseStack, submitNodeCollector, state, wrappedLevel, parts, packedLight);
 		}
 
-		BlockEntityRenderer<StorageBlockEntity, ? extends BlockEntityRenderState> renderer = minecraft.getBlockEntityRenderDispatcher().getRenderer(renderBlockEntity);
+		BlockEntityRenderer<StorageBlockEntity, ? extends BlockEntityRenderState> renderer = minecraft.getBlockEntityRenderDispatcher()
+				.getRenderer(renderBlockEntity);
 		if (renderer == null) {
 			return;
 		}
 		submitBlockEntityRender(renderer, renderBlockEntity, partialTicks, poseStack, submitNodeCollector, packedLight);
 	}
 
-	private static <T extends BlockEntity, S extends BlockEntityRenderState> void submitBlockEntityRender(
-			BlockEntityRenderer<T, S> renderer, T blockEntity, float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
+	private static <T extends BlockEntity, S extends BlockEntityRenderState> void submitBlockEntityRender(BlockEntityRenderer<T, S> renderer, T blockEntity,
+			float partialTicks, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight) {
 		S renderState = renderer.createRenderState();
 		renderer.extractRenderState(blockEntity, renderState, partialTicks, Vec3.ZERO, null);
 		renderState.lightCoords = packedLight;
 		renderer.submit(renderState, poseStack, submitNodeCollector, RenderHelper.ZERO_POS_CAMERA_RENDER_STATE);
 	}
 
-	private static void submitModelParts(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, BlockState state, StaticBlockEntityTintGetter wrappedLevel, List<BlockStateModelPart> parts, int packedLight) {
+	private static void submitModelParts(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, BlockState state,
+			StaticBlockEntityTintGetter wrappedLevel, List<BlockStateModelPart> parts, int packedLight) {
 		List<BakedQuad> cutoutQuads = new ArrayList<>();
 		List<BakedQuad> translucentQuads = new ArrayList<>();
 		for (BlockStateModelPart part : parts) {
@@ -95,7 +98,8 @@ public class StorageBlockRenderer {
 		}
 	}
 
-	private static void submitQuads(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, BlockState state, StaticBlockEntityTintGetter wrappedLevel, int packedLight, List<BakedQuad> quads, net.minecraft.client.renderer.rendertype.RenderType renderType) {
+	private static void submitQuads(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, BlockState state, StaticBlockEntityTintGetter wrappedLevel,
+			int packedLight, List<BakedQuad> quads, net.minecraft.client.renderer.rendertype.RenderType renderType) {
 		submitNodeCollector.submitCustomGeometry(poseStack, renderType, (pose, vertexConsumer) -> {
 			QuadInstance quadInstance = new QuadInstance();
 			quadInstance.setLightCoords(packedLight);
@@ -135,9 +139,11 @@ public class StorageBlockRenderer {
 		OFFSET_MAP.put(AbstractChestedHorse.class, (renderBlockEntity) -> MULE_OTHER_OFFSET);
 	}
 
-	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
+	private static final Function<StorageBlockEntity, Vec3> DEFAULT_OFFSET = (
+			renderBlockEntity) -> renderBlockEntity instanceof ChestBlockEntity ? new Vec3(0, -1.343, -0.515) : new Vec3(0, -1.40, -0.48);
 
-	public static void submitChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
+	public static void submitChestedHorseStorage(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState,
+			PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, @Nullable StorageBlockEntity renderBlockEntity) {
 		if (renderBlockEntity == null) {
 			return;
 		}
@@ -146,15 +152,20 @@ public class StorageBlockRenderer {
 
 		Function<StorageBlockEntity, Vec3> offsetFunction = OFFSET_MAP.getOrDefault(chestedHorseClass, DEFAULT_OFFSET);
 		if (offsetFunction != null) {
-			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y, offsetFunction.apply(renderBlockEntity).z);
+			poseStack.translate(offsetFunction.apply(renderBlockEntity).x, offsetFunction.apply(renderBlockEntity).y,
+					offsetFunction.apply(renderBlockEntity).z);
 		}
 
-		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 90, 1, renderBlockEntity, packedLight, submitNodeCollector, entityRenderState.partialTick);
-		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 270, -1, renderBlockEntity, packedLight, submitNodeCollector, entityRenderState.partialTick);
+		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 90, 1, renderBlockEntity, packedLight, submitNodeCollector,
+				entityRenderState.partialTick);
+		submitStorageOnSide(chestedHorseClass, entityRenderState, poseStack, 270, -1, renderBlockEntity, packedLight, submitNodeCollector,
+				entityRenderState.partialTick);
 		poseStack.popPose();
 	}
 
-	private static void submitStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack, int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, SubmitNodeCollector submitNodeCollector, float partialTick) {
+	private static void submitStorageOnSide(Class<? extends AbstractChestedHorse> chestedHorseClass, EntityRenderState entityRenderState, PoseStack poseStack,
+			int storageRotation, float xOffsetMultiplier, StorageBlockEntity renderBlockEntity, int packedLight, SubmitNodeCollector submitNodeCollector,
+			float partialTick) {
 		float halfWidth = entityRenderState.boundingBoxWidth / 2;
 		poseStack.pushPose();
 
@@ -177,7 +188,7 @@ public class StorageBlockRenderer {
 		}
 		poseStack.translate(-0.5, -0.5, -0.5);
 
-		StorageBlockRenderer.submitStorageBlock(partialTick, poseStack, submitNodeCollector, packedLight, renderBlockEntity);
+		submitStorageBlock(partialTick, poseStack, submitNodeCollector, packedLight, renderBlockEntity);
 		poseStack.popPose();
 	}
 }
