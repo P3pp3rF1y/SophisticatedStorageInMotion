@@ -45,10 +45,10 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContai
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.ItemComponentHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageOpennessPayload;
-
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
@@ -117,8 +117,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		Vector3f point = new Vector3f(vector);
 		point.rotate(Axis.YN.rotationDegrees(side > 0 ? 90.0F : -90.0F));
 		point.add((float) (chestedHorse.getBbWidth() * (chestedHorse instanceof Llama ? 0.75F : 0.62F)) * side,
-				(float) (chestedHorse.getBbHeight() * (chestedHorse instanceof Llama ? 0.62F : 0.55F)),
-				chestedHorse instanceof Llama ? -0.08F : -0.05F);
+				(float) (chestedHorse.getBbHeight() * (chestedHorse instanceof Llama ? 0.62F : 0.55F)), chestedHorse instanceof Llama ? -0.08F : -0.05F);
 		point.rotate(Axis.YN.rotationDegrees(chestedHorse.yBodyRot - 180.0F));
 		point.add(chestedHorse.position().toVector3f());
 		return point;
@@ -127,7 +126,10 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
 		setStorageItem(storageItem);
 		if (setupDefaults && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
-			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(), getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper ? movingStorageWrapper.getNumberOfInventorySlots() : getStorageWrapper().getInventoryHandler().size());
+			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(),
+					getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper
+							? movingStorageWrapper.getNumberOfInventorySlots()
+							: getStorageWrapper().getInventoryHandler().size());
 			LimitedBarrelBlock.setupDefaultSettings(getStorageWrapper());
 		}
 	}
@@ -181,16 +183,11 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 				if (blockItem.getBlock() instanceof ChestBlock) {
 					renderBlockEntity = new ChestBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
 				} else if (blockItem.getBlock() instanceof LimitedBarrelBlock) {
-					renderBlockEntity = new LimitedBarrelBlockEntity(BlockPos.ZERO,
-							blockItem.getBlock().defaultBlockState()
-									.setValue(LimitedBarrelBlock.HORIZONTAL_FACING, Direction.NORTH)
-									.setValue(LimitedBarrelBlock.VERTICAL_FACING, VerticalFacing.UP)
-					);
+					renderBlockEntity = new LimitedBarrelBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState()
+							.setValue(LimitedBarrelBlock.HORIZONTAL_FACING, Direction.NORTH).setValue(LimitedBarrelBlock.VERTICAL_FACING, VerticalFacing.UP));
 				} else if (blockItem.getBlock() instanceof BarrelBlock) {
 					renderBlockEntity = new BarrelBlockEntity(BlockPos.ZERO,
-							blockItem.getBlock().defaultBlockState()
-									.setValue(BarrelBlock.FACING, Direction.UP)
-					);
+							blockItem.getBlock().defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
 				} else if (blockItem.getBlock() instanceof ShulkerBoxBlock) {
 					renderBlockEntity = new ShulkerBoxBlockEntity(BlockPos.ZERO, blockItem.getBlock().defaultBlockState());
 				}
@@ -214,7 +211,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			if (!isShulkerBox() && !isPacked()) {
 				dropAllItems();
 
-				@Nullable UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
+				@Nullable
+				UUID storageId = storageItem.get(ModCoreDataComponents.STORAGE_UUID);
 				if (storageId != null) {
 					MovingStorageData.get().removeStorageContents(storageId);
 				}
@@ -229,7 +227,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	private void dropAllItems() {
-		InventoryHelper.dropItems(getStorageWrapper().getInventoryHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
+		InventoryHelper.dropItems(getStorageWrapper().getInventoryHandler(), entity.level(), entity.position().x(), entity.position().y(),
+				entity.position().z());
 		InventoryHelper.dropItems(getStorageWrapper().getUpgradeHandler(), entity.level(), entity.position().x(), entity.position().y(), entity.position().z());
 	}
 
@@ -272,7 +271,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 			if (stack.isEmpty()) {
 				return;
 			}
-			droppedItemEntityCount.addAndGet((int) Math.ceil(stack.getCount() / (double) Math.min(stack.getMaxStackSize(), AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE)));
+			droppedItemEntityCount
+					.addAndGet((int) Math.ceil(stack.getCount() / (double) Math.min(stack.getMaxStackSize(), AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE)));
 		});
 
 		if (droppedItemEntityCount.get() <= Config.SERVER.tooManyItemEntityDrops.get()) {
@@ -282,11 +282,10 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 		ItemBase packingTapeItem = ModItems.PACKING_TAPE.get();
 		Component packingTapeItemName = packingTapeItem.getName(new ItemStack(packingTapeItem)).copy().withStyle(ChatFormatting.GREEN);
 		if (player instanceof ServerPlayer serverPlayer) {
-			serverPlayer.level().getServer().sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
-					entity.getName().copy().withStyle(ChatFormatting.GREEN),
-					Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED),
-					packingTapeItemName)
-			);
+			serverPlayer.level().getServer()
+					.sendSystemMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("too_many_item_entity_drops",
+							entity.getName().copy().withStyle(ChatFormatting.GREEN),
+							Component.literal(String.valueOf(droppedItemEntityCount.get())).withStyle(ChatFormatting.RED), packingTapeItemName));
 		}
 
 		return false;

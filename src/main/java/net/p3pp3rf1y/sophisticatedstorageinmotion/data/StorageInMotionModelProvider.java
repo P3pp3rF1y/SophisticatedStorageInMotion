@@ -18,7 +18,9 @@ public class StorageInMotionModelProvider extends SophisticatedModelProvider {
 
 	@Override
 	protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-		itemModels.itemModelOutput.accept(ModItems.STORAGE_BOAT.get(), ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ModItems.STORAGE_BOAT.get()), new StorageBoatItemRenderer.Unbaked()));
-		itemModels.itemModelOutput.accept(ModItems.STORAGE_MINECART.get(), ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ModItems.STORAGE_MINECART.get()), new StorageMinecartItemRenderer.Unbaked()));
+		itemModels.itemModelOutput.accept(ModItems.STORAGE_BOAT.get(),
+				ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ModItems.STORAGE_BOAT.get()), new StorageBoatItemRenderer.Unbaked()));
+		itemModels.itemModelOutput.accept(ModItems.STORAGE_MINECART.get(),
+				ItemModelUtils.specialModel(ModelLocationUtils.getModelLocation(ModItems.STORAGE_MINECART.get()), new StorageMinecartItemRenderer.Unbaked()));
 	}
 }

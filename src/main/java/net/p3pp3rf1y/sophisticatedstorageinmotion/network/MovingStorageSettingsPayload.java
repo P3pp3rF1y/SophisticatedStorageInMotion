@@ -12,14 +12,10 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 
 import java.util.UUID;
 
-public record MovingStorageSettingsPayload(UUID storageUuid,
-										   ContainerContents.SettingsData settingsData) implements CustomPacketPayload {
+public record MovingStorageSettingsPayload(UUID storageUuid, ContainerContents.SettingsData settingsData) implements CustomPacketPayload {
 	public static final Type<MovingStorageSettingsPayload> TYPE = new Type<>(SophisticatedStorageInMotion.getRL("storage_settings"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, MovingStorageSettingsPayload> STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
-			MovingStorageSettingsPayload::storageUuid,
-			ContainerContents.SettingsData.STREAM_CODEC,
-			MovingStorageSettingsPayload::settingsData,
+	public static final StreamCodec<RegistryFriendlyByteBuf, MovingStorageSettingsPayload> STREAM_CODEC = StreamCodec.composite(UUIDUtil.STREAM_CODEC,
+			MovingStorageSettingsPayload::storageUuid, ContainerContents.SettingsData.STREAM_CODEC, MovingStorageSettingsPayload::settingsData,
 			MovingStorageSettingsPayload::new);
 
 	@Override
@@ -30,7 +26,8 @@ public record MovingStorageSettingsPayload(UUID storageUuid,
 	public static void handlePayload(MovingStorageSettingsPayload payload, IPayloadContext context) {
 		MovingStorageData movingStorageData = MovingStorageData.get();
 		ContainerContents contents = movingStorageData.getContents(payload.storageUuid);
-		movingStorageData.setContentsClient(payload.storageUuid, new ContainerContents(contents.inventory(), contents.partitioner(), contents.upgrades(), payload.settingsData));
+		movingStorageData.setContentsClient(payload.storageUuid,
+				new ContainerContents(contents.inventory(), contents.partitioner(), contents.upgrades(), payload.settingsData));
 		ClientStorageContentsTooltipBase.refreshContents();
 	}
 }
