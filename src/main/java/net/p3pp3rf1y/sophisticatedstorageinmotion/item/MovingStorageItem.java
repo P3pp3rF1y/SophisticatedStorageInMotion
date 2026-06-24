@@ -88,18 +88,23 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	public void addCreativeTabItems(Consumer<ItemStack> itemConsumer) {
 		if (Config.COMMON.enabledItems.isItemEnabled(this)) {
 			List<ItemStack> movingStorages = getBaseMovingStorageItems();
-			movingStorages.forEach(movingStorage ->  {
-				itemConsumer.accept(createWithStorage(movingStorage.copy(), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.BARREL_ITEM.get()), WoodType.SPRUCE)));
+			movingStorages.forEach(movingStorage -> {
+				itemConsumer.accept(
+						createWithStorage(movingStorage.copy(), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.BARREL_ITEM.get()), WoodType.SPRUCE)));
 				ItemStack limitedIStack = new ItemStack(ModBlocks.LIMITED_GOLD_BARREL_1_ITEM.get());
 				if (limitedIStack.getItem() instanceof ITintableBlockItem tintableBlockItem) {
 					tintableBlockItem.setMainColor(limitedIStack, DyeColor.YELLOW.getTextureDiffuseColor());
 					tintableBlockItem.setAccentColor(limitedIStack, DyeColor.LIME.getTextureDiffuseColor());
 				}
 				itemConsumer.accept(createWithStorage(movingStorage.copy(), limitedIStack));
-				itemConsumer.accept(createWithStorage(movingStorage.copy(), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.LIMITED_COPPER_BARREL_2.get()), WoodType.BIRCH)));
-				itemConsumer.accept(createWithStorage(movingStorage.copy(), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.LIMITED_IRON_BARREL_3.get()), WoodType.ACACIA)));
-				itemConsumer.accept(createWithStorage(movingStorage.copy(), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.LIMITED_DIAMOND_BARREL_4.get()), WoodType.CRIMSON)));
-				itemConsumer.accept(createWithStorage(movingStorage.copy(), WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.NETHERITE_CHEST_ITEM.get()), WoodType.BAMBOO)));
+				itemConsumer.accept(createWithStorage(movingStorage.copy(),
+						WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.LIMITED_COPPER_BARREL_2.get()), WoodType.BIRCH)));
+				itemConsumer.accept(createWithStorage(movingStorage.copy(),
+						WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.LIMITED_IRON_BARREL_3.get()), WoodType.ACACIA)));
+				itemConsumer.accept(createWithStorage(movingStorage.copy(),
+						WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.LIMITED_DIAMOND_BARREL_4.get()), WoodType.CRIMSON)));
+				itemConsumer.accept(createWithStorage(movingStorage.copy(),
+						WoodStorageBlockItem.setWoodType(new ItemStack(ModBlocks.NETHERITE_CHEST_ITEM.get()), WoodType.BAMBOO)));
 				itemConsumer.accept(createWithStorage(movingStorage.copy(), new ItemStack(ModBlocks.IRON_SHULKER_BOX_ITEM.get())));
 			});
 		}
@@ -110,12 +115,13 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	}
 
 	public static ItemStack createWithStorage(ItemStack movingStorage, ItemStack storageStack) {
-		MovingStorageItem.setStorageItem(movingStorage, storageStack);
+		setStorageItem(movingStorage, storageStack);
 		return movingStorage;
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder,
+			TooltipFlag tooltipFlag) {
 		super.appendHoverText(stack, context, tooltipDisplay, tooltipAdder, tooltipFlag);
 		if (tooltipFlag.isAdvanced()) {
 			HolderLookup.Provider registries = context.registries();
@@ -127,10 +133,10 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 			}
 		}
 		if (!Screen.hasShiftDown() && MovingStorageWrapper.hasContentsUuid(stack)) {
-			tooltipAdder.accept(Component.translatable(
-					TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
-					Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA)
-			).withStyle(ChatFormatting.GRAY));
+			tooltipAdder.accept(Component
+					.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".press_for_contents",
+							Component.translatable(TranslationHelper.INSTANCE.translItemTooltip("storage") + ".shift").withStyle(ChatFormatting.AQUA))
+					.withStyle(ChatFormatting.GRAY));
 		}
 	}
 
@@ -161,7 +167,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 			if (wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() == stack.getCount()) {
 				return StashResult.NO_SPACE;
 			}
-			if (wrapper.getInventoryHandler().getSlotTracker().getItems().contains(stack.getItem()) || wrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(stack)) {
+			if (wrapper.getInventoryHandler().getSlotTracker().getItems().contains(stack.getItem())
+					|| wrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(stack)) {
 				return StashResult.MATCH_AND_SPACE;
 			}
 
@@ -173,11 +180,10 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
 		ItemStack storageItem = getStorageItem(movingStorageStack);
-		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {},
-				() -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)), MovingStorageData::get,
+		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {
+		}, () -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)), MovingStorageData::get,
 				() -> movingStorageStack.getOrDefault(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, false),
-				locked -> movingStorageStack.set(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, locked),
-				upgrade -> true);
+				locked -> movingStorageStack.set(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, locked), upgrade -> true);
 		return wrapper;
 	}
 
@@ -191,7 +197,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
-		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPickup(player) || slot.getItem().isEmpty() || action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
+		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPickup(player) || slot.getItem().isEmpty()
+				|| action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
 			return super.overrideStackedOnOther(stack, slot, action, player);
 		}
 
@@ -213,7 +220,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess carriedAccess) {
-		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPlace(stack) || action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
+		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPlace(stack) || action != ClickAction.SECONDARY
+				|| !isShulkerBoxMovingStorage(stack)) {
 			return super.overrideOtherStackedOnMe(stack, otherStack, slot, action, player, carriedAccess);
 		}
 
@@ -238,48 +246,50 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	}
 
 	static {
-		DecorationTableBlockEntity.registerItemDecorator(stack -> stack.getItem() instanceof MovingStorageItem, new DecorationTableBlockEntity.IItemDecorator() {
-			@Override
-			public boolean supportsMaterials(ItemStack input) {
-				ItemStack storageItem = getStorageItem(input);
-				return STORAGE_DECORATOR.supportsMaterials(storageItem);
-			}
+		DecorationTableBlockEntity.registerItemDecorator(stack -> stack.getItem() instanceof MovingStorageItem,
+				new DecorationTableBlockEntity.IItemDecorator() {
+					@Override
+					public boolean supportsMaterials(ItemStack input) {
+						ItemStack storageItem = getStorageItem(input);
+						return STORAGE_DECORATOR.supportsMaterials(storageItem);
+					}
 
-			@Override
-			public boolean supportsTints(ItemStack input) {
-				ItemStack storageItem = getStorageItem(input);
-				return STORAGE_DECORATOR.supportsTints(storageItem);
-			}
+					@Override
+					public boolean supportsTints(ItemStack input) {
+						ItemStack storageItem = getStorageItem(input);
+						return STORAGE_DECORATOR.supportsTints(storageItem);
+					}
 
-			@Override
-			public boolean supportsTopInnerTrim(ItemStack input) {
-				ItemStack storageItem = getStorageItem(input);
-				return STORAGE_DECORATOR.supportsTopInnerTrim(storageItem);
-			}
+					@Override
+					public boolean supportsTopInnerTrim(ItemStack input) {
+						ItemStack storageItem = getStorageItem(input);
+						return STORAGE_DECORATOR.supportsTopInnerTrim(storageItem);
+					}
 
-			@Override
-			public ItemStack decorateWithMaterials(ItemStack input, Map<BarrelMaterial, ResourceLocation> materialsToApply) {
-				ItemStack storageItem = getStorageItem(input);
-				ItemStack storageResult = STORAGE_DECORATOR.decorateWithMaterials(storageItem, materialsToApply);
-				if (storageResult.isEmpty()) {
-					return ItemStack.EMPTY;
-				}
-				ItemStack result = input.copy();
-				setStorageItem(result, storageResult);
-				return result;
-			}
+					@Override
+					public ItemStack decorateWithMaterials(ItemStack input, Map<BarrelMaterial, ResourceLocation> materialsToApply) {
+						ItemStack storageItem = getStorageItem(input);
+						ItemStack storageResult = STORAGE_DECORATOR.decorateWithMaterials(storageItem, materialsToApply);
+						if (storageResult.isEmpty()) {
+							return ItemStack.EMPTY;
+						}
+						ItemStack result = input.copy();
+						setStorageItem(result, storageResult);
+						return result;
+					}
 
-			@Override
-			public DecorationTableBlockEntity.TintDecorationResult decorateWithTints(ItemStack input, int mainColorToSet, int accentColorToSet) {
-				ItemStack storageItem = getStorageItem(input);
-				DecorationTableBlockEntity.TintDecorationResult tintResult = STORAGE_DECORATOR.decorateWithTints(storageItem, mainColorToSet, accentColorToSet);
-				if (tintResult.result().isEmpty()) {
-					return DecorationTableBlockEntity.TintDecorationResult.EMPTY;
-				}
-				ItemStack result = input.copy();
-				setStorageItem(result, tintResult.result());
-				return new DecorationTableBlockEntity.TintDecorationResult(result, tintResult.requiredDyeParts());
-			}
-		});
+					@Override
+					public DecorationTableBlockEntity.TintDecorationResult decorateWithTints(ItemStack input, int mainColorToSet, int accentColorToSet) {
+						ItemStack storageItem = getStorageItem(input);
+						DecorationTableBlockEntity.TintDecorationResult tintResult = STORAGE_DECORATOR.decorateWithTints(storageItem, mainColorToSet,
+								accentColorToSet);
+						if (tintResult.result().isEmpty()) {
+							return DecorationTableBlockEntity.TintDecorationResult.EMPTY;
+						}
+						ItemStack result = input.copy();
+						setStorageItem(result, tintResult.result());
+						return new DecorationTableBlockEntity.TintDecorationResult(result, tintResult.requiredDyeParts());
+					}
+				});
 	}
 }

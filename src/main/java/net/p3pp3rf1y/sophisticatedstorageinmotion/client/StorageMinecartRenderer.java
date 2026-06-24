@@ -29,7 +29,8 @@ public class StorageMinecartRenderer extends AbstractMinecartRenderer<StorageMin
 	}
 
 	@Override
-	protected void renderMinecartContents(MinecartRenderState minecartRenderState, BlockState state, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+	protected void renderMinecartContents(MinecartRenderState minecartRenderState, BlockState state, PoseStack poseStack, MultiBufferSource buffer,
+			int packedLight) {
 		StorageBlockEntity renderBlockEntity = minecartRenderState.getRenderData(ContextKeys.RENDER_BLOCK_ENTITY);
 		if (renderBlockEntity == null) {
 			return;
