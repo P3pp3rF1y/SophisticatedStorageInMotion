@@ -1,18 +1,31 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.AbstractChestedHorse;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.p3pp3rf1y.sophisticatedcore.client.render.BlockHighlightRenderHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.VoxelOutliner;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.PaintbrushMovingStorageOverlay;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
@@ -25,6 +38,9 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageMinecartItem;
 import java.util.function.BiConsumer;
 
 public class ClientEventHandler {
+	private static final int PAINTBRUSH_CAN_APPLY_HIGHLIGHT_COLOR = 0x69c53b;
+	private static final int PAINTBRUSH_MISSING_ITEMS_HIGHLIGHT_COLOR = 0xc53b3b;
+
 	private static final BiConsumer<LivingEntity, LivingEntityRenderState> STORAGE_HORSE_RENDER_STATE_MODIFIER = (entity, renderState) -> {
 		if (!(entity instanceof AbstractChestedHorse chestedHorse) || !(entity instanceof IMovingStorageEntity movingStorage)
 				|| movingStorage.getStorageItem().isEmpty()) {
@@ -44,6 +60,40 @@ public class ClientEventHandler {
 
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(ClientMovingStorageContentsTooltip::onWorldLoad);
+		eventBus.addListener(ClientEventHandler::submitCustomGeometry);
+	}
+
+	private static void submitCustomGeometry(SubmitCustomGeometryEvent event) {
+		renderPaintbrushEntityHighlight(event.getSubmitNodeCollector(), event.getPoseStack(),
+				Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false), event.getLevelRenderState().cameraRenderState.pos);
+	}
+
+	private static void renderPaintbrushEntityHighlight(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos) {
+		Minecraft mc = Minecraft.getInstance();
+		LocalPlayer player = mc.player;
+		if (player == null || mc.screen != null || mc.level == null || !(mc.hitResult instanceof EntityHitResult entityHitResult)
+				|| !(entityHitResult.getEntity() instanceof IMovingStorageEntity)) {
+			return;
+		}
+
+		InventoryHelper.getItemFromEitherHand(player, net.p3pp3rf1y.sophisticatedstorage.init.ModItems.PAINTBRUSH.get())
+				.flatMap(paintbrush -> PaintbrushMovingStorageOverlay.getItemRequirementsFor(paintbrush, player, entityHitResult.getEntity()))
+				.ifPresent(itemRequirements -> renderPaintbrushEntityHighlight(submitNodeCollector, poseStack, partialTick, cameraPos,
+						entityHitResult.getEntity(), itemRequirements.itemsMissing().isEmpty()));
+	}
+
+	private static void renderPaintbrushEntityHighlight(SubmitNodeCollector submitNodeCollector, PoseStack poseStack, float partialTick, Vec3 cameraPos,
+			Entity entity, boolean canApply) {
+		AABB boundingBox = entity.getBoundingBox();
+		double x = Mth.lerp(partialTick, entity.xOld, entity.getX());
+		double y = Mth.lerp(partialTick, entity.yOld, entity.getY());
+		double z = Mth.lerp(partialTick, entity.zOld, entity.getZ());
+		int color = canApply ? PAINTBRUSH_CAN_APPLY_HIGHLIGHT_COLOR : PAINTBRUSH_MISSING_ITEMS_HIGHLIGHT_COLOR;
+		poseStack.pushPose();
+		poseStack.translate(x - cameraPos.x(), y - cameraPos.y(), z - cameraPos.z());
+		BlockHighlightRenderHelper.submitThickEdges(submitNodeCollector, poseStack, color, VoxelOutliner.edgesFromAABB(boundingBox), entity.getX(),
+				entity.getY(), entity.getZ());
+		poseStack.popPose();
 	}
 
 	private static void registerMovingStorageRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
