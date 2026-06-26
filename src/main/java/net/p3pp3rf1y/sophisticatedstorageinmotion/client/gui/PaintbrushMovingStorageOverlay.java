@@ -26,10 +26,12 @@ import java.util.Optional;
 
 public class PaintbrushMovingStorageOverlay {
 
+	private static final int CACHE_REFRESH_INTERVAL_TICKS = 60;
 	private static Optional<PaintbrushItem.ItemRequirements> ITEM_REQUIREMENTS_CACHE = Optional.empty();
 	private static int lastEntityIdCached = -1;
 	@Nullable
 	private static ItemStack lastPaintbrushCached = null;
+	private static long lastCacheUpdateGameTime = -CACHE_REFRESH_INTERVAL_TICKS;
 
 	public static <T extends Entity & IMovingStorageEntity> Optional<PaintbrushItem.ItemRequirements> getItemRequirementsFor(ItemStack paintbrush,
 			Player player, Entity entity) {
@@ -40,10 +42,13 @@ public class PaintbrushMovingStorageOverlay {
 		@SuppressWarnings("unchecked")
 		T movingStorage = (T) entity;
 
-		if (movingStorage.getId() != lastEntityIdCached || paintbrush != lastPaintbrushCached) {
+		long gameTime = player.level().getGameTime();
+		boolean cacheExpired = gameTime < lastCacheUpdateGameTime || gameTime - lastCacheUpdateGameTime >= CACHE_REFRESH_INTERVAL_TICKS;
+		if (movingStorage.getId() != lastEntityIdCached || paintbrush != lastPaintbrushCached || cacheExpired) {
 			ITEM_REQUIREMENTS_CACHE = getItemRequirements(paintbrush, player, movingStorage);
 			lastEntityIdCached = movingStorage.getId();
 			lastPaintbrushCached = paintbrush;
+			lastCacheUpdateGameTime = gameTime;
 		}
 		return ITEM_REQUIREMENTS_CACHE;
 	}
@@ -72,6 +77,7 @@ public class PaintbrushMovingStorageOverlay {
 			if (!mc.gui.screen().isPauseScreen()) {
 				lastEntityIdCached = -1;
 				lastPaintbrushCached = null;
+				lastCacheUpdateGameTime = -CACHE_REFRESH_INTERVAL_TICKS;
 			}
 			return;
 		}
