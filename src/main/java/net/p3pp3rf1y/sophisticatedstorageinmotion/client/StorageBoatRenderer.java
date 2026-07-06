@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.AbstractBoatRenderer;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.RaftRenderer;
 import net.minecraft.client.renderer.entity.state.BoatRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.properties.WoodType;
@@ -36,7 +37,7 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 				new BoatRenderer(context, ModelLayers.DARK_OAK_BOAT), WoodType.JUNGLE, new BoatRenderer(context, ModelLayers.JUNGLE_BOAT), WoodType.MANGROVE,
 				new BoatRenderer(context, ModelLayers.MANGROVE_BOAT), WoodType.OAK, new BoatRenderer(context, ModelLayers.OAK_BOAT), WoodType.PALE_OAK,
 				new BoatRenderer(context, ModelLayers.PALE_OAK_BOAT), WoodType.SPRUCE, new BoatRenderer(context, ModelLayers.SPRUCE_BOAT), WoodType.BAMBOO,
-				new BoatRenderer(context, ModelLayers.BAMBOO_RAFT));
+				new RaftRenderer(context, ModelLayers.BAMBOO_RAFT));
 	}
 
 	@Override
