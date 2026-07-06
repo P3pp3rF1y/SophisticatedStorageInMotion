@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
@@ -167,6 +168,11 @@ public class StorageBoat extends ChestBoat implements IMovingStorageEntity {
 
 	public boolean isRaft() {
 		return getWoodType() == WoodType.BAMBOO;
+	}
+
+	@Override
+	protected double rideHeight(EntityDimensions dimensions) {
+		return isRaft() ? dimensions.height() * 0.8888889F : super.rideHeight(dimensions);
 	}
 
 	@Override
