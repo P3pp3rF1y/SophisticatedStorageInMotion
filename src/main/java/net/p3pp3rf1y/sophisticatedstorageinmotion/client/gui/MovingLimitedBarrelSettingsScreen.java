@@ -6,7 +6,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedcore.settings.StorageSettingsTabControlBase;
-import net.p3pp3rf1y.sophisticatedcore.settings.itemdisplay.ItemDisplaySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedstorage.client.gui.LimitedBarrelScreen;
 
@@ -35,7 +34,7 @@ public class MovingLimitedBarrelSettingsScreen extends MovingStorageSettingsScre
 		return new MovingStorageSettingsTabControl(this, new Position(leftPos + imageWidth, topPos + 4)) {
 			@Override
 			protected boolean isSettingsCategoryDisabled(String categoryName) {
-				return categoryName.equals(ItemDisplaySettingsCategory.NAME) || categoryName.equals(NoSortSettingsCategory.NAME);
+				return categoryName.equals(NoSortSettingsCategory.NAME);
 			}
 		};
 	}
