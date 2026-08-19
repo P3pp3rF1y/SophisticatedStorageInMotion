@@ -146,7 +146,8 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 
 	@Override
 	public boolean stillValid(Player player) {
-		return getStorageEntity().map(se -> player.distanceToSqr(se.position()) <= 64.0D).orElse(false); // TODO if packing is allowed check if not packed here
+		return getStorageEntity().map(se -> se.isAlive() && !se.isRemoved() && player.canReach(se, 4.0D)).orElse(false); // TODO if packing is allowed check if
+																															// not packed here
 	}
 
 	@Override
