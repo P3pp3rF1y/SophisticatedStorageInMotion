@@ -19,6 +19,13 @@ public class SubtypeInterpreters {
 		};
 	}
 
+	public static Map<Item, PropertyBasedSubtypeInterpreter> getAllSubtypeInterpreters() {
+		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = new HashMap<>(
+				net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters());
+		subtypeInterpreters.putAll(getSubtypeInterpreters());
+		return subtypeInterpreters;
+	}
+
 	public static Optional<PropertyBasedSubtypeInterpreter> getSubtypeInterpreter(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters,
 			ItemStack stack) {
 		return Optional.ofNullable(subtypeInterpreters.get(stack.getItem()));

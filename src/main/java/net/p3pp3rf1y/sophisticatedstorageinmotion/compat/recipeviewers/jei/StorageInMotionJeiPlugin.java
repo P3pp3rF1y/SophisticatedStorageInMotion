@@ -37,12 +37,11 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.Mo
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
+import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getAllSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @JeiPlugin
@@ -60,7 +59,7 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		getSubtypeInterpreters()
+		getAllSubtypeInterpreters()
 				.forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
 	}
 
@@ -91,9 +90,7 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	private IRecipeViewerDisplayCatalog getCatalog() {
 		if (catalog == null) {
-			Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = new HashMap<>(getSubtypeInterpreters());
-			// Add Storage subtype interpreters as well
-			subtypeInterpreters.putAll(getSubtypeInterpreters());
+			Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getAllSubtypeInterpreters();
 			catalog = createCatalog(subtypeInterpreters);
 		}
 		return catalog;

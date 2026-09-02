@@ -21,11 +21,10 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.MovingStorageSettin
 import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageRecipeViewerDisplays;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
+import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getAllSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @EmiEntrypoint
@@ -39,7 +38,7 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 	}
 
 	private void registerDefaultComparisons(EmiRegistry registry) {
-		getSubtypeInterpreters().forEach((item, comparator) -> registry.setDefaultComparison(item, EmiSubtypeInterpreter.of(comparator)));
+		getAllSubtypeInterpreters().forEach((item, comparator) -> registry.setDefaultComparison(item, EmiSubtypeInterpreter.of(comparator)));
 	}
 
 	private void registerGuiHandlers(EmiRegistry registry) {
@@ -66,9 +65,7 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 	}
 
 	public void registerRecipes(EmiRegistry registry) {
-		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = new HashMap<>(getSubtypeInterpreters());
-		// Add Storage subtype interpreters as well
-		subtypeInterpreters.putAll(getSubtypeInterpreters());
+		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getAllSubtypeInterpreters();
 
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.removeRecipes(recipe -> {

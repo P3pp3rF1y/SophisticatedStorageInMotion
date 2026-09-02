@@ -27,12 +27,11 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContai
 import net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.MovingStorageRecipeViewerDisplays;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedstorage.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
+import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getAllSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @REIPluginClient
@@ -60,9 +59,7 @@ public class StorageInMotionReiClientPlugin implements REIClientPlugin {
 
 	@Override
 	public void registerDisplays(DisplayRegistry registry) {
-		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = new HashMap<>(getSubtypeInterpreters());
-		// Add Storage subtype interpreters as well
-		subtypeInterpreters.putAll(getSubtypeInterpreters());
+		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getAllSubtypeInterpreters();
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.registerGlobalDisplayGenerator(new CraftingSpecReiDisplayGenerator(() -> catalog, stack -> true));
 		registry.registerVisibilityPredicate((category, display) -> {
