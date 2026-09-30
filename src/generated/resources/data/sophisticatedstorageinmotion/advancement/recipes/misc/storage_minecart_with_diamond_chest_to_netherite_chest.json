@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_minecart_with_diamond_chest_to_netherite_chest"
+        "recipes": "sophisticatedstorageinmotion:storage_minecart_with_diamond_chest_to_netherite_chest"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

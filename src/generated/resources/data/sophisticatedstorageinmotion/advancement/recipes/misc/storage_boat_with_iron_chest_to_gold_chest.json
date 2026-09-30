@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_boat_with_iron_chest_to_gold_chest"
+        "recipes": "sophisticatedstorageinmotion:storage_boat_with_iron_chest_to_gold_chest"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

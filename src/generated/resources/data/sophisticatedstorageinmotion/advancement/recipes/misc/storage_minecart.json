@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_minecart"
+        "recipes": "sophisticatedstorageinmotion:storage_minecart"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

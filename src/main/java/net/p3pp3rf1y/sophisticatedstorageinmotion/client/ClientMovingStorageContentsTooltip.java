@@ -5,6 +5,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.RequestMovingStorageInventoryContentsPayload;
@@ -21,12 +22,18 @@ public class ClientMovingStorageContentsTooltip extends ClientStorageContentsToo
 		lastRequestTime = 0;
 	}
 
-	public void renderImage(Font font, int leftX, int topY, int width, int height, GuiGraphicsExtractor guiGraphics) {
-		extractTooltip(MovingStorageItem.getMovingStorageWrapper(movingStorage), font, leftX, topY, guiGraphics);
+	@Override
+	public void extractImage(Font font, int leftX, int topY, int width, int height, GuiGraphicsExtractor guiGraphics) {
+		extractTooltip(font, leftX, topY, guiGraphics);
 	}
 
 	public ClientMovingStorageContentsTooltip(MovingStorageItem.MovingStorageContentsTooltip tooltip) {
 		movingStorage = tooltip.getMovingStorage();
+	}
+
+	@Override
+	protected IStorageWrapper getTooltipStorageWrapper() {
+		return MovingStorageItem.getMovingStorageWrapper(movingStorage);
 	}
 
 	@Override

@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:bamboo_storage_raft"
+        "recipes": "sophisticatedstorageinmotion:bamboo_storage_raft"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

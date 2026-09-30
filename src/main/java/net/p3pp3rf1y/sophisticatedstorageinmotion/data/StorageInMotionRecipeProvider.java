@@ -1,16 +1,18 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.data;
 
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.neoforge.common.Tags;
 import net.p3pp3rf1y.sophisticatedcore.crafting.ShapeBasedRecipeBuilder;
@@ -22,15 +24,14 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.crafting.*;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.StorageBoatItem;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 public class StorageInMotionRecipeProvider extends RecipeProvider {
-	private final HolderLookup.RegistryLookup<Item> items;
+	private final HolderGetter<Item> items;
 
-	public StorageInMotionRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
-		super(provider, recipeOutput);
-		items = provider.lookupOrThrow(Registries.ITEM);
+	public StorageInMotionRecipeProvider(BootstrapContext<Recipe<?>> recipes, BootstrapContext<Advancement> advancements) {
+		super(recipes, advancements);
+		items = output.lookup(Registries.ITEM);
 	}
 
 	@Override
@@ -231,20 +232,4 @@ public class StorageInMotionRecipeProvider extends RecipeProvider {
 		return new ItemStackTemplate(movingStorageItem, components.build());
 	}
 
-	public static class Runner extends RecipeProvider.Runner {
-
-		protected Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
-			super(packOutput, registries);
-		}
-
-		@Override
-		protected RecipeProvider createRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
-			return new StorageInMotionRecipeProvider(provider, recipeOutput);
-		}
-
-		@Override
-		public String getName() {
-			return "Sophisticated Storage In Motion Recipes";
-		}
-	}
 }

@@ -148,7 +148,7 @@ public class StorageBlockRenderer {
 			return;
 		}
 		poseStack.pushPose();
-		poseStack.mulPose(Axis.XP.rotationDegrees(180));
+		poseStack.rotate(Axis.XP.rotationDegrees(180));
 
 		Function<StorageBlockEntity, Vec3> offsetFunction = OFFSET_MAP.getOrDefault(chestedHorseClass, DEFAULT_OFFSET);
 		if (offsetFunction != null) {
@@ -171,7 +171,7 @@ public class StorageBlockRenderer {
 
 		float scale = Llama.class.isAssignableFrom(chestedHorseClass) ? 0.57f : 0.5f;
 		poseStack.scale(scale, scale, scale);
-		poseStack.mulPose(Axis.YN.rotationDegrees(storageRotation));
+		poseStack.rotate(Axis.YN.rotationDegrees(storageRotation));
 		float xOffset = halfWidth * -0.49f * xOffsetMultiplier;
 		float sideOffset;
 
@@ -184,7 +184,7 @@ public class StorageBlockRenderer {
 		double yOffset = -entityRenderState.boundingBoxHeight * 0.379f;
 		poseStack.translate(xOffset, yOffset, zOffset);
 		if (!(renderBlockEntity instanceof ChestBlockEntity)) {
-			poseStack.mulPose(Axis.XN.rotationDegrees(90));
+			poseStack.rotate(Axis.XN.rotationDegrees(90));
 		}
 		poseStack.translate(-0.5, -0.5, -0.5);
 

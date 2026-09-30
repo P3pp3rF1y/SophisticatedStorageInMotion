@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_boat_with_copper_barrel_to_iron_barrel"
+        "recipes": "sophisticatedstorageinmotion:storage_boat_with_copper_barrel_to_iron_barrel"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

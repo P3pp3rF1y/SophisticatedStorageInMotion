@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_minecart_with_gold_chest_to_diamond_chest"
+        "recipes": "sophisticatedstorageinmotion:storage_minecart_with_gold_chest_to_diamond_chest"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

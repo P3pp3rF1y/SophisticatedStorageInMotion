@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_boat_with_limited_diamond_barrel_4_to_limited_netherite_barrel_4"
+        "recipes": "sophisticatedstorageinmotion:storage_boat_with_limited_diamond_barrel_4_to_limited_netherite_barrel_4"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

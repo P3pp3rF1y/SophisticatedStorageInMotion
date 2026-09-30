@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:mangrove_storage_boat"
+        "recipes": "sophisticatedstorageinmotion:mangrove_storage_boat"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

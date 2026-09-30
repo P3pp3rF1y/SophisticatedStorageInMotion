@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_minecart_with_limited_gold_barrel_4_to_limited_diamond_barrel_4"
+        "recipes": "sophisticatedstorageinmotion:storage_minecart_with_limited_gold_barrel_4_to_limited_diamond_barrel_4"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

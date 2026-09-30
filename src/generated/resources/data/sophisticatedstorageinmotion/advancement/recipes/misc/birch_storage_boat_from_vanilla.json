@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:birch_storage_boat_from_vanilla"
+        "recipes": "sophisticatedstorageinmotion:birch_storage_boat_from_vanilla"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -71,7 +71,7 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 
 		poseStack.pushPose();
 		poseStack.translate(0, woodType == WoodType.BAMBOO ? 8 / 16F : 3 / 16F, 0);
-		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - renderState.yRot));
+		poseStack.rotate(Axis.YP.rotationDegrees(180.0F - renderState.yRot));
 		float interpolatedHurtTime = renderState.hurtTime;
 		float interpolatedDamage = renderState.damageTime;
 		if (interpolatedDamage < 0.0F) {
@@ -79,17 +79,17 @@ public class StorageBoatRenderer extends EntityRenderer<StorageBoat, BoatRenderS
 		}
 
 		if (interpolatedHurtTime > 0.0F) {
-			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * renderState.hurtDir));
+			poseStack.rotate(Axis.XP.rotationDegrees(Mth.sin(interpolatedHurtTime) * interpolatedHurtTime * interpolatedDamage / 10.0F * renderState.hurtDir));
 		}
 
 		float bubbleAngle = renderState.bubbleAngle;
 		if (!Mth.equal(bubbleAngle, 0.0F)) {
-			poseStack.mulPose(new Quaternionf().setAngleAxis(renderState.bubbleAngle * 0.017453292F, 1.0F, 0.0F, 1.0F));
+			poseStack.rotate(new Quaternionf().setAngleAxis(renderState.bubbleAngle * 0.017453292F, 1.0F, 0.0F, 1.0F));
 		}
 
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		poseStack.mulPose(Axis.YP.rotationDegrees(180));
-		poseStack.mulPose(Axis.XP.rotationDegrees(180));
+		poseStack.rotate(Axis.YP.rotationDegrees(180));
+		poseStack.rotate(Axis.XP.rotationDegrees(180));
 		poseStack.scale(6 / 7F, 6 / 7F, 6 / 7F);
 		poseStack.translate(-0.5F, 0,
 				(renderBlockEntity instanceof BarrelBlockEntity || renderBlockEntity instanceof ShulkerBoxBlockEntity ? 0 : 1 / 16F) + 0.02F);

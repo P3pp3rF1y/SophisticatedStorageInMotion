@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_boat_with_limited_iron_barrel_2_to_limited_gold_barrel_2"
+        "recipes": "sophisticatedstorageinmotion:storage_boat_with_limited_iron_barrel_2_to_limited_gold_barrel_2"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

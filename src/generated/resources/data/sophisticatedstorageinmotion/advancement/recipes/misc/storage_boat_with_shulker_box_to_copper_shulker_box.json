@@ -19,7 +19,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "sophisticatedstorageinmotion:storage_boat_with_shulker_box_to_copper_shulker_box"
+        "recipes": "sophisticatedstorageinmotion:storage_boat_with_shulker_box_to_copper_shulker_box"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
