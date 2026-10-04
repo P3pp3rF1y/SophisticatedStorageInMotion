@@ -31,11 +31,15 @@ import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelMaterial;
 import net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.LinkedStorageTooltip;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageContentsTooltip;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
@@ -160,11 +164,21 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public Optional<TooltipComponent> getInventoryTooltip(ItemStack stack) {
+		ItemStack inner = getStorageItem(stack);
+		if (StorageBlockEntity.hasLinkedStorageEndpoint(inner)) {
+			return Optional.of(new StorageContentsTooltip(inner,
+					StorageBlockEntity.getLinkedStorageEndpointData(inner).flatMap(
+							endpoint -> StorageBlockEntity.getLinkedStorageEndpointRole(inner).map(role -> new LinkedStorageTooltip(role, endpoint.groupId())))
+							.orElse(null)));
+		}
 		return Optional.of(new MovingStorageContentsTooltip(stack));
 	}
 
 	@Override
 	public StashResult getItemStashable(HolderLookup.Provider registries, ItemStack storageStack, ItemStack stack) {
+		if (getStorageItem(storageStack).has(net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
+			return StashResult.NO_SPACE;
+		}
 		if (getStorageItemType(storageStack).map(item -> item instanceof ShulkerBoxItem).orElse(false)) {
 			MovingStorageWrapper wrapper = getMovingStorageWrapper(storageStack);
 
@@ -186,6 +200,9 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
 		ItemStack storageItem = getStorageItem(movingStorageStack);
+		if (storageItem.has(net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
+			throw new IllegalArgumentException("Linked moving storage must resolve its canonical host instead of allocating ordinary contents");
+		}
 		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {
 		}, () -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)), MovingStorageData::get,
 				() -> movingStorageStack.getOrDefault(net.p3pp3rf1y.sophisticatedstorage.init.ModDataComponents.LOCKED, false),
@@ -194,6 +211,11 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	}
 
 	public int stash(ItemStack movingStorageStack, ItemResource resource, int amount, TransactionContext tx) {
+		ItemStack inner = getStorageItem(movingStorageStack);
+		if (inner.has(net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
+			return StorageLinkedStorageResolver.resolveServerCanonicalHost(inner)
+					.map(host -> host.getInventoryForUpgradeProcessing().insert(resource, amount, tx)).orElse(0);
+		}
 		MovingStorageWrapper wrapper = getMovingStorageWrapper(movingStorageStack);
 		if (wrapper.getContentsUuid().isEmpty()) {
 			wrapper.setContentsUuid(UUID.randomUUID());
@@ -204,16 +226,22 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	@Override
 	public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction action, Player player) {
 		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPickup(player) || slot.getItem().isEmpty()
-				|| action != ClickAction.PRIMARY || !isShulkerBoxMovingStorage(stack)) {
+				|| action != ClickAction.SECONDARY || !isShulkerBoxMovingStorage(stack)) {
 			return super.overrideStackedOnOther(stack, slot, action, player);
 		}
 
 		ItemStack stackToStash = slot.getItem();
+		int countToTake;
 		try (Transaction tx = Transaction.openRoot()) {
-			int stashed = stash(stack, ItemResource.of(stackToStash), stackToStash.getCount(), tx);
-			if (stashed > 0) {
-				tx.commit();
-				slot.safeTake(stashed, stashed, player);
+			countToTake = stash(stack, ItemResource.of(stackToStash), stackToStash.getCount(), tx);
+		}
+		if (countToTake > 0) {
+			ItemStack taken = slot.safeTake(countToTake, countToTake, player);
+			if (!taken.isEmpty()) {
+				try (Transaction tx = Transaction.openRoot()) {
+					stash(stack, ItemResource.of(taken), taken.getCount(), tx);
+					tx.commit();
+				}
 				return true;
 			}
 		}
@@ -227,7 +255,7 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess carriedAccess) {
-		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPlace(stack) || action != ClickAction.PRIMARY
+		if (hasCreativeScreenContainerOpen(player) || stack.getCount() > 1 || !slot.mayPlace(stack) || action != ClickAction.SECONDARY
 				|| !isShulkerBoxMovingStorage(stack)) {
 			return super.overrideOtherStackedOnMe(stack, otherStack, slot, action, player, carriedAccess);
 		}

@@ -50,11 +50,14 @@ public class MovingStorageTierUpgradeShapelessRecipe extends CustomShapelessReci
 
 	@Override
 	public boolean matches(CraftingInput input, Level level) {
-		return super.matches(input, level) && getOriginalMovingStorage(input).isPresent();
+		return super.matches(input, level) && getOriginalMovingStorage(input).map(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).orElse(false);
 	}
 
 	@Override
 	public ItemStack assemble(CraftingInput input) {
+		if (getOriginalMovingStorage(input).filter(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).isEmpty()) {
+			return ItemStack.EMPTY;
+		}
 		ItemStack upgradedMovingStorage = super.assemble(input);
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);

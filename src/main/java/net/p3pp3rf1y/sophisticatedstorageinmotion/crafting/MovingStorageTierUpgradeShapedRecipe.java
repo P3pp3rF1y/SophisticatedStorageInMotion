@@ -49,11 +49,14 @@ public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWr
 
 	@Override
 	public boolean matches(CraftingInput input, Level level) {
-		return compose.matches(input, level) && getOriginalMovingStorage(input).isPresent();
+		return compose.matches(input, level) && getOriginalMovingStorage(input).map(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).orElse(false);
 	}
 
 	@Override
 	public ItemStack assemble(CraftingInput input) {
+		if (getOriginalMovingStorage(input).filter(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).isEmpty()) {
+			return ItemStack.EMPTY;
+		}
 		ItemStack upgradedMovingStorage = compose.assemble(input);
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
@@ -82,6 +85,12 @@ public class MovingStorageTierUpgradeShapedRecipe implements CraftingRecipe, IWr
 		}
 
 		return Optional.empty();
+	}
+
+	static boolean isPrimaryOrUnlinked(ItemStack moving) {
+		ItemStack storage = MovingStorageItem.getStorageItem(moving);
+		return !storage.has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)
+				|| Boolean.TRUE.equals(storage.get(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT));
 	}
 
 	@Override
