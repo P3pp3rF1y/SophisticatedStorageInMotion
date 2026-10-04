@@ -20,17 +20,22 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedcore.Config;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelMaterial;
 import net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.LinkedStorageTooltip;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageContentsTooltip;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
@@ -154,11 +159,21 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public Optional<TooltipComponent> getInventoryTooltip(ItemStack stack) {
+		ItemStack inner = getStorageItem(stack);
+		if (StorageBlockEntity.hasLinkedStorageEndpoint(inner)) {
+			return Optional.of(new StorageContentsTooltip(inner,
+					StorageBlockEntity.getLinkedStorageEndpointData(inner).flatMap(
+							endpoint -> StorageBlockEntity.getLinkedStorageEndpointRole(inner).map(role -> new LinkedStorageTooltip(role, endpoint.groupId())))
+							.orElse(null)));
+		}
 		return Optional.of(new MovingStorageContentsTooltip(stack));
 	}
 
 	@Override
 	public StashResult getItemStashable(HolderLookup.Provider registries, ItemStack storageStack, ItemStack stack) {
+		if (getStorageItem(storageStack).has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
+			return StashResult.NO_SPACE;
+		}
 		if (getStorageItemType(storageStack).map(item -> item instanceof ShulkerBoxItem).orElse(false)) {
 			MovingStorageWrapper wrapper = getMovingStorageWrapper(storageStack);
 
@@ -178,14 +193,21 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
 		ItemStack storageItem = getStorageItem(movingStorageStack);
-		MovingStorageWrapper wrapper = MovingStorageWrapper.fromStack(storageItem, () -> {
+		if (storageItem.has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
+			throw new IllegalArgumentException("Linked moving storage must resolve its canonical host instead of allocating ordinary contents");
+		}
+		return MovingStorageWrapper.fromStack(storageItem, () -> {
 		}, () -> movingStorageStack.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItem)), MovingStorageData::get,
 				() -> movingStorageStack.getOrDefault(ModDataComponents.LOCKED, false), locked -> movingStorageStack.set(ModDataComponents.LOCKED, locked),
 				upgrade -> true);
-		return wrapper;
 	}
 
 	public ItemStack stash(ItemStack movingStorageStack, ItemStack stack, boolean simulate) {
+		ItemStack inner = getStorageItem(movingStorageStack);
+		if (inner.has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
+			return StorageLinkedStorageResolver.resolveServerCanonicalHost(inner)
+					.map(host -> host.getInventoryForUpgradeProcessing().insertItem(stack, simulate)).orElse(stack);
+		}
 		MovingStorageWrapper wrapper = getMovingStorageWrapper(movingStorageStack);
 		if (wrapper.getContentsUuid().isEmpty()) {
 			wrapper.setContentsUuid(UUID.randomUUID());

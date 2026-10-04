@@ -11,6 +11,7 @@ public class MovingLimitedBarrelSettingsContainerMenu extends MovingStorageSetti
 	}
 
 	public static MovingLimitedBarrelSettingsContainerMenu fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
-		return new MovingLimitedBarrelSettingsContainerMenu(windowId, playerInventory.player, buffer.readInt());
+		return new MovingLimitedBarrelSettingsContainerMenu(windowId, playerInventory.player,
+				MovingStorageContainerMenu.readMenuData(buffer, playerInventory.player));
 	}
 }

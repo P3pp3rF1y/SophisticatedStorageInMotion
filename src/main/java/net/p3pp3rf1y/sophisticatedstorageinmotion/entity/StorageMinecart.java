@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.util.SimpleItemContent;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModDataComponents;
@@ -98,6 +99,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 		ItemStack result = new ItemStack(ModItems.STORAGE_MINECART.get());
 		ItemStack storageItemCopy = getStorageItem().copy();
 		storageItemCopy.remove(ModCoreDataComponents.STORAGE_UUID);
+		LinkedStorageStackLifecycle.clear(storageItemCopy);
 		result.set(ModDataComponents.STORAGE_ITEM, SimpleItemContent.copyOf(storageItemCopy));
 		return result;
 	}
@@ -189,6 +191,9 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public void clearChestVehicleContent() {
+		if (getStorageHolder().isLinkedStorage()) {
+			return;
+		}
 		unpackChestVehicleLootTable(null);
 		InventoryHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryHandler();
 		for (int slot = 0; slot < inventoryHandler.getSlots(); slot++) {

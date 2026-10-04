@@ -6,10 +6,15 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointAccessProviders;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.data.DataGenerators;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.*;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,5 +55,20 @@ public class SophisticatedStorageInMotion {
 
 	private static void setup(FMLCommonSetupEvent event) {
 		event.enqueueWork(ModItems::registerDispenseBehavior);
+		event.enqueueWork(() -> LinkedStorageEndpointAccessProviders.register((player, manager, groupId) -> {
+			for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+				LinkedStorageEndpointData endpoint = MovingStorageItem.getStorageItem(player.getInventory().getItem(slot))
+						.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+				if (endpoint != null && endpoint.groupId().equals(groupId) && manager.isEndpointMember(groupId, endpoint.endpointId())) {
+					return true;
+				}
+			}
+			return player.level().getEntities(player, player.getBoundingBox().inflate(8), entity -> entity instanceof IMovingStorageEntity).stream()
+					.anyMatch(entity -> {
+						LinkedStorageEndpointData endpoint = ((IMovingStorageEntity) entity).getStorageItem()
+								.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT);
+						return endpoint != null && endpoint.groupId().equals(groupId) && manager.isEndpointMember(groupId, endpoint.endpointId());
+					});
+		}));
 	}
 }

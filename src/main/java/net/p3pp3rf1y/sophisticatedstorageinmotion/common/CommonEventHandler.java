@@ -2,7 +2,11 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -16,16 +20,20 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.EnderLinkerItem;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageService;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedstorage.Config;
 import net.p3pp3rf1y.sophisticatedstorage.block.ItemContentsStorage;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockBase;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderToolHandler;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
 import net.p3pp3rf1y.sophisticatedstorage.item.*;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
@@ -41,11 +49,25 @@ public class CommonEventHandler {
 		IEventBus eventBus = NeoForge.EVENT_BUS;
 		eventBus.addListener(CommonEventHandler::onMovingStorageUncrafted);
 		eventBus.addListener(CommonEventHandler::onMovingStorageCraftedFromShulkerBox);
+		eventBus.addListener(CommonEventHandler::onMovingStorageTierUpgraded);
 		eventBus.addListener(TierUpgradeHandler::onTierUpgradeInteract);
 		eventBus.addListener(CommonEventHandler::onStorageToolInteract);
 		eventBus.addListener(CommonEventHandler::onPacked);
 		eventBus.addListener(CommonEventHandler::onPaintbrushInteract);
 		eventBus.addListener(CommonEventHandler::onStorageUpgradeInteract);
+		eventBus.addListener(CommonEventHandler::onEnderLinkerInteract);
+	}
+
+	private static void onEnderLinkerInteract(PlayerInteractEvent.EntityInteract event) {
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage)
+				|| !(event.getEntity().getItemInHand(event.getHand()).getItem() instanceof EnderLinkerItem)) {
+			return;
+		}
+		EnderLinkerItem.tryLinkInteractionTarget(event.getEntity(), event.getEntity().getItemInHand(event.getHand()), movingStorage.getStorageHolder(),
+				event.getTarget().blockPosition()).ifPresent(result -> {
+					event.setCanceled(true);
+					event.setCancellationResult(result == LinkedStorageService.LinkResult.SUCCESS ? InteractionResult.SUCCESS : InteractionResult.FAIL);
+				});
 	}
 
 	private static void onStorageUpgradeInteract(PlayerInteractEvent.EntityInteract event) {
@@ -83,21 +105,27 @@ public class CommonEventHandler {
 	private static void onPacked(PlayerInteractEvent.EntityInteract event) {
 		Player player = event.getEntity();
 		ItemStack itemInHand = player.getItemInHand(event.getHand());
-		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof PackingTapeItem)
-				|| Config.COMMON.dropPacked.get()) {
+		if (!(event.getTarget() instanceof IMovingStorageEntity movingStorage) || !(itemInHand.getItem() instanceof PackingTapeItem)) {
 			return;
 		}
-
-		if (movingStorage.getStorageHolder().pack()) {
+		if (Config.COMMON.dropPacked.get()) {
+			player.displayClientMessage(Component.translatable("gui.sophisticatedstorage.status.packing_tape_disabled"), true);
+		} else if (movingStorage.getStorageHolder().isLinkedStorage()) {
+			player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 1, 0.7F);
+			player.displayClientMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("packing_tape_linked_storage"), true);
+		} else if (movingStorage.getStorageHolder().pack()) {
 			if (!player.isCreative()) {
 				itemInHand.setDamageValue(itemInHand.getDamageValue() + 1);
 				if (itemInHand.getDamageValue() >= itemInHand.getMaxDamage()) {
 					player.setItemInHand(event.getHand(), ItemStack.EMPTY);
 				}
 			}
-			event.setCanceled(true);
-			event.setCancellationResult(InteractionResult.SUCCESS);
+		} else {
+			return;
 		}
+
+		event.setCanceled(true);
+		event.setCancellationResult(InteractionResult.SUCCESS);
 	}
 
 	private static void onMovingStorageUncrafted(PlayerEvent.ItemCraftedEvent event) {
@@ -116,6 +144,12 @@ public class CommonEventHandler {
 		}
 
 		MovingStorageData.moveToItemStorage(result, storageId);
+	}
+
+	private static void onMovingStorageTierUpgraded(PlayerEvent.ItemCraftedEvent event) {
+		if (event.getEntity().level() instanceof ServerLevel serverLevel) {
+			MovingLinkedStorageEndpointAdapter.completePrimaryTierUpgrade(serverLevel, event.getCrafting(), event.getInventory());
+		}
 	}
 
 	private static boolean isUncraftedFromSingleMovingStorage(Container inventory) {
@@ -145,6 +179,9 @@ public class CommonEventHandler {
 		}
 
 		ItemStack storageItem = MovingStorageItem.getStorageItem(result);
+		if (storageItem.has(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) {
+			return;
+		}
 		if (storageItem.getItem() instanceof ShulkerBoxItem) {
 			StackStorageWrapper shulkerStorageWrapper = StackStorageWrapper.fromStack(level.registryAccess(), storageItem);
 			shulkerStorageWrapper.getContentsUuid().ifPresent(id -> {

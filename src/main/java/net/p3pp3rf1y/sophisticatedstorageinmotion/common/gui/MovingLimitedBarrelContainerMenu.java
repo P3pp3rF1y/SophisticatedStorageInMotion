@@ -15,7 +15,7 @@ public class MovingLimitedBarrelContainerMenu<T extends Entity & IMovingStorageE
 	}
 
 	public static MovingLimitedBarrelContainerMenu<?> fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
-		return new MovingLimitedBarrelContainerMenu<>(windowId, playerInventory.player, buffer.readInt());
+		return new MovingLimitedBarrelContainerMenu<>(windowId, playerInventory.player, readMenuData(buffer, playerInventory.player));
 	}
 
 	@Override
