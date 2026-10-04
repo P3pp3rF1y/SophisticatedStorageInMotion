@@ -6,8 +6,10 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
@@ -34,7 +36,15 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 	}
 
 	@Override
+	public boolean matches(CraftingContainer input, Level level) {
+		return super.matches(input, level) && getOriginalMovingStorage(input).map(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).orElse(false);
+	}
+
+	@Override
 	public ItemStack assemble(CraftingContainer input, RegistryAccess registries) {
+		if (getOriginalMovingStorage(input).filter(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).isEmpty()) {
+			return ItemStack.EMPTY;
+		}
 		ItemStack upgradedMovingStorage = super.assemble(input, registries);
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);
@@ -64,6 +74,11 @@ public class MovingStorageTierUpgradeShapedRecipe extends ShapedRecipe implement
 		}
 
 		return Optional.empty();
+	}
+
+	static boolean isPrimaryOrUnlinked(ItemStack moving) {
+		ItemStack storage = MovingStorageItem.getStorageItem(moving);
+		return LinkedStorageStackData.getEndpoint(storage) == null || LinkedStorageStackData.isPrimaryEndpoint(storage);
 	}
 
 	@Override

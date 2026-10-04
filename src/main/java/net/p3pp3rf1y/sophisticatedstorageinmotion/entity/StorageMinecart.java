@@ -26,6 +26,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.gui.StorageInMotionTranslationHelper;
@@ -102,6 +103,7 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 		ItemStack result = new ItemStack(ModItems.STORAGE_MINECART.get());
 		ItemStack storageItemCopy = getStorageItem().copy();
 		NBTHelper.removeTag(storageItemCopy, StorageWrapper.UUID_TAG);
+		LinkedStorageStackLifecycle.clear(storageItemCopy);
 		result.getOrCreateTag().put(EntityStorageHolder.STORAGE_ITEM_TAG, storageItemCopy.save(new CompoundTag()));
 		return result;
 	}
@@ -200,6 +202,9 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 
 	@Override
 	public void clearChestVehicleContent() {
+		if (getStorageHolder().isLinkedStorage()) {
+			return;
+		}
 		unpackChestVehicleLootTable(null);
 		InventoryHandler inventoryHandler = getStorageHolder().getStorageWrapper().getInventoryHandler();
 		for (int slot = 0; slot < inventoryHandler.getSlots(); slot++) {

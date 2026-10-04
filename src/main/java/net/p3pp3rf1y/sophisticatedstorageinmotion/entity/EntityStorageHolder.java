@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -24,6 +25,11 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageBlockEndpoint;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageEndpointAdapter;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
@@ -34,6 +40,7 @@ import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderBase;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModItems;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
@@ -50,7 +57,7 @@ import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 
 @SuppressWarnings("PMD.UnnecessaryImport")
-public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase {
+public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extends StorageHolderBase implements ILinkedStorageBlockEndpoint {
 	public static final String STORAGE_ITEM_TAG = "storageItem";
 	private static final int AVERAGE_DROPPED_ITEM_ENTITY_STACK_SIZE = 20;
 	private final T entity;
@@ -61,6 +68,26 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	public EntityStorageHolder(T entity) {
 		super(!(entity instanceof AbstractChestedHorse));
 		this.entity = entity;
+	}
+
+	public ItemStack getInstalledStorageItem() {
+		return entity.getStorageItem();
+	}
+
+	@Override
+	public boolean isLinkedStorageLinkCandidate() {
+		return entity.isAlive() && !isPacked() && entity.getStorageItem().getItem() instanceof StorageBlockItem;
+	}
+
+	@Nullable
+	@Override
+	public LinkedStorageEndpointData getLinkedStorageEndpointData() {
+		return LinkedStorageStackData.getEndpoint(entity.getStorageItem());
+	}
+
+	@Override
+	public ILinkedStorageEndpointAdapter<ILinkedStorageBlockEndpoint> getLinkedStorageBlockEndpointAdapter() {
+		return MovingLinkedStorageEndpointAdapter.INSTANCE;
 	}
 
 	@Override
@@ -121,7 +148,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	public void setStorageItemFrom(ItemStack storageItem, boolean setupDefaults) {
 		setStorageItem(storageItem);
-		if (setupDefaults && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
+		if (setupDefaults && !isLinkedStorage() && MovingStorageWrapper.isLimitedBarrel(storageItem)) {
 			LimitedBarrelBlockEntity.setFixedSettings(getStorageWrapper(),
 					getStorageWrapper() instanceof MovingStorageWrapper movingStorageWrapper
 							? movingStorageWrapper.getNumberOfInventorySlots()
@@ -214,25 +241,30 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	public void onDestroy() {
-		if (entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-			if (Config.COMMON.dropPacked.get()) {
-				pack();
+		if (!entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			if (entity.level() instanceof ServerLevel serverLevel && isLinkedStorage()) {
+				LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(entity.getStorageItem());
+				LinkedStorageGroupsSavedData.get(serverLevel).manager().detachLostEndpoint(endpoint.groupId(), endpoint.endpointId());
 			}
-			ItemStack storageItem = entity.getStorageItem();
-			if (!isShulkerBox() && !isPacked(storageItem)) {
-				dropAllItems();
-				ItemStack finalStorageItem = storageItem;
-				storageItem = NBTHelper.getUniqueId(storageItem, StorageWrapper.UUID_TAG).map(storageId -> {
-					MovingStorageData.get(storageId).removeStorageContents();
-					return ItemNBTHelper.cleanUpStack(finalStorageItem);
-				}).orElse(storageItem);
-			}
-			ItemStack drop = entity.getDropStack(storageItem);
-			if (entity.hasCustomName()) {
-				drop.setHoverName(entity.getCustomName());
-			}
-			entity.spawnAtLocation(drop);
+			return;
 		}
+		if (Config.COMMON.dropPacked.get() && !isLinkedStorage()) {
+			pack();
+		}
+		ItemStack storageItem = entity.getStorageItem();
+		if (!isLinkedStorage() && !isShulkerBox() && !isPacked(storageItem)) {
+			dropAllItems();
+			ItemStack finalStorageItem = storageItem;
+			storageItem = NBTHelper.getUniqueId(storageItem, StorageWrapper.UUID_TAG).map(storageId -> {
+				MovingStorageData.get(storageId).removeStorageContents();
+				return ItemNBTHelper.cleanUpStack(finalStorageItem);
+			}).orElse(storageItem);
+		}
+		ItemStack drop = entity.getDropStack(storageItem);
+		if (entity.hasCustomName()) {
+			drop.setHoverName(entity.getCustomName());
+		}
+		entity.spawnAtLocation(drop);
 	}
 
 	private void dropAllItems() {
@@ -247,7 +279,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	public boolean pack() {
-		if (isShulkerBox() || isPacked(entity.getStorageItem())) {
+		if (isLinkedStorage() || isShulkerBox() || isPacked(entity.getStorageItem())) {
 			return false;
 		}
 
@@ -267,6 +299,9 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	}
 
 	private boolean canBeHurtByWithFeedback(DamageSource source) {
+		if (isLinkedStorage()) {
+			return true;
+		}
 		if (Config.COMMON.dropPacked.get() || isPacked() || !(source.getEntity() instanceof Player player)) {
 			return true;
 		}
@@ -298,7 +333,7 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	public boolean hurt(DamageSource source, float amount, BiFunction<DamageSource, Float, Boolean> superHurt) {
 		if (canBeHurtByWithFeedback(source) && superHurt.apply(source, amount)) {
-			if (source.getEntity() instanceof Player player && player.getAbilities().instabuild && entity.isRemoved()) {
+			if (!isLinkedStorage() && source.getEntity() instanceof Player player && player.getAbilities().instabuild && entity.isRemoved()) {
 				dropAllItems();
 			}
 			return true;
@@ -314,8 +349,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 	@Override
 	protected void openMenu(Player player) {
 		if (player instanceof ServerPlayer serverPlayer) {
-			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((w, p, pl) -> createMenu(w, pl), entity.getName()),
-					buffer -> buffer.writeInt(entity.getId()));
+			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((w, p, pl) -> createMenu(w, pl), getMenuDisplayName(entity.getName())),
+					buffer -> MovingStorageContainerMenu.writeMenuData(buffer, player, entity.getId()));
 		}
 	}
 

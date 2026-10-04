@@ -8,13 +8,18 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointAccessProviders;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.client.ClientEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.CommonEventHandler;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.data.DataGenerators;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntitiesClient;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModItems;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.StorageInMotionPacketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,6 +61,19 @@ public class SophisticatedStorageInMotion {
 	private static void setup(FMLCommonSetupEvent event) {
 		StorageInMotionPacketHandler.INSTANCE.init();
 		event.enqueueWork(ModItems::registerDispenseBehavior);
+		event.enqueueWork(() -> LinkedStorageEndpointAccessProviders.register((player, manager, groupId) -> {
+			for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+				LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(MovingStorageItem.getStorageItem(player.getInventory().getItem(slot)));
+				if (endpoint != null && endpoint.groupId().equals(groupId) && manager.isEndpointMember(groupId, endpoint.endpointId())) {
+					return true;
+				}
+			}
+			return player.level().getEntities(player, player.getBoundingBox().inflate(8), entity -> entity instanceof IMovingStorageEntity).stream()
+					.anyMatch(entity -> {
+						LinkedStorageEndpointData endpoint = LinkedStorageStackData.getEndpoint(((IMovingStorageEntity) entity).getStorageItem());
+						return endpoint != null && endpoint.groupId().equals(groupId) && manager.isEndpointMember(groupId, endpoint.endpointId());
+					});
+		}));
 		ModCompat.compatsSetup();
 	}
 }

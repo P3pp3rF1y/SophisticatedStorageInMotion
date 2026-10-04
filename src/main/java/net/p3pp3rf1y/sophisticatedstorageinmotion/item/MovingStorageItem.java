@@ -20,6 +20,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedcore.Config;
 import net.p3pp3rf1y.sophisticatedcore.api.IStashStorageItem;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
@@ -27,12 +28,16 @@ import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedstorage.block.BarrelMaterial;
 import net.p3pp3rf1y.sophisticatedstorage.block.DecorationTableBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.block.ITintableBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderBase;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedstorage.item.BarrelBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.LinkedStorageTooltip;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageContentsTooltip;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageLinkedStorageResolver;
 import net.p3pp3rf1y.sophisticatedstorage.item.WoodStorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.EntityStorageHolder;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
@@ -148,11 +153,21 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	@Override
 	public Optional<TooltipComponent> getInventoryTooltip(ItemStack stack) {
+		ItemStack inner = getStorageItem(stack);
+		if (StorageBlockEntity.hasLinkedStorageEndpoint(inner)) {
+			return Optional.of(new StorageContentsTooltip(inner,
+					StorageBlockEntity.getLinkedStorageEndpointData(inner).flatMap(
+							endpoint -> StorageBlockEntity.getLinkedStorageEndpointRole(inner).map(role -> new LinkedStorageTooltip(role, endpoint.groupId())))
+							.orElse(null)));
+		}
 		return Optional.of(new MovingStorageContentsTooltip(stack));
 	}
 
 	@Override
 	public StashResult getItemStashable(ItemStack storageStack, ItemStack stack) {
+		if (LinkedStorageStackData.getEndpoint(getStorageItem(storageStack)) != null) {
+			return StashResult.NO_SPACE;
+		}
 		if (getStorageItemType(storageStack).map(item -> item instanceof ShulkerBoxItem).orElse(false)) {
 			MovingStorageWrapper wrapper = getMovingStorageWrapper(storageStack);
 
@@ -172,6 +187,9 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 
 	public static MovingStorageWrapper getMovingStorageWrapper(ItemStack movingStorageStack) {
 		ItemStack storageItem = getStorageItem(movingStorageStack);
+		if (LinkedStorageStackData.getEndpoint(storageItem) != null) {
+			throw new IllegalArgumentException("Linked moving storage must resolve its canonical host instead of allocating ordinary contents");
+		}
 		return MovingStorageWrapper.fromStack(storageItem, () -> {
 		}, () -> MovingStorageItem.setStorageItem(movingStorageStack, storageItem), MovingStorageData::get,
 				() -> NBTHelper.getBoolean(movingStorageStack, StorageHolderBase.LOCKED_TAG).orElse(false),
@@ -179,6 +197,11 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 	}
 
 	public ItemStack stash(ItemStack movingStorageStack, ItemStack stack, boolean simulate) {
+		ItemStack inner = getStorageItem(movingStorageStack);
+		if (LinkedStorageStackData.getEndpoint(inner) != null) {
+			return StorageLinkedStorageResolver.resolveServerCanonicalHost(inner)
+					.map(host -> host.getInventoryForUpgradeProcessing().insertItem(stack, simulate)).orElse(stack);
+		}
 		MovingStorageWrapper wrapper = getMovingStorageWrapper(movingStorageStack);
 		if (wrapper.getContentsUuid().isEmpty()) {
 			wrapper.setContentsUuid(UUID.randomUUID());

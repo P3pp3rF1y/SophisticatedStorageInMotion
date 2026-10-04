@@ -10,8 +10,13 @@ import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.player.Inventory;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointRole;
+import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.block.StorageBlockEntity;
 import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
+
+import java.util.Optional;
 
 public class MovingStorageScreen extends StorageScreenBase<MovingStorageContainerMenu<?>> {
 	public static final int HORSE_VIEW_PADDING = 7;
@@ -25,6 +30,14 @@ public class MovingStorageScreen extends StorageScreenBase<MovingStorageContaine
 
 	protected MovingStorageScreen(MovingStorageContainerMenu menu, Inventory playerInventory, Component title) {
 		super(menu, playerInventory, title);
+	}
+
+	@Override
+	public Optional<LinkedStorageEndpointRole> getLinkedStorageEndpointRole() {
+		if (getMenu().getStorageWrapper() == NoopStorageWrapper.INSTANCE) {
+			return Optional.empty();
+		}
+		return getMenu().getStorageEntity().flatMap(entity -> StorageBlockEntity.getLinkedStorageEndpointRole(entity.getStorageItem()));
 	}
 
 	@Override

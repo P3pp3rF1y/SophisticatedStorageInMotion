@@ -6,6 +6,7 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
@@ -34,7 +35,15 @@ public class MovingStorageTierUpgradeShapelessRecipe extends ShapelessRecipe imp
 	}
 
 	@Override
+	public boolean matches(CraftingContainer input, Level level) {
+		return super.matches(input, level) && getOriginalMovingStorage(input).map(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).orElse(false);
+	}
+
+	@Override
 	public ItemStack assemble(CraftingContainer input, RegistryAccess registries) {
+		if (getOriginalMovingStorage(input).filter(MovingStorageTierUpgradeShapedRecipe::isPrimaryOrUnlinked).isEmpty()) {
+			return ItemStack.EMPTY;
+		}
 		ItemStack upgradedMovingStorage = super.assemble(input, registries);
 		getOriginalMovingStorage(input).ifPresent(originalMovingStorage -> {
 			ItemStack originalStorageItem = MovingStorageItem.getStorageItem(originalMovingStorage);

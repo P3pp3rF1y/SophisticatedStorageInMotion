@@ -2,13 +2,22 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SettingsContainerMenu;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
+import net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageSettingsMessage;
+import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
@@ -17,8 +26,12 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.MovingStorageContentsMessage;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.StorageInMotionPacketHandler;
 
+import java.util.Objects;
+
 public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IStorageWrapper> {
 	private final int entityId;
+	private final LinkedStorageEndpointData openedEndpoint;
+	private final IStorageWrapper openedWrapper;
 	private CompoundTag lastSettingsNbt = null;
 
 	protected MovingStorageSettingsContainerMenu(int windowId, Player player, int entityId) {
@@ -28,6 +41,24 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 	protected MovingStorageSettingsContainerMenu(MenuType<?> menuType, int windowId, Player player, int entityId) {
 		super(menuType, windowId, player, getWrapper(player.level(), entityId));
 		this.entityId = entityId;
+		openedEndpoint = getEndpoint();
+		openedWrapper = storageWrapper;
+	}
+
+	private LinkedStorageEndpointData getEndpoint() {
+		Entity entity = player.level().getEntity(entityId);
+		return entity instanceof IMovingStorageEntity movingStorage ? LinkedStorageStackData.getEndpoint(movingStorage.getStorageItem()) : null;
+	}
+
+	@Override
+	public boolean stillValid(Player player) {
+		Entity entity = player.level().getEntity(entityId);
+		return entity instanceof IMovingStorageEntity movingStorage && entity.isAlive() && player.canReach(entity, 4.0D)
+				&& !movingStorage.getStorageHolder().isPacked() && Objects.equals(openedEndpoint, getEndpoint())
+				&& openedWrapper == movingStorage.getStorageHolder().getStorageWrapper()
+				&& (openedEndpoint == null || openedWrapper != NoopStorageWrapper.INSTANCE
+						&& (player.level().isClientSide || player.level() instanceof ServerLevel serverLevel && LinkedStorageGroupsSavedData.get(serverLevel)
+								.manager().isEndpointMember(openedEndpoint.groupId(), openedEndpoint.endpointId())));
 	}
 
 	private static IStorageWrapper getWrapper(Level level, int entityId) {
@@ -39,8 +70,30 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 	}
 
 	@Override
+	public ItemStack getStorageSettingsTabIcon() {
+		if (openedEndpoint != null && player.level().getEntity(entityId) instanceof IMovingStorageEntity movingStorage) {
+			return movingStorage.getStorageItem();
+		}
+		return super.getStorageSettingsTabIcon();
+	}
+
+	@Override
 	public void detectSettingsChangeAndReload() {
 		if (player.level().isClientSide) {
+			if (openedEndpoint != null) {
+				boolean snapshotChanged = ClientLinkedStorageContents.removeUpdatedGroup(openedEndpoint.groupId());
+				boolean settingsChanged = ClientLinkedStorageContents.removeUpdatedSettings(openedEndpoint.groupId());
+				if (snapshotChanged || settingsChanged) {
+					ClientLinkedStorageContents.getContents(openedEndpoint.groupId()).ifPresent(contents -> {
+						Entity entity = player.level().getEntity(entityId);
+						if (snapshotChanged && entity instanceof IMovingStorageEntity movingStorage) {
+							movingStorage.getStorageHolder().refreshClientLinkedStorage();
+						}
+						storageWrapper.getSettingsHandler().reloadFrom(contents.getContents().getCompound("settings"));
+					});
+				}
+				return;
+			}
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				MovingStorageData storage = MovingStorageData.get(uuid);
 				if (storage.removeUpdatedStorageSettingsFlag(uuid)) {
@@ -51,7 +104,8 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 	}
 
 	public static MovingStorageSettingsContainerMenu fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf buffer) {
-		return new MovingStorageSettingsContainerMenu(windowId, playerInventory.player, buffer.readInt());
+		return new MovingStorageSettingsContainerMenu(windowId, playerInventory.player,
+				MovingStorageContainerMenu.readMenuData(buffer, playerInventory.player));
 	}
 
 	public int getEntityId() {
@@ -65,6 +119,12 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 
 		if (lastSettingsNbt == null || !lastSettingsNbt.equals(storageWrapper.getSettingsHandler().getNbt())) {
 			lastSettingsNbt = storageWrapper.getSettingsHandler().getNbt().copy();
+			if (openedEndpoint != null) {
+				if (player instanceof ServerPlayer serverPlayer && stillValid(player)) {
+					PacketHandler.INSTANCE.sendToClient(serverPlayer, new LinkedStorageSettingsMessage(openedEndpoint.groupId(), lastSettingsNbt));
+				}
+				return;
+			}
 
 			storageWrapper.getContentsUuid().ifPresent(uuid -> {
 				CompoundTag settingsContents = new CompoundTag();
