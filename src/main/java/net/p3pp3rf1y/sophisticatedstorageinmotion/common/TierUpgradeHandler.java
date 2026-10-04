@@ -2,6 +2,8 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -13,6 +15,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedstorage.client.gui.StorageTranslationHelper;
 import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderBase;
 import net.p3pp3rf1y.sophisticatedstorage.entity.StorageHolderTierUpgradeHandler;
 import net.p3pp3rf1y.sophisticatedstorage.init.ModBlocks;
@@ -60,12 +63,30 @@ public class TierUpgradeHandler {
 			SophisticatedStorageInMotion.LOGGER.warn("No tier upgrade definition found for {}", () -> BuiltInRegistries.ITEM.getKey(tierDefinitionItem));
 			return;
 		}
+		if (entity instanceof IMovingStorageEntity movingStorage && movingStorage.getStorageHolder().isLinkedStorage() && !player.level().isClientSide()
+				&& !movingStorage.getStorageHolder().isPrimaryLinkedStorage()) {
+			player.playSound(SoundEvents.NOTE_BLOCK_BASS.value(), 1, 0.7F);
+			player.sendOverlayMessage(StorageTranslationHelper.INSTANCE.translStatusMessage("tier_upgrade_main_linked_storage_only"));
+			event.setCanceled(true);
+			event.setCancellationResult(InteractionResult.FAIL);
+			return;
+		}
+		int countRequired = upgradeDefinition.getCountRequired(storageItem);
+		if (tierUpgrade.getCount() < countRequired) {
+			event.setCanceled(true);
+			event.setCancellationResult(InteractionResult.FAIL);
+			return;
+		}
 
 		if (!player.level().isClientSide()) {
-			upgradeDefinition.upgradeEntity(entity, storageItem);
+			if (!upgradeDefinition.upgradeEntity(entity, storageItem)) {
+				event.setCanceled(true);
+				event.setCancellationResult(InteractionResult.FAIL);
+				return;
+			}
 
 			if (!player.isCreative()) {
-				tierUpgrade.shrink(1);
+				tierUpgrade.shrink(countRequired);
 			}
 		}
 
@@ -74,7 +95,11 @@ public class TierUpgradeHandler {
 	}
 
 	interface IEntityTierUpgradeDefinition {
-		void upgradeEntity(Entity entity, ItemStack storageItem);
+		boolean upgradeEntity(Entity entity, ItemStack storageItem);
+
+		default int getCountRequired(ItemStack storageItem) {
+			return 1;
+		}
 	}
 
 	private static class VanillaMinecartChestTierUpgradeDefinition implements IEntityTierUpgradeDefinition {
@@ -84,9 +109,9 @@ public class TierUpgradeHandler {
 			this.upgradedItem = upgradedItem;
 		}
 
-		public void upgradeEntity(Entity entity, ItemStack storageItem) {
+		public boolean upgradeEntity(Entity entity, ItemStack storageItem) {
 			if (!(entity instanceof MinecartChest minecartChest)) {
-				return;
+				return false;
 			}
 
 			StorageMinecart storageMinecart = new StorageMinecart(minecartChest.level(), minecartChest.getX(), minecartChest.getY(), minecartChest.getZ());
@@ -100,6 +125,7 @@ public class TierUpgradeHandler {
 
 			minecartChest.discard();
 			minecartChest.level().addFreshEntity(storageMinecart);
+			return true;
 		}
 	}
 
@@ -111,13 +137,23 @@ public class TierUpgradeHandler {
 		}
 
 		@Override
-		public void upgradeEntity(Entity entity, ItemStack storageItem) {
+		public boolean upgradeEntity(Entity entity, ItemStack storageItem) {
 			if (!(entity instanceof IMovingStorageEntity movingStorage)) {
-				return;
+				return false;
 			}
 			StorageHolderBase storageHolder = movingStorage.getStorageHolder();
 
+			if (storageHolder.isLinkedStorage()) {
+				return entity.level() instanceof ServerLevel serverLevel
+						&& storageHolderDefinition.upgradeLinkedStorageHolder(serverLevel, storageHolder, storageItem);
+			}
 			storageHolderDefinition.upgradeStorageHolder(storageHolder, storageItem);
+			return true;
+		}
+
+		@Override
+		public int getCountRequired(ItemStack storageItem) {
+			return storageHolderDefinition.getCountRequired(storageItem);
 		}
 	}
 
