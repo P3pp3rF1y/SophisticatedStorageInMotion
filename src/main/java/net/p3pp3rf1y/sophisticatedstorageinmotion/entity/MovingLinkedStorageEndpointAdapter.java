@@ -98,9 +98,8 @@ public final class MovingLinkedStorageEndpointAdapter implements ILinkedStorageE
 		canonicalHost.changeSize(inventorySlots - canonicalHost.getInventoryHandler().size(), upgradeSlots - canonicalHost.getUpgradeHandler().size());
 		canonicalHost.getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class).itemsChanged();
 		canonicalHost.persistCanonicalContents();
-		if (!manager.updatePrimaryHostDescriptor(endpoint.groupId(), endpoint.endpointId(),
-				new LinkedStorageHostDescriptor(StorageLinkedStorageHostWrapper.FACTORY_ID,
-						StorageLinkedStorageHostWrapper.createVirtualCarrier(storage, canonicalHost)))) {
+		if (!manager.updatePrimaryHostDescriptor(endpoint.groupId(), endpoint.endpointId(), new LinkedStorageHostDescriptor(
+				StorageLinkedStorageHostWrapper.FACTORY_ID, StorageLinkedStorageHostWrapper.createVirtualCarrier(storage, canonicalHost)))) {
 			return false;
 		}
 		storage.set(ModCoreDataComponents.LINKED_STORAGE_PRIMARY_ENDPOINT, true);
@@ -116,8 +115,7 @@ public final class MovingLinkedStorageEndpointAdapter implements ILinkedStorageE
 				continue;
 			}
 			ItemStack originalStorage = MovingStorageItem.getStorageItem(input);
-			if (endpoint.equals(originalStorage.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT))
-					&& originalStorage.getItem() != resultStorage.getItem()) {
+			if (endpoint.equals(originalStorage.get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT)) && originalStorage.getItem() != resultStorage.getItem()) {
 				return true;
 			}
 		}
