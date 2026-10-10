@@ -24,6 +24,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
@@ -63,6 +65,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	@Nullable
 	private StorageBlockEntity renderBlockEntity = null;
+	@Nullable
+	private ContentsFilteredFluidHandler contentsFilteredFluidHandler;
 
 	public EntityStorageHolder(T entity) {
 		super(!(entity instanceof AbstractChestedHorse));
@@ -71,6 +75,28 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	public ItemStack getInstalledStorageItem() {
 		return entity.getStorageItem();
+	}
+
+	@Nullable
+	public IFluidHandler getExternalFluidHandler(@Nullable Direction side) {
+		if (!isLinkedStorageLinkCandidate() || !isLinkedStorage() || !(entity.level() instanceof ServerLevel)) {
+			return null;
+		}
+		IFluidHandler handler = getStorageWrapper().getFluidHandler().orElse(null);
+		if (handler == null || !isLocked()) {
+			return handler;
+		}
+		if (contentsFilteredFluidHandler == null || contentsFilteredFluidHandler.fluidHandler() != handler) {
+			contentsFilteredFluidHandler = new ContentsFilteredFluidHandler(handler, this::isLocked);
+		}
+		return contentsFilteredFluidHandler;
+	}
+
+	@Nullable
+	public IEnergyStorage getExternalEnergyStorage(@Nullable Direction side) {
+		return isLinkedStorageLinkCandidate() && isLinkedStorage() && entity.level() instanceof ServerLevel
+				? getStorageWrapper().getEnergyStorage().orElse(null)
+				: null;
 	}
 
 	@Override

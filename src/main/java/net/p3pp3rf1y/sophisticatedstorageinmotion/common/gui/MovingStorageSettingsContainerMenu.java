@@ -88,7 +88,7 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 						if (snapshotChanged && entity instanceof IMovingStorageEntity movingStorage) {
 							movingStorage.getStorageHolder().refreshClientLinkedStorage();
 						}
-						storageWrapper.getSettingsHandler().reloadFrom(contents.getContents().getCompound("settings"));
+						storageWrapper.getSettingsHandler().reloadFromStorageContents(contents.getContents());
 					});
 				}
 				return;

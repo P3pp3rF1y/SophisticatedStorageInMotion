@@ -14,6 +14,7 @@ import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrel
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingLimitedBarrelSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.common.gui.MovingStorageSettingsContainerMenu;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageBoat;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.StorageMinecart;
 
@@ -48,6 +49,18 @@ public class ModEntities {
 			.register("moving_limited_barrel_settings", () -> IMenuTypeExtension.create(MovingLimitedBarrelSettingsContainerMenu::fromBuffer));
 
 	private static void registerCapabilities(RegisterCapabilitiesEvent event) {
+		event.registerEntity(Capabilities.FluidHandler.ENTITY, STORAGE_MINECART.get(),
+				(entity, side) -> entity.getStorageHolder().getExternalFluidHandler(side));
+		event.registerEntity(Capabilities.FluidHandler.ENTITY, STORAGE_BOAT.get(), (entity, side) -> entity.getStorageHolder().getExternalFluidHandler(side));
+		event.registerEntity(Capabilities.EnergyStorage.ENTITY, STORAGE_MINECART.get(),
+				(entity, side) -> entity.getStorageHolder().getExternalEnergyStorage(side));
+		event.registerEntity(Capabilities.EnergyStorage.ENTITY, STORAGE_BOAT.get(), (entity, side) -> entity.getStorageHolder().getExternalEnergyStorage(side));
+		for (EntityType<?> horseType : new EntityType<?>[]{EntityType.DONKEY, EntityType.MULE, EntityType.LLAMA, EntityType.TRADER_LLAMA}) {
+			event.registerEntity(Capabilities.FluidHandler.ENTITY, horseType,
+					(entity, side) -> entity instanceof IMovingStorageEntity moving ? moving.getStorageHolder().getExternalFluidHandler(side) : null);
+			event.registerEntity(Capabilities.EnergyStorage.ENTITY, horseType,
+					(entity, side) -> entity instanceof IMovingStorageEntity moving ? moving.getStorageHolder().getExternalEnergyStorage(side) : null);
+		}
 		event.registerEntity(Capabilities.ItemHandler.ENTITY_AUTOMATION, STORAGE_MINECART.get(),
 				(entity, direction) -> entity.getStorageHolder().getStorageWrapper().getInventoryForInputOutput());
 		event.registerEntity(Capabilities.ItemHandler.ENTITY_AUTOMATION, STORAGE_BOAT.get(),
