@@ -6,6 +6,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -102,8 +103,7 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 			return;
 		}
 		LinkedStorageGroupManager manager = LinkedStorageGroupsSavedData.get(serverLevel).manager();
-		Optional<StorageLinkedStorageHostWrapper> host = manager.resolveVirtualHost(endpoint.groupId())
-				.filter(StorageLinkedStorageHostWrapper.class::isInstance).map(StorageLinkedStorageHostWrapper.class::cast);
+		Optional<IStorageWrapper> host = manager.resolveVirtualHost(endpoint, false).filter(IStorageWrapper.class::isInstance).map(IStorageWrapper.class::cast);
 		if (host.isEmpty()) {
 			buffer.writeBoolean(false);
 			return;
@@ -111,13 +111,15 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 		buffer.writeBoolean(true);
 		buffer.writeUUID(endpoint.groupId());
 		buffer.writeVarLong(manager.getRevision(endpoint.groupId()));
-		ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.encode(buffer, host.get().getDisplayName());
+		ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.encode(buffer,
+				((ILinkedStorageVirtualHost) host.get()).getLinkedStorageDisplayName().orElse(movingStorage.getStorageItem().getHoverName()));
 		buffer.writeNbt((CompoundTag) ContainerContents.CODEC.encodeStart(player.registryAccess().createSerializationContext(NbtOps.INSTANCE),
 				manager.resolveContents(endpoint.groupId()).orElseThrow().getContents(endpoint.groupId())).getOrThrow());
 		buffer.writeVarInt(host.get().getInventoryHandler().size());
 		buffer.writeVarInt(host.get().getUpgradeHandler().size());
 		buffer.writeVarInt(host.get().getColumnsTaken());
-		buffer.writeNbt(host.get().getVirtualCarrierSnapshot().orElseThrow());
+		buffer.writeIdentifier(manager.getHostDescriptor(endpoint.groupId()).orElseThrow().factoryId());
+		buffer.writeNbt(((ILinkedStorageVirtualHost) host.get()).getVirtualCarrierSnapshot().orElseThrow());
 	}
 
 	public static int readMenuData(FriendlyByteBuf buffer, Player player) {
@@ -135,16 +137,19 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 		int inventorySlots = buffer.readVarInt();
 		int upgradeSlots = buffer.readVarInt();
 		int columnsTaken = buffer.readVarInt();
+		Identifier factoryId = buffer.readIdentifier();
 		var virtualCarrier = buffer.readNbt();
 		if (virtualCarrier == null)
 			return entityId;
 		ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, inventorySlots, upgradeSlots, columnsTaken);
-		CompoundTag profiledCarrier = StorageLinkedStorageHostWrapper.applyClientSnapshotProfile(virtualCarrier, groupName, inventorySlots, upgradeSlots);
+		CompoundTag profiledCarrier = factoryId.equals(StorageLinkedStorageHostWrapper.FACTORY_ID)
+				? StorageLinkedStorageHostWrapper.applyClientSnapshotProfile(virtualCarrier, groupName, inventorySlots, upgradeSlots)
+				: virtualCarrier;
 		if (player.level().getEntity(entityId) instanceof IMovingStorageEntity movingStorage
 				&& movingStorage.getStorageItem().get(ModCoreDataComponents.LINKED_STORAGE_ENDPOINT) instanceof LinkedStorageEndpointData endpoint
 				&& groupId.equals(endpoint.groupId())) {
-			ClientLinkedStorageContents.getContents(groupId).ifPresent(linkedContents -> movingStorage.getStorageHolder()
-					.bindClientLinkedStorage(StorageLinkedStorageHostWrapper.create(linkedContents, profiledCarrier)));
+			ClientLinkedStorageContents.getContents(groupId).ifPresent(linkedContents -> movingStorage.getStorageHolder().bindClientLinkedStorage(
+					(IStorageWrapper) LinkedStorageHostFactories.get(factoryId).orElseThrow().create(linkedContents, profiledCarrier)));
 			ClientLinkedStorageContents.removeUpdatedGroup(groupId);
 		}
 		return entityId;
@@ -164,6 +169,11 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 	@Override
 	public Optional<Entity> getEntity() {
 		return getStorageEntity().map(e -> e);
+	}
+
+	@Override
+	public Optional<java.util.UUID> getLinkedStorageGroupId() {
+		return Optional.ofNullable(openedIdentity.endpoint()).map(LinkedStorageEndpointData::groupId);
 	}
 
 	@Override
@@ -204,8 +214,10 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 				if (snapshotChanged)
 					getStorageEntity().ifPresent(entity -> entity.getStorageHolder().refreshClientLinkedStorage());
 				storageWrapper.getSettingsHandler().reloadFrom(contents.getContents(openedIdentity.endpoint().groupId()).settings());
-				if (snapshotChanged)
+				if (snapshotChanged) {
+					storageWrapper.getUpgradeHandler().refreshUpgradeWrappers();
 					refreshUpgradeControls();
+				}
 				return true;
 			}).orElse(false);
 		}

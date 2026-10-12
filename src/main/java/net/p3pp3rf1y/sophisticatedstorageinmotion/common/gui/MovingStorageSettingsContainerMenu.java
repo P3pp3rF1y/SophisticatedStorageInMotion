@@ -18,7 +18,10 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ClientLinkedStorageContents
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageEndpointData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageSettingsPayload;
+import net.p3pp3rf1y.sophisticatedcore.settings.ISettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.common.gui.StorageSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.init.ModEntities;
@@ -67,6 +70,11 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 		}
 
 		return movingStorageEntity.getStorageHolder().getStorageWrapper();
+	}
+
+	@Override
+	protected <C extends ISettingsCategory<?, ?>, T extends SettingsContainerBase<C>> ISettingsContainerFactory<C, T> getSettingsContainerFactory(String name) {
+		return StorageSettingsContainerMenu.getCanonicalSettingsContainerFactory(storageWrapper, name, super.getSettingsContainerFactory(name));
 	}
 
 	@Override
