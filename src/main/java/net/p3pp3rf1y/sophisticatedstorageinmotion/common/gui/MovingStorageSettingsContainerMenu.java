@@ -18,7 +18,10 @@ import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageGroupsSavedDat
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
 import net.p3pp3rf1y.sophisticatedcore.network.LinkedStorageSettingsMessage;
 import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
+import net.p3pp3rf1y.sophisticatedcore.settings.ISettingsCategory;
+import net.p3pp3rf1y.sophisticatedcore.settings.SettingsContainerBase;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.common.gui.StorageSettingsContainerMenu;
 import net.p3pp3rf1y.sophisticatedstorage.entity.MovingStorageWrapper;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
@@ -70,6 +73,12 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 	}
 
 	@Override
+	protected <C extends ISettingsCategory, T extends SettingsContainerBase<C>> ISettingsContainerFactory<C, T> getSettingsContainerFactory(String name) {
+		ISettingsContainerFactory<C, T> canonicalFactory = StorageSettingsContainerMenu.getCanonicalSettingsContainerFactory(name);
+		return canonicalFactory != null ? canonicalFactory : super.getSettingsContainerFactory(name);
+	}
+
+	@Override
 	public ItemStack getStorageSettingsTabIcon() {
 		if (openedEndpoint != null && player.level().getEntity(entityId) instanceof IMovingStorageEntity movingStorage) {
 			return movingStorage.getStorageItem();
@@ -89,7 +98,7 @@ public class MovingStorageSettingsContainerMenu extends SettingsContainerMenu<IS
 						if (snapshotChanged && entity instanceof IMovingStorageEntity movingStorage) {
 							movingStorage.getStorageHolder().refreshClientLinkedStorage();
 						}
-						storageWrapper.getSettingsHandler().reloadFrom(contents.getContents().getCompound("settings"));
+						storageWrapper.getSettingsHandler().reloadFromStorageContents(contents.getContents());
 					});
 				}
 				return;

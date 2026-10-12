@@ -3,21 +3,31 @@ package net.p3pp3rf1y.sophisticatedstorageinmotion.common;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.EnderLinkerItem;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageService;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
@@ -35,10 +45,13 @@ import net.p3pp3rf1y.sophisticatedstorage.item.PackingTapeItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.PaintbrushItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.ShulkerBoxItem;
 import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.SophisticatedStorageInMotion;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.IMovingStorageEntity;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingLinkedStorageEndpointAdapter;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
+
+import javax.annotation.Nullable;
 
 import java.util.UUID;
 
@@ -48,6 +61,7 @@ public class CommonEventHandler {
 
 	public static void registerHandlers() {
 		IEventBus eventBus = MinecraftForge.EVENT_BUS;
+		eventBus.addGenericListener(Entity.class, CommonEventHandler::onAttachHorseStorageCapabilities);
 		eventBus.addListener(CommonEventHandler::onMovingStorageUncrafted);
 		eventBus.addListener(CommonEventHandler::onMovingStorageCraftedFromShulkerBox);
 		eventBus.addListener(CommonEventHandler::onMovingStorageTierUpgraded);
@@ -57,6 +71,56 @@ public class CommonEventHandler {
 		eventBus.addListener(CommonEventHandler::onPaintbrushInteract);
 		eventBus.addListener(CommonEventHandler::onStorageUpgradeInteract);
 		eventBus.addListener(CommonEventHandler::onEnderLinkerInteract);
+	}
+
+	private static void onAttachHorseStorageCapabilities(AttachCapabilitiesEvent<Entity> event) {
+		Entity entity = event.getObject();
+		if (entity.getType() != EntityType.DONKEY && entity.getType() != EntityType.MULE && entity.getType() != EntityType.LLAMA
+				&& entity.getType() != EntityType.TRADER_LLAMA) {
+			return;
+		}
+		class HorseStorageCapabilities implements ICapabilityProvider {
+			private LazyOptional<IFluidHandler> fluid = LazyOptional.empty();
+			private LazyOptional<IEnergyStorage> energy = LazyOptional.empty();
+			@Nullable
+			private IFluidHandler exposedFluid;
+			@Nullable
+			private IEnergyStorage exposedEnergy;
+
+			@Override
+			public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction side) {
+				if (!(entity instanceof IMovingStorageEntity moving) || !entity.isAlive()) {
+					return LazyOptional.empty();
+				}
+				if (capability == ForgeCapabilities.FLUID_HANDLER) {
+					IFluidHandler current = moving.getStorageHolder().getExternalFluidHandler(side);
+					if (current != exposedFluid) {
+						fluid.invalidate();
+						exposedFluid = current;
+						fluid = current == null ? LazyOptional.empty() : LazyOptional.of(() -> current);
+					}
+					return fluid.cast();
+				}
+				if (capability == ForgeCapabilities.ENERGY) {
+					IEnergyStorage current = moving.getStorageHolder().getExternalEnergyStorage(side);
+					if (current != exposedEnergy) {
+						energy.invalidate();
+						exposedEnergy = current;
+						energy = current == null ? LazyOptional.empty() : LazyOptional.of(() -> current);
+					}
+					return energy.cast();
+				}
+				return LazyOptional.empty();
+			}
+
+			void invalidate() {
+				fluid.invalidate();
+				energy.invalidate();
+			}
+		}
+		HorseStorageCapabilities provider = new HorseStorageCapabilities();
+		event.addCapability(new ResourceLocation(SophisticatedStorageInMotion.MOD_ID, "horse_linked_storage"), provider);
+		event.addListener(provider::invalidate);
 	}
 
 	private static void onEnderLinkerInteract(PlayerInteractEvent.EntityInteract event) {

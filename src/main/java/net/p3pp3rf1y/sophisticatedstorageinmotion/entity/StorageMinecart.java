@@ -24,6 +24,8 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackLifecycle;
@@ -41,6 +43,12 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	private final EntityStorageHolder<StorageMinecart> entityStorageHolder;
 
 	private final LazyOptional<?> itemHandler = LazyOptional.of(() -> getStorageHolder().getStorageWrapper().getInventoryForInputOutput());
+	private LazyOptional<IFluidHandler> fluidHandler = LazyOptional.empty();
+	private LazyOptional<IEnergyStorage> energyHandler = LazyOptional.empty();
+	@Nullable
+	private IFluidHandler exposedFluidHandler;
+	@Nullable
+	private IEnergyStorage exposedEnergyHandler;
 
 	public StorageMinecart(EntityType<StorageMinecart> entityType, Level level) {
 		super(entityType, level);
@@ -164,6 +172,8 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	public void invalidateCaps() {
 		super.invalidateCaps();
 		itemHandler.invalidate();
+		fluidHandler.invalidate();
+		energyHandler.invalidate();
 	}
 
 	@Override
@@ -247,6 +257,24 @@ public class StorageMinecart extends MinecartChest implements IMovingStorageEnti
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
 		if (this.isAlive() && capability == ForgeCapabilities.ITEM_HANDLER) {
 			return itemHandler.cast();
+		}
+		if (this.isAlive() && capability == ForgeCapabilities.FLUID_HANDLER) {
+			IFluidHandler current = entityStorageHolder.getExternalFluidHandler(facing);
+			if (current != exposedFluidHandler) {
+				fluidHandler.invalidate();
+				exposedFluidHandler = current;
+				fluidHandler = current == null ? LazyOptional.empty() : LazyOptional.of(() -> current);
+			}
+			return fluidHandler.cast();
+		}
+		if (this.isAlive() && capability == ForgeCapabilities.ENERGY) {
+			IEnergyStorage current = entityStorageHolder.getExternalEnergyStorage(facing);
+			if (current != exposedEnergyHandler) {
+				energyHandler.invalidate();
+				exposedEnergyHandler = current;
+				energyHandler = current == null ? LazyOptional.empty() : LazyOptional.of(() -> current);
+			}
+			return energyHandler.cast();
 		}
 		return super.getCapability(capability, facing);
 	}

@@ -23,6 +23,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageSavedData;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.ILinkedStorageBlockEndpoint;
@@ -64,6 +66,8 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	@Nullable
 	private StorageBlockEntity renderBlockEntity = null;
+	@Nullable
+	private ContentsFilteredFluidHandler contentsFilteredFluidHandler;
 
 	public EntityStorageHolder(T entity) {
 		super(!(entity instanceof AbstractChestedHorse));
@@ -72,6 +76,28 @@ public class EntityStorageHolder<T extends Entity & IMovingStorageEntity> extend
 
 	public ItemStack getInstalledStorageItem() {
 		return entity.getStorageItem();
+	}
+
+	@Nullable
+	public IFluidHandler getExternalFluidHandler(@Nullable Direction side) {
+		if (!isLinkedStorageLinkCandidate() || !isLinkedStorage() || !(entity.level() instanceof ServerLevel)) {
+			return null;
+		}
+		IFluidHandler handler = getStorageWrapper().getFluidHandler().orElse(null);
+		if (handler == null) {
+			return null;
+		}
+		if (contentsFilteredFluidHandler == null || contentsFilteredFluidHandler.fluidHandler() != handler) {
+			contentsFilteredFluidHandler = new ContentsFilteredFluidHandler(handler, this::isLocked);
+		}
+		return contentsFilteredFluidHandler;
+	}
+
+	@Nullable
+	public IEnergyStorage getExternalEnergyStorage(@Nullable Direction side) {
+		return isLinkedStorageLinkCandidate() && isLinkedStorage() && entity.level() instanceof ServerLevel
+				? getStorageWrapper().getEnergyStorage().orElse(null)
+				: null;
 	}
 
 	@Override
