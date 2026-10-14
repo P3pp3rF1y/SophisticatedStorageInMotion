@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getAllSubtypeInterpreters;
+import static net.p3pp3rf1y.sophisticatedstorageinmotion.compat.recipeviewers.common.subtypes.SubtypeInterpreters.getSubtypeInterpreters;
 
 @SuppressWarnings("unused")
 @JeiPlugin
@@ -59,7 +60,7 @@ public class StorageInMotionJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerItemSubtypes(ISubtypeRegistration registration) {
-		getAllSubtypeInterpreters()
+		getSubtypeInterpreters()
 				.forEach((item, subtypeInterpreter) -> registration.registerSubtypeInterpreter(item, JeiSubtypeInterpreter.of(subtypeInterpreter)));
 	}
 
