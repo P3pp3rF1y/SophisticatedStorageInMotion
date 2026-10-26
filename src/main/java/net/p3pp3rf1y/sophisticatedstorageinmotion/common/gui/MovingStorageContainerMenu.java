@@ -19,6 +19,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SophisticatedMenuProvider;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
@@ -118,6 +119,7 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 		buffer.writeVarInt(host.get().getInventoryHandler().size());
 		buffer.writeVarInt(host.get().getUpgradeHandler().size());
 		buffer.writeVarInt(host.get().getColumnsTaken());
+		buffer.writeEnum(host.get().getSortBy());
 		buffer.writeIdentifier(manager.getHostDescriptor(endpoint.groupId()).orElseThrow().factoryId());
 		buffer.writeNbt(((ILinkedStorageVirtualHost) host.get()).getVirtualCarrierSnapshot().orElseThrow());
 	}
@@ -137,11 +139,12 @@ public class MovingStorageContainerMenu<T extends Entity & IMovingStorageEntity>
 		int inventorySlots = buffer.readVarInt();
 		int upgradeSlots = buffer.readVarInt();
 		int columnsTaken = buffer.readVarInt();
+		SortBy sortBy = buffer.readEnum(SortBy.class);
 		Identifier factoryId = buffer.readIdentifier();
 		var virtualCarrier = buffer.readNbt();
 		if (virtualCarrier == null)
 			return entityId;
-		ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, inventorySlots, upgradeSlots, columnsTaken);
+		ClientLinkedStorageContents.updateContents(groupId, revision, contents, groupName, inventorySlots, upgradeSlots, columnsTaken, sortBy);
 		if (factoryId.equals(StorageLinkedStorageHostWrapper.FACTORY_ID)) {
 			StorageLinkedStorageHostWrapper.applyClientSnapshotProfile(virtualCarrier, groupName, inventorySlots, upgradeSlots);
 		}
