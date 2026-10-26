@@ -6,6 +6,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.init.ModCoreDataComponents;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ContainerContents;
 import net.p3pp3rf1y.sophisticatedcore.linkedstorage.*;
@@ -51,6 +52,11 @@ public final class MovingLinkedStorageEndpointAdapter implements ILinkedStorageE
 		ItemStack item = requireHolder(endpoint).getInstalledStorageItem();
 		UUID uuid = item.get(ModCoreDataComponents.STORAGE_UUID);
 		return uuid == null ? new ContainerContents() : MovingStorageData.get().getContents(uuid).copy();
+	}
+
+	@Override
+	public SortBy getSortBy(ServerLevel level, ILinkedStorageBlockEndpoint endpoint) {
+		return requireHolder(endpoint).getStorageWrapper().getSortBy();
 	}
 
 	@Override
