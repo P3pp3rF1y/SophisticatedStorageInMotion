@@ -14,7 +14,7 @@ public class MovingStorageItemClient {
 	public static TooltipComponent getTooltipImage(ItemStack stack) {
 		ItemStack inner = MovingStorageItem.getStorageItem(stack);
 		if (StorageBlockEntity.hasLinkedStorageEndpoint(inner)) {
-			return StorageItemClient.getTooltipImage(inner);
+			return StorageItemClient.getTooltipImage(inner, stack);
 		}
 		Minecraft mc = Minecraft.getInstance();
 		if (Screen.hasShiftDown() || (mc.player != null && !mc.player.containerMenu.getCarried().isEmpty())) {
