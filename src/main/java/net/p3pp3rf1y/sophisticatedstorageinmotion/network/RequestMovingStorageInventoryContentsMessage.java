@@ -4,11 +4,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.linkedstorage.LinkedStorageStackData;
+import net.p3pp3rf1y.sophisticatedcore.network.ItemStackReference;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedstorage.block.StorageWrapper;
+import net.p3pp3rf1y.sophisticatedstorage.item.StorageBlockItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.entity.MovingStorageData;
+import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 
 import javax.annotation.Nullable;
 
@@ -17,17 +22,20 @@ import java.util.function.Supplier;
 
 public class RequestMovingStorageInventoryContentsMessage {
 	private final UUID storageUuid;
+	private final ItemStackReference itemReference;
 
-	public RequestMovingStorageInventoryContentsMessage(UUID storageUuid) {
+	public RequestMovingStorageInventoryContentsMessage(UUID storageUuid, ItemStackReference itemReference) {
 		this.storageUuid = storageUuid;
+		this.itemReference = itemReference;
 	}
 
 	public static void encode(RequestMovingStorageInventoryContentsMessage msg, FriendlyByteBuf packetBuffer) {
 		packetBuffer.writeUUID(msg.storageUuid);
+		ItemStackReference.encode(msg.itemReference, packetBuffer);
 	}
 
 	public static RequestMovingStorageInventoryContentsMessage decode(FriendlyByteBuf packetBuffer) {
-		return new RequestMovingStorageInventoryContentsMessage(packetBuffer.readUUID());
+		return new RequestMovingStorageInventoryContentsMessage(packetBuffer.readUUID(), ItemStackReference.decode(packetBuffer));
 	}
 
 	static void onMessage(RequestMovingStorageInventoryContentsMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
@@ -41,6 +49,15 @@ public class RequestMovingStorageInventoryContentsMessage {
 			return;
 		}
 
+		ItemStack stack = msg.itemReference.resolve(player);
+		if (!(stack.getItem() instanceof MovingStorageItem)) {
+			return;
+		}
+		ItemStack storageItem = MovingStorageItem.getStorageItem(stack);
+		if (LinkedStorageStackData.getEndpoint(storageItem) != null
+				|| StorageBlockItem.getContentsUuid(storageItem).filter(msg.storageUuid::equals).isEmpty()) {
+			return;
+		}
 		CompoundTag baseContentsTag = MovingStorageData.get(msg.storageUuid).getContents();
 		if (!baseContentsTag.contains(StorageWrapper.CONTENTS_TAG)) {
 			return;

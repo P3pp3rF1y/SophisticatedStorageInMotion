@@ -158,7 +158,8 @@ public abstract class MovingStorageItem extends ItemBase implements IStashStorag
 			return Optional.of(new StorageContentsTooltip(inner,
 					StorageBlockEntity.getLinkedStorageEndpointData(inner).flatMap(
 							endpoint -> StorageBlockEntity.getLinkedStorageEndpointRole(inner).map(role -> new LinkedStorageTooltip(role, endpoint.groupId())))
-							.orElse(null)));
+							.orElse(null),
+					stack));
 		}
 		return Optional.of(new MovingStorageContentsTooltip(stack));
 	}
