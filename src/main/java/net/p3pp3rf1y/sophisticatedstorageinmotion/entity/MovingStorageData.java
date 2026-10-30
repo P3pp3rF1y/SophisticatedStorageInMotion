@@ -63,6 +63,10 @@ public class MovingStorageData extends SavedData implements IStorageSavedData {
 		return movingStorageContents.computeIfAbsent(storageId, k -> new ContainerContents());
 	}
 
+	public Optional<ContainerContents> findContents(UUID storageId) {
+		return Optional.ofNullable(movingStorageContents.get(storageId));
+	}
+
 	public static void moveToItemStorage(HolderLookup.Provider registries, ItemStack storageItem, UUID storageId) {
 		MovingStorageData storageData = get();
 		ContainerContents contents = storageData.getContents(storageId);

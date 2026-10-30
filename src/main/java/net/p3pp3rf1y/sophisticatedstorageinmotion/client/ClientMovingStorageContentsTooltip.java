@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.client;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
@@ -7,6 +8,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.client.render.ClientStorageContentsTooltipBase;
+import net.p3pp3rf1y.sophisticatedcore.network.ItemStackReference;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.item.MovingStorageItem;
 import net.p3pp3rf1y.sophisticatedstorageinmotion.network.RequestMovingStorageInventoryContentsPayload;
 
@@ -38,6 +40,9 @@ public class ClientMovingStorageContentsTooltip extends ClientStorageContentsToo
 
 	@Override
 	protected void sendInventorySyncRequest(UUID uuid) {
-		ClientPacketDistributor.sendToServer(new RequestMovingStorageInventoryContentsPayload(uuid));
+		if (Minecraft.getInstance().player != null) {
+			ItemStackReference.find(Minecraft.getInstance().player, movingStorage)
+					.ifPresent(reference -> ClientPacketDistributor.sendToServer(new RequestMovingStorageInventoryContentsPayload(uuid, reference)));
+		}
 	}
 }
