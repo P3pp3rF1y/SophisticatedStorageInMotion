@@ -5,12 +5,14 @@ import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.widget.Bounds;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.IRecipeViewerDisplayContext;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.RecipeViewerDisplayCatalog;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.common.subtypes.PropertyBasedSubtypeInterpreter;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.CraftingSpecEmiRecipe;
+import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiCraftingRecipeHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiGridMenuInfo;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiSettingsGhostDragDropHandler;
 import net.p3pp3rf1y.sophisticatedcore.compat.recipeviewers.emi.EmiStorageGhostDragDropHandler;
@@ -32,7 +34,9 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 	@Override
 	public void register(EmiRegistry registry) {
 		registerGuiHandlers(registry);
-		registerRecipes(registry);
+		EmiCraftingRecipeHandler craftingRecipeHandler = new EmiCraftingRecipeHandler();
+		registerRecipes(registry, craftingRecipeHandler);
+		registry.addRecipeHandler(MenuType.CRAFTING, craftingRecipeHandler);
 		registerDefaultComparisons(registry);
 		registerRecipeHandlers(registry);
 	}
@@ -65,13 +69,22 @@ public class StorageInMotionEmiPlugin implements EmiPlugin {
 	}
 
 	public void registerRecipes(EmiRegistry registry) {
+		EmiCraftingRecipeHandler craftingRecipeHandler = new EmiCraftingRecipeHandler();
+		registerRecipes(registry, craftingRecipeHandler);
+		registry.addRecipeHandler(MenuType.CRAFTING, craftingRecipeHandler);
+	}
+
+	private void registerRecipes(EmiRegistry registry, EmiCraftingRecipeHandler craftingRecipeHandler) {
 		Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters = getSubtypeInterpreters();
 		// Add Storage subtype interpreters as well
 		subtypeInterpreters.putAll(SubtypeInterpreters.getSubtypeInterpreters());
 
 		IRecipeViewerDisplayCatalog catalog = createCatalog(subtypeInterpreters);
 		registry.removeRecipes(recipe -> recipe.getBackingRecipe() != null && catalog.replacesCraftingRecipe(recipe.getBackingRecipe()));
-		catalog.getCraftingSpecs().stream().flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(registry::addRecipe);
+		catalog.getCraftingSpecs().stream().flatMap(spec -> CraftingSpecEmiRecipe.ofGroupedUsageAndFocusedRecipes(spec).stream()).forEach(recipe -> {
+			craftingRecipeHandler.addRecipe(recipe);
+			registry.addRecipe(recipe);
+		});
 	}
 
 	private static IRecipeViewerDisplayCatalog createCatalog(Map<Item, PropertyBasedSubtypeInterpreter> subtypeInterpreters) {
