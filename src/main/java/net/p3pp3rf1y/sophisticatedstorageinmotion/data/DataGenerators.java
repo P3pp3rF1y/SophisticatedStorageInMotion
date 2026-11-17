@@ -1,15 +1,17 @@
 package net.p3pp3rf1y.sophisticatedstorageinmotion.data;
 
-import net.minecraft.core.RegistrySetBuilder;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.data.event.GatherDataRegistryEntriesEvent;
 
 public class DataGenerators {
 	private DataGenerators() {
 	}
 
+	public static void gatherRegistryEntries(GatherDataRegistryEntriesEvent evt) {
+		evt.recipe(StorageInMotionRecipeProvider::new);
+	}
+
 	public static void gatherData(GatherDataEvent.Client evt) {
-		evt.createReloadableRegistryObjects(new RegistrySetBuilder().add(RecipeProvider.asBootstrap(StorageInMotionRecipeProvider::new)));
 		evt.createProvider(StorageInMotionModelProvider::new);
 	}
 }

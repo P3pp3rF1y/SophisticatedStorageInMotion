@@ -35,6 +35,7 @@ public class SophisticatedStorageInMotion {
 		}
 		modBus.addListener(ModPayloads::registerPayloads);
 		modBus.addListener(DataGenerators::gatherData);
+		modBus.addListener(DataGenerators::gatherRegistryEntries);
 		modBus.addListener(SophisticatedStorageInMotion::setup);
 	}
 
